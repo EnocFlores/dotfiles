@@ -1,7 +1,7 @@
 " The default vimrc file... but with my own edits
 "
-" Maintainer:	The Vim Project <https://github.com/vim/vim>
-" Former Maintainer:	Bram Moolenaar <Bram@vim.org> - RIP 2023 Aug 3
+" Maintainer: The Vim Project <https://github.com/vim/vim>
+" Former Maintainer: Bram Moolenaar <Bram@vim.org> - RIP 2023 Aug 3
 " Editor: EnocFlores <https://github.com/EnocFlores>
 " Last Change: 2023 Nov 21
 " 
