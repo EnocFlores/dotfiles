@@ -1,2 +1,2 @@
-# dotfiles-public
+# dotfiles
 Repo to quickly get started on new machines with my favorite configs
