@@ -1,5 +1,5 @@
 # EnocFlores <https://github.com/EnocFlores>
-# Last Change: 2023.11.21
+# Last Change: 2023.12.06
 
 
 
@@ -34,6 +34,32 @@ export PATH=$(brew --prefix openssh)/bin:$PATH
 # ============================================== #
 setopt HIST_IGNORE_SPACE
 
+# ============================================== #
+# === Share history between all your zsh     === #
+# === sessions, very useful if you use       === #
+# === multiple terminals or tmux             === #
+# ============================================== #
+setopt sharehistory
+
+# ============================================== #
+# === Enable if you want to ignore duplicate === #
+# === commands, useful to keep your history  === #
+# === de-cluttered from the same commands    === #
+# ============================================== #
+# setopt histignorealldups
+
+# ============================================== #
+# === Keep 1000 lines of history within the  === #
+# === scrollable shell history               === #
+# ============================================== #
+HISTSIZE=1000
+# ============================================== #
+# === Save 10000 lines of history and store  === #
+# === it in the ~/.zsh_history file          === #
+# ============================================== #
+SAVEHIST=10000
+HISTFILE=~/.zsh_history
+
 # === Set some env variables for editors ======= #
 export EDITOR='vim'
 export VISUAL='vim'
@@ -44,7 +70,11 @@ setopt prompt_subst
 parse_git_branch() {
   git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/  (\1)/'
 }
-export PS1='%K{016} %n@%m %k%K{017} %F{cyan} %1~%f %k%K{053}%F{201}$(parse_git_branch)%f %# %k%F{053} %f'
+if [ "$TERM" = "linux" ];then
+	export PS1='%K{0}%B%F{2} %n@%m %f%b%k%K{4} %B%F{6} %1~%f%b %k%K{5}%B%F{5}$(parse_git_branch)%f%b %B%F{2}%# %k %f%b'
+else
+	export PS1='%B%K{016}%F{2} %n@%m %f%k%K{017} %F{cyan} %1~%f %k%K{053}%F{201}$(parse_git_branch)%f %F{2}%#%f %k%F{053} %f%b'
+fi
 
 # === Enable zsh advanced tab completion ======= #
 autoload -U compinit
@@ -131,6 +161,21 @@ alias ls="ls --color=auto"
 alias cls="clear"
 alias editav="vim ~/.vimrc"
 alias editatx="vim ~/.tmux.conf"
+
+
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
+# !!!!!!!!!!!! Linux Specific Start !!!!!!!!!!!! #
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
+
+alias copy="xclip -selection c"
+alias bat="batcat"
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
+# !!!!!!!!!!!! Linux Specific End !!!!!!!!!!!!!! #
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
+
+
 
 # === EnocFlores (git base repo) =============== #
 alias cdEF="cd ~/Development/EnocFlores"

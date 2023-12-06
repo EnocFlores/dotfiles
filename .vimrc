@@ -3,7 +3,7 @@
 " Maintainer: The Vim Project <https://github.com/vim/vim>
 " Former Maintainer: Bram Moolenaar <Bram@vim.org> - RIP 2023 Aug 3
 " Editor: EnocFlores <https://github.com/EnocFlores>
-" Last Change: 2023 Nov 21
+" Last Change: 2023 Dec 06
 " 
 " This is loaded if no vimrc file was found.
 " Except when Vim is run with "-u NONE" or "-C".
@@ -36,6 +36,7 @@ set number
 set ruler
 
 " === Theme & Colors =========================== "
+set t_Co=256
 set background=dark
 set termguicolors
 let &t_8f = "\<Esc>[38:2:%lu:%lu:%lum"
@@ -49,7 +50,9 @@ set clipboard=unnamed
 " === Other useful life settings =============== "
 set cursorline
 set tabstop=2
+set backspace=indent,eol,start
 set hls
+syntax on
 
 if exists("&relativenumber")
 	set relativenumber
