@@ -1,5 +1,5 @@
 # EnocFlores <https://github.com/EnocFlores>
-# Last Change: 2023.12.06
+# Last Change: 2023.12.12
 
 
 
@@ -159,6 +159,7 @@ alias edita="vim ~/.zshrc"
 # === Basic aliases ============================ #
 alias ls="ls --color=auto"
 alias cls="clear"
+alias python="python3"
 alias editav="vim ~/.vimrc"
 alias editatx="vim ~/.tmux.conf"
 
@@ -224,5 +225,14 @@ chpwd_functions+=(test_the_alias_2)
 # ================ ALIASES END ================= #
 # ============================================== #
 
-# === Show sys info before initialization ====== #
-neofetch
+# ============================================== #
+# === Show sys info before initialization,   === #
+# === but only if tmux is not running. I     === #
+# === don't need to see my system info all   === #
+# === over my panes and shifting my previous === #
+# === work                                   === #
+# ============================================== #
+if ! pgrep "tmux" > /dev/null
+then
+	neofetch
+fi
