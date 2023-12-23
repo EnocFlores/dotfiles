@@ -1,41 +1,41 @@
-" The default vimrc file... but with my own edits
+" My custom vimrc file, optional vim-plugs, and some default configurations
 "
 " Maintainer: The Vim Project <https://github.com/vim/vim>
 " Former Maintainer: Bram Moolenaar <Bram@vim.org> - RIP 2023 Aug 3
 " Editor: EnocFlores <https://github.com/EnocFlores>
-" Last Change: 2023 Dec 06
+" Last Change: 2023 Dec 22
 " 
 " This is loaded if no vimrc file was found.
 " Except when Vim is run with "-u NONE" or "-C".
 " Individual settings can be reverted with ":set option&".
 " Other commands can be reverted as mentioned below.
 
+" ====================================== "
+" === Get the full benefits of Vim   === "
+" === but just in case you open vim  === "
+" === in vi mode then this check     === "
+" === will not activate nocompatible === "
+" === mode                           === "
+" ====================================== "
+if &compatible
+    set nocompatible
+endif
 
+" ====================================== "
+" === To make sure nocompatible is   === "
+" === set even if +eval is missing   === "
+" === in the vim installation, this  === "
+" === loop remains false but is not  === "
+" === registered if +eval is missing === "
+" === the silent command just allows === "
+" === this to not display any errors === "
+" === from this trick                === "
+" ====================================== "
+silent! while 0
+    set nocompatible
+silent! endwhile
 
-" ============================================== "
-" ================= LINE BREAK ================= "
-" ============================================== "
-
-" === Get the full benefits of Vim ============= "
-set nocompatible
-
-" ============================================== "
-" === Adds 'gh' as another way of exiting    === "
-" === INSERT mode, back to NORMAL mode       === "
-" ============================================== "
-" === No longer using a standard keyboard so === "
-" === this isn't necessary to me anymore     === "
-" === (ESC is now in immediate reach for me) === "
-" ============================================== "
-" inoremap gh <ESC>
-" vnoremap gh <ESC>
-" set timeoutlen=150
-
-" === Enable line numbers and the ruler ======== "
-set number
-set ruler
-
-" === Theme & Colors =========================== "
+" === Theme & Colors =================== "
 set t_Co=256
 set background=dark
 set termguicolors
@@ -43,115 +43,246 @@ let &t_8f = "\<Esc>[38:2:%lu:%lu:%lum"
 let &t_8b = "\<Esc>[48:2:%lu:%lu:%lum"
 colorscheme ron
 
-" === Use the OS clipboard by default (on  ===== "
-" === versions compiled with `+clipboard`) ===== "
-set clipboard=unnamed
-
-" === Other useful life settings =============== "
-set cursorline
-set tabstop=2
-set backspace=indent,eol,start
-set hls
+" ====================================== "
+" === Syntax highlighting a          === "
+" === programmer's best friend       === "
+" ====================================== "
 syntax on
 
+" ====================================== "
+" === Adds 'gh' as another way of    === "
+" === exiting INSERT mode, back to   === "
+" === NORMAL mode                    === "
+" ====================================== "
+" === No longer using a standard     === "
+" === keyboard so this isn't         === "
+" === necessary to me anymore (ESC   === "
+" === is now in immediate reach)     === "
+" ====================================== "
+" inoremap gh <ESC>
+" vnoremap gh <ESC>
+" set timeoutlen=150
+
+" === Enable line numbers ============== "
+set number
+
+" ====================================== "
+" === Enable cursor position to      === "
+" === always be displayed            === "
+" ====================================== "
+set ruler
+
+" ====================================== "
+" === This is an extremely helpful   === "
+" === feature to have, next to the   === "
+" === ruler, the start of the        === "
+" === command you write will show    === "
+" ====================================== "
+set showcmd
+
+" ====================================== "
+" === Use the OS clipboard by        === "
+" === default (on versions compiled  === "
+" === with `+clipboard`)             === "
+" ====================================== "
+set clipboard=unnamed
+
+" ====================================== "
+" === This will enable some sort of  === "
+" === highligh on the line that your === "
+" === cursor is on                   === "
+" ====================================== "
+set cursorline
+
+" ====================================== "
+" === When you search a word all the === "
+" === instances of that word will be === "
+" === highlighted as well, which is  === "
+" === why cursorline is so useful    === "
+" ====================================== "
+set hls
+
+" ====================================== "
+" === Allow backspacing anywhere in  === "
+" === insert mode                    === "
+" ====================================== "
+set backspace=indent,eol,start
+
+" ====================================== "
+" === This will set tabs to be 4     === "
+" === spaces by default, and tabs    === "
+" === will be made up of spaces      === "
+" === instead of tab characters      === "
+" === The one exception for now is   === "
+" === with json files, those will be === "
+" === 2 spaces                       === "
+" ====================================== "
+set tabstop=4
+set softtabstop=4
+set shiftwidth=4
+set expandtab
+autocmd FileType json setlocal tabstop=2 softtabstop=2 shiftwidth=2
+
+" ====================================== "
+" === At my current level I do not   === "
+" === make heavy use of the vim      === "
+" === command line so keeping it at  === "
+" === 200 lines seems reasonable     === "
+" ====================================== "
+set history=200
+
+" ====================================== "
+" === This helps a lot when writing  === "
+" === commands with autocomplete     === "
+" === beacuase is displays all the   === "
+" === available options right above  === "
+" === which you can tab through      === "
+" ====================================== "
+set wildmenu
+
+" ====================================== "
+" === This is a useful feature when  === "
+" === you just want to click the top === "
+" === or bottom 5 lines to scroll    === "
+" === slightly and brings the text   === "
+" === into view better               === "
+" ====================================== "
+set scrolloff=5
+
+" ====================================== "
+" === This will check if you have a  === "
+" === mouse and then whether to use  === "
+" === xterm mouse features or other  === "
+" ====================================== "
+if has('mouse')
+    if &term =~ 'xterm'
+        set mouse=a
+    else
+        set mouse=nvi
+    endif
+endif
+
+" ====================================== "
+" === This checks if relative time   === "
+" === measurement is avilable and    === "
+" === therefore the system can       === "
+" === handle the incremental search  === "
+" === feature                        === "
+" ====================================== "
+if has('reltime')
+    set incsearch
+endif
+
+" ====================================== "
+" === This sets relative numbers to  === "
+" === help in navigating around, in  === "
+" === insert mode this is not needed === "
+" === which is why it is turned off  === "
+" ====================================== "
 if exists("&relativenumber")
-	set relativenumber
-	au BufReadPost * set relativenumber
+    set relativenumber
+    autocmd BufReadPost * set relativenumber
 endif
 
 autocmd InsertEnter * :set norelativenumber
 autocmd InsertLeave * :set relativenumber
 
-" ============================================== "
-" ================= LINE BREAK ================= "
-" ============================================== "
-
-" === This is where plugins are starting ======= "
-
-call plug#begin()
-" The default plugin directory will be as follows:
-"   - Vim (Linux/macOS): '~/.vim/plugged'
-"   - Vim (Windows): '~/vimfiles/plugged'
-"   - Neovim (Linux/macOS/Windows): stdpath('data') . '/plugged'
-" You can specify a custom plugin directory by passing it as the argument
-"   - e.g. `call plug#begin('~/.vim/plugged')`
-"   - Avoid using standard Vim directory names like 'plugin'
-
-" Plug in purpura colorscheme
-Plug 'yassinebridi/vim-purpura'
-
-" Initialize plugin system
-" - Automatically executes `filetype plugin indent on` and `syntax enable`.
-call plug#end()
-" You can revert the settings after the call like so:
-"   filetype indent off   " Disable file-type-specific indentation
-"   syntax off            " Disable syntax highlighting
-
-" colorscheme purpura
-
-
-
-" ============================================== "
-" ================= LINE BREAK ================= "
-" ============================================== "
-
-" === This is where the standard settings ====== "
-" === are started                         ====== "
-
-" When started as "evim", evim.vim will already have done these settings.
-if v:progname =~? "evim"
-  finish
-endif
-
-" Bail out if something that ran earlier, e.g. a system wide vimrc, does not
-" want Vim to use these default values.
-if exists('skip_defaults_vim')
-  finish
-endif
-
-" Use Vim settings, rather than Vi settings (much better!).
-" This must be first, because it changes other options as a side effect.
-" Avoid side effects when it was already reset.
-if &compatible
-  set nocompatible
-endif
-
-
-
-" When the +eval feature is missing, the set command above will be skipped.
-" Use a trick to reset compatible only when the +eval feature is missing.
-silent! while 0
-  set nocompatible
-silent! endwhile
-
-" Allow backspacing over everything in insert mode.
-set backspace=indent,eol,start
-
-set history=200		" keep 200 lines of command line history
-set ruler		" show the cursor position all the time
-set showcmd		" display incomplete commands
-set wildmenu		" display completion matches in a status line
-
-set ttimeout		" time out for key codes
-set ttimeoutlen=100	" wait up to 100ms after Esc for special key
-
-" Show @@@ in the last line if it is truncated.
-set display=truncate
-
-" Show a few lines of context around the cursor.  Note that this makes the
-" text scroll if you mouse-click near the start or end of the window.
-set scrolloff=5
-
-" Do incremental searching when it's possible to timeout.
-if has('reltime')
-  set incsearch
-endif
-
-" Do not recognize octal numbers for Ctrl-A and Ctrl-X, most users find it
-" confusing.
+" ====================================== "
+" === Do not recognize octal numbers === "
+" === for Ctrl-A and Ctrl-X, I have  === "
+" === personally never used them and === "
+" === don't plan to yet              === "
+" ====================================== "
 set nrformats-=octal
 
-" For Win32 GUI: remove 't' flag from 'guioptions': no tearoff menu entries.
+
+
+" ====================================== "
+" =========== VIM-PLUG START =========== "
+" ====================================== "
+
+" ====================================== "
+" === First I run a check to see if  === "
+" === vim-plug is present            === "
+" ====================================== "
+
+if filereadable(expand('~/.vim/autoload/plug.vim'))
+    call plug#begin()
+" ====================================== "
+" === The default plugin directory   === "
+" === will be as follows:            === "
+" === - Vim (Linux/macOS): '~/.vim/plugged'
+" === - Vim (Windows): '~/vimfiles/plugged'
+" === - Neovim (Linux/macOS/Windows): stdpath('data') . '/plugged'
+" === You can specify a custom       === "
+" === plugin directory by passing    === "
+" === it as the argument             === "
+" === - e.g. `call plug#begin('~/.vim/plugged')`
+" === - Avoid using standard Vim directory names like 'plugin'
+" ====================================== "
+
+    " Plug in purpura colorscheme
+    Plug 'yassinebridi/vim-purpura'
+
+    " Plug in nerdcommenter to comment with gc
+    Plug 'preservim/nerdcommenter'
+
+    " Initialize plugin system
+    " - Automatically executes `filetype plugin indent on` and `syntax enable`.
+    call plug#end()
+    " DON'T FORGET to run :PlugInstall
+
+    " You can revert the settings after the call like so:
+    "   filetype indent off   " Disable file-type-specific indentation
+    "   syntax off            " Disable syntax highlighting
+
+    " colorscheme purpura
+    
+    " sets mapleader because nerdcommenter uses it for its bindings
+    let mapleader = " "
+
+    " Add spaces after comment delimiters by default
+    let g:NERDSpaceDelims = 1
+
+    " Align line-wise comment delimiters flush left instead of following code indentation
+    let g:NERDDefaultAlign = 'left'
+else
+    echo "vim-plug are not installed, if you do not intend to then you can delete this warning in your .vimrc"
+endif
+
+" ====================================== "
+" ============= VIM-PLUG END =========== "
+" ====================================== "
+
+
+
+" ====================================== "
+" === These are settings kept from   === "
+" === default initial vimrc file     === "
+" ====================================== "
+
+" ====================================== "
+" === This will highlight strings    === "
+" === inside C comments.             === "
+" ====================================== "
+let c_comment_strings=1
+
+" ====================================== "
+" === Sets a timeout for key codes   === "
+" === Currently set to 100ms until   === "
+" === it just registers as a         === "
+" === standalone key press           === "
+" ====================================== "
+set ttimeout
+set ttimeoutlen=100
+
+" ====================================== "
+" === For Win32 GUI: remove 't' flag === "
+" === from 'guioptions': no tearoff  === "
+" === menu entries.                  === "
+" === Don't personally use windows   === "
+" === but I kept it just in case     === "
+" ====================================== "
 if has('win32')
   set guioptions-=t
 endif
@@ -165,18 +296,6 @@ sunmap Q
 " so that you can undo CTRL-U after inserting a line break.
 " Revert with ":iunmap <C-U>".
 inoremap <C-U> <C-G>u<C-U>
-
-" In many terminal emulators the mouse works just fine.  By enabling it you
-" can position the cursor, Visually select and scroll with the mouse.
-" Only xterm can grab the mouse events when using the shift key, for other
-" terminals use ":", select text and press Esc.
-if has('mouse')
-  if &term =~ 'xterm'
-    set mouse=a
-  else
-    set mouse=nvi
-  endif
-endif
 
 " Only do this part when Vim was compiled with the +eval feature.
 if 1
@@ -216,17 +335,6 @@ if 1
 	  \ echohl None
   augroup END
 
-endif
-
-" Switch syntax highlighting on when the terminal has colors or when using the
-" GUI (which always has colors).
-if &t_Co > 2 || has("gui_running")
-  " Revert with ":syntax off".
-  syntax on
-
-  " I like highlighting strings inside C comments.
-  " Revert with ":unlet c_comment_strings".
-  let c_comment_strings=1
 endif
 
 " Convenient command to see the difference between the current buffer and the
