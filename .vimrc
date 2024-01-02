@@ -103,6 +103,14 @@ set cursorline
 set hls
 
 " ====================================== "
+" === I want my searches to be case  === "
+" === insensitive except for when I  === "
+" === uppercase letters              === "
+" ====================================== "
+set ignorecase
+set smartcase
+
+" ====================================== "
 " === Allow backspacing anywhere in  === "
 " === insert mode                    === "
 " ====================================== "
@@ -194,6 +202,25 @@ autocmd InsertLeave * :set relativenumber
 " === don't plan to yet              === "
 " ====================================== "
 set nrformats-=octal
+
+" === netrw configs ==================== "
+" nnoremap <C-n> <Esc>:35Lexplore<cr> "Fails in nvim, so:
+nnoremap <C-n> <Esc>:Lexplore<cr>:vertical resize 35<cr>
+let g:netrw_liststyle=3
+let g:netrw_altv=1
+
+" === search through my git repo ======= "
+set gp=git\ grep\ -ni
+
+" ====================================== "
+" === File navigation ================== "
+" ====================================== "
+set isfname+=@-@
+set includeexpr=substitute(v:fname,'^@\/','','')
+
+" === Just some next.js configs ======== "
+set path+=components,src
+set suffixesadd+=,/index.js,index.js
 
 
 
