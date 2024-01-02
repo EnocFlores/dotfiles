@@ -38,6 +38,17 @@ I hope you enjoy your Neovim journey,
 P.S. You can delete this when you're done too. It's your config now :)
 --]]
 
+------------------------------------------
+-- First thing first, use my already    --
+-- current vimrc to start off with my   --
+-- my expected configurations, hasn't   --
+-- broken anything... yet!              --
+------------------------------------------
+vim.o.runtimepath = vim.o.runtimepath .. ',~/.vim'
+vim.o.runtimepath = vim.o.runtimepath .. ',~/.vim/after'
+vim.o.packpath = vim.o.runtimepath
+vim.cmd('source ~/.vimrc')
+
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
@@ -68,6 +79,10 @@ vim.opt.rtp:prepend(lazypath)
 --    as they will be available in your neovim runtime.
 require('lazy').setup({
   -- NOTE: First, some plugins that don't require any configuration
+
+-- Add Github Copilot and Copilot chat  --
+  'github/copilot.vim',
+  'gptlang/CopilotChat.nvim',
 
   -- Git related plugins
   'tpope/vim-fugitive',
