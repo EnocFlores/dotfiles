@@ -3,7 +3,7 @@
 " Maintainer: The Vim Project <https://github.com/vim/vim>
 " Former Maintainer: Bram Moolenaar <Bram@vim.org> - RIP 2023 Aug 3
 " Editor: EnocFlores <https://github.com/EnocFlores>
-" Last Change: 2023 Dec 22
+" Last Change: 2024 Jan 19
 " 
 " This is loaded if no vimrc file was found.
 " Except when Vim is run with "-u NONE" or "-C".
@@ -36,12 +36,51 @@ silent! while 0
 silent! endwhile
 
 " === Theme & Colors =================== "
-set t_Co=256
-set background=dark
-set termguicolors
-let &t_8f = "\<Esc>[38:2:%lu:%lu:%lum"
-let &t_8b = "\<Esc>[48:2:%lu:%lu:%lum"
+
+" === Set colorscheme to ron =========== "
 colorscheme ron
+
+" ====================================== "
+" === There is some differences that === "
+" === occur when using tmux within   === "
+" === your choosen terminal, the     === "
+" === background and foreground can  === "
+" === be particulurly tricky and so  === "
+" === this checks for a screen       === "
+" === terminal and adds this fix so  === "
+" === that everything looks as       === "
+" === expected across your different === "
+" === terminals, this fix can be     === "
+" === found in the term.txt file in  === "
+" === the VIM REFERENCE MANUAL       === "
+" ====================================== "
+if &term == 'screen-256color'
+    " set t_Co=256
+    " set termguicolors
+    let &termguicolors = v:true
+    let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+    let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+
+    " Set the background color
+    " highlight Normal ctermbg=0
+
+    " Set the foreground color
+    " highlight Normal ctermfg=1
+endif
+
+" ====================================== "
+" === This is still being tested on  === "
+" === compatability with neovim      === "
+" ====================================== "
+" if has('nvim') || has('vim')
+"   if has('unix') && has('termguicolors')
+"     " Enable true color support
+"     set termguicolors
+"   elseif has('unix') && has('tmux') && $TMUX != ''
+"     " Enable 256 color support in tmux
+"     set t_Co=256
+"   endif
+" endif
 
 " ====================================== "
 " === Syntax highlighting a          === "
@@ -85,7 +124,11 @@ set showcmd
 " === default (on versions compiled  === "
 " === with `+clipboard`)             === "
 " ====================================== "
-set clipboard=unnamed
+if exists("+clipboard")
+    set clipboard=unnamedplus
+else
+    echo "Your vim installation lacks +clipboard, you can remove this notification from your vimrc"
+endif
 
 " ====================================== "
 " === This will enable some sort of  === "
@@ -208,6 +251,8 @@ set nrformats-=octal
 nnoremap <C-n> <Esc>:Lexplore<cr>:vertical resize 35<cr>
 let g:netrw_liststyle=3
 let g:netrw_altv=1
+let g:netrw_preview=1
+let g:netrw_winsize=300
 
 " === search through my git repo ======= "
 set gp=git\ grep\ -ni
@@ -218,7 +263,7 @@ set gp=git\ grep\ -ni
 set isfname+=@-@
 set includeexpr=substitute(v:fname,'^@\/','','')
 
-" === Just some next.js configs ======== "
+" === Just some JavaScript configs ===== "
 set path+=components,src
 set suffixesadd+=,/index.js,index.js
 
@@ -227,6 +272,24 @@ set suffixesadd+=,/index.js,index.js
 " ====================================== "
 " =========== VIM-PLUG START =========== "
 " ====================================== "
+
+" ====================================== "
+" === If vim-plug is not found, then === "
+" === prompt user to auto install it === "
+" === at launch or comment out this  === "
+" === VIM-PLUG block                 === "
+" ====================================== "
+if empty(glob('~/.vim/autoload/plug.vim'))
+    let user_input = input("Do you want to install vim-plug? (y/n): ")
+
+    if user_input ==# 'y' || user_input ==# 'Y'
+        echo "Alright, installing vim-plug now..."
+        silent execute '!curl -fLo ~/.vim/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+        autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+    else
+        echo "Okay then, you should comment out everything within the VIM-PLUG blocks in your vimrc to avoid further interference with these checks and messages"
+    endif
+endif
 
 " ====================================== "
 " === First I run a check to see if  === "
@@ -249,7 +312,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
 " ====================================== "
 
     " Plug in purpura colorscheme
-    Plug 'yassinebridi/vim-purpura'
+    " Plug 'yassinebridi/vim-purpura'
 
     " Plug in nerdcommenter to comment with gc
     Plug 'preservim/nerdcommenter'
@@ -274,7 +337,7 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
     " Align line-wise comment delimiters flush left instead of following code indentation
     let g:NERDDefaultAlign = 'left'
 else
-    echo "vim-plug are not installed, if you do not intend to then you can delete this warning in your .vimrc"
+    echo "vim-plug is not installed, if you do not intend to then you can delete this warning in your .vimrc"
 endif
 
 " ====================================== "

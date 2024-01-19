@@ -1,5 +1,5 @@
 # EnocFlores <https://github.com/EnocFlores>
-# Last Change: 2023.12.22
+# Last Change: 2024.01.19
 
 
 
@@ -55,7 +55,7 @@ setopt sharehistory
 # === keep your history de-cluttered === #
 # === from the same commands         === #
 # ====================================== #
-# setopt histignorealldups
+setopt histignorealldups
 
 # ====================================== #
 # === Keep 1000 lines of history     === #
@@ -196,9 +196,11 @@ alias edita="vim ~/.zshrc"
 # === Basic aliases ==================== #
 alias ls="ls --color=auto"
 alias cls="clear"
-alias python="python3"
+alias python="python3.11"
 alias editav="vim ~/.vimrc"
 alias editatx="vim ~/.tmux.conf"
+alias editan="vim ~/.config/nvim/init.lua"
+alias vims="nvim -S Session.vim"
 
 
 
@@ -207,11 +209,17 @@ alias editatx="vim ~/.tmux.conf"
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
 
 os=$(uname -s)
+arch=$(uname -m)
+device=$(uname -o)
 
 if [ "$os" = "Linux" ]; then
     echo "Your OS is Linux."
     alias copy="xclip -selection c"
     alias bat="batcat"
+    if [ "$arch" = "x86_64" ]; then
+        alias nvim="~/Downloads/Programs/nvim-linux64/bin/nvim"
+    fi
+    export PATH=/home/eknock/.local/bin:$PATH
 elif [ "$os" = "Darwin" ]; then
     echo "Your OS is macOS."
     alias copy="pbcopy"
@@ -253,7 +261,7 @@ if [ "$os" = "Linux" ]; then
     function test_the_alias_1 {
         case $PWD/ in
             ~/Development/*) alias hello='echo "Did you mean Hello World?!"';;
-            *) if whence -w hello | grep "alias" > /dev/null 2&>1; then unalias hello; fi;;
+            *) if whence -w hello | grep "alias" > /dev/null 2>&1; then unalias hello; fi;;
         esac
 	}
 	chpwd_functions+=(test_the_alias_1)
