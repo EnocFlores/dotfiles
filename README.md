@@ -31,9 +31,10 @@ Should work with:
 - Linux (Debian/Ubuntu based)
 - OsX
 - Termux on Android
-
-| :warning:  It is dangerous to download random scripts from the internet without understanding them, proceed with caution   |
-|-----------------------------------------|
+- 
+| :warning: WARNING          |
+|:---------------------------|
+| It is dangerous to download random scripts from the internet without understanding them, proceed with caution |
 ```sh
 curl -O https://raw.githubusercontent.com/EnocFlores/dotfiles/main/install.sh
 chmod +x install.sh
