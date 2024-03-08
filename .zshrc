@@ -1,5 +1,5 @@
 # EnocFlores <https://github.com/EnocFlores>
-# Last Change: 2024.01.19
+# Last Change: 2024.03.06
 
 
 
@@ -7,8 +7,7 @@
 # !!!!!!!! Brew  Specific Start !!!!!!!! #
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
 
-if which brew > /dev/null
-then
+if which brew > /dev/null; then
     echo "brew is installed."
 # === Add Homebrew commands to PATH  === #
     export PATH=/opt/homebrew/bin:$PATH
@@ -142,6 +141,24 @@ function zle-line-init zle-keymap-select {
 zle -N zle-line-init
 zle -N zle-keymap-select
 
+# ====================================== #
+# === tmux package manager check and === #
+# === installation                   === #
+# ====================================== #
+
+if [[ -d "~/.tmux/plugins/tpm" ]]; then
+    # If it doesn't exist, ask the user if they want to install tpm
+    echo "The tpm plugin is not installed. Do you want to install it now? (y/n)"
+    read answer
+
+    if [ "$answer" = "y" ]; then
+        # If the user answers 'y', run the git clone command to download tpm
+        git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+    fi
+else
+    echo "tpm is installed"
+fi
+
 # === Point NVM to config directory ==== #
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
@@ -158,8 +175,7 @@ export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || pr
 # ====================================== #
 
 # === FOR LATER USE ONCE TESTED ======== #
-if which nvm > /dev/null
-then
+if which nvm > /dev/null; then
     echo "nvm is installed."
 else
     echo "nvm is not installed."
@@ -198,8 +214,9 @@ alias ls="ls --color=auto"
 alias cls="clear"
 alias python="python3.11"
 alias editav="vim ~/.vimrc"
+alias editanv="vim ~/.config/nvim/init.lua"
 alias editatx="vim ~/.tmux.conf"
-alias editan="vim ~/.config/nvim/init.lua"
+alias editat="vim ~/.config/alacritty/alacritty.toml"
 alias vims="nvim -S Session.vim"
 
 
@@ -208,8 +225,8 @@ alias vims="nvim -S Session.vim"
 # !!!!!!!! System Specific Start !!!!!!! #
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
 
-os=$(uname -s)
 arch=$(uname -m)
+os=$(uname -s)
 device=$(uname -o)
 
 if [ "$os" = "Linux" ]; then
@@ -247,6 +264,7 @@ alias gpush='f() { git push origin $1 || git push portable $1 || git push backup
 # === SOMETHING USEFUL TO WORK ON ====== #
 # alias gdelete="git branch -d `git branch --list 'FRONT-*'`"
 alias glist='f() { git branch --list $1 };f'
+alias gittree="git log --all --decorate --oneline --graph"
 
 # === NPM (shortened npm commands) ===== #
 alias nrd="npm run dev"
@@ -325,8 +343,7 @@ alias colorsFG='showFgColors'
 # === and info vertically for        === #
 # === narrower screens or windows    === #
 # ====================================== #
-if ! pgrep "tmux" > /dev/null
-then
+if ! pgrep "tmux" > /dev/null; then
     if (( $(tput cols) > 80 )); then
         neofetch
     else
