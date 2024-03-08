@@ -1,7 +1,7 @@
 # dotfiles
 Repo to quickly get started on new machines with my favorite configs
 
-## Suported programs
+## Supported programs
 
 ### alacritty
 I used the default alacritty config and slowly moved over my iterm2 styles, just recently transitioned so have only made very basic changes
@@ -23,19 +23,24 @@ This install script will ask to install:
 - vim
 - neovim
 
-This install script will attempt to install neovim, which installation can vary widly from OS and architecture
+This install script will attempt to install neovim, which installation can vary widely from OS and architecture
 
 The programs will be needed to use these dotfiles and their plugins
 
 Should work with:
 - Linux (Debian/Ubuntu based)
 - OsX
-- Termux on Andriod
+- Termux on Android
 
+| :warning:  It is dangerous to download random scripts from the internet without understanding them, proceed with caution   |
+|-----------------------------------------|
 ```sh
-curl -o- https://raw.githubusercontent.com/EnocFlores/dotfiles/main/install.sh | bash
+curl -O https://raw.githubusercontent.com/EnocFlores/dotfiles/main/install.sh
+chmod +x install.sh
+./install.sh
+rm install.sh
 ```
 
 ### update script
-Once this repository is downloaded you can run this script to update your dotfiles if there have been new updates to the remote dotfiles repository
+Once this repository is downloaded, you can run this script to update your dotfiles if there have been new updates to the remote dotfiles repository
 
