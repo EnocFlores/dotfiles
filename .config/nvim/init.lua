@@ -1,41 +1,25 @@
---[[
+-- EnocFlores <https://github.com/EnocFlores>
+-- Last Change: 2024.03.07             
+-- Special thanks to TJ from nvim-lua on github for their Kickstart.nvim project
+-- https://github.com/nvim-lua/kickstart.nvim
 
+--[[
 =====================================================================
 ==================== READ THIS BEFORE CONTINUING ====================
 =====================================================================
-
-Kickstart.nvim is *not* a distribution.
-
-Kickstart.nvim is a template for your own configuration.
-  The goal is that you can read every line of code, top-to-bottom, understand
-  what your configuration is doing, and modify it to suit your needs.
-
-  Once you've done that, you should start exploring, configuring and tinkering to
-  explore Neovim!
 
   If you don't know anything about Lua, I recommend taking some time to read through
   a guide. One possible example:
   - https://learnxinyminutes.com/docs/lua/
 
-
   And then you can explore or search through `:help lua-guide`
   - https://neovim.io/doc/user/lua-guide.html
-
 
 Kickstart Guide:
 
 I have left several `:help X` comments throughout the init.lua
 You should run that command and read that help section for more information.
 
-In addition, I have some `NOTE:` items throughout the file.
-These are for you, the reader to help understand what is happening. Feel free to delete
-them once you know what you're doing, but they should serve as a guide for when you
-are first encountering a few different constructs in your nvim config.
-
-I hope you enjoy your Neovim journey,
-- TJ
-
-P.S. You can delete this when you're done too. It's your config now :)
 --]]
 
 ------------------------------------------
@@ -49,15 +33,21 @@ vim.o.runtimepath = vim.o.runtimepath .. ',~/.vim/after'
 vim.o.packpath = vim.o.runtimepath
 vim.cmd('source ~/.vimrc')
 
--- Set <space> as the leader key
--- See `:help mapleader`
---  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
+------------------------------------------
+-- Set <space> as the leader key        --
+-- See `:help mapleader`                --
+-- NOTE: Must happen before plugins     --
+-- are required (otherwise wrong leader --
+-- will be used)                        --
+------------------------------------------
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
--- [[ Install `lazy.nvim` plugin manager ]]
---    https://github.com/folke/lazy.nvim
---    `:help lazy.nvim.txt` for more info
+------------------------------------------
+--[[Install `lazy.nvim` plugin manager]]--
+-- https://github.com/folke/lazy.nvim   --
+-- `:help lazy.nvim.txt` for more info  --
+------------------------------------------
 local lazypath = vim.fn.stdpath 'data' .. '/lazy/lazy.nvim'
 if not vim.loop.fs_stat(lazypath) then
   vim.fn.system {
@@ -71,18 +61,75 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+------------------------------------------
 -- [[ Configure plugins ]]
 -- NOTE: Here is where you install your plugins.
 --  You can configure plugins using the `config` key.
 --
 --  You can also configure plugins after the setup call,
 --    as they will be available in your neovim runtime.
+------------------------------------------
 require('lazy').setup({
   -- NOTE: First, some plugins that don't require any configuration
 
 -- Add Github Copilot and Copilot chat  --
   'github/copilot.vim',
-  'gptlang/CopilotChat.nvim',
+  {
+    "CopilotC-Nvim/CopilotChat.nvim",
+    opts = {
+      show_help = "yes", -- Show help text for CopilotChatInPlace, default: yes
+      debug = false, -- Enable or disable debug mode, the log file will be in ~/.local/state/nvim/CopilotChat.nvim.log
+      disable_extra_info = 'no', -- Disable extra information (e.g: system prompt) in the response.
+      language = "English" -- Copilot answer language settings when using default prompts. Default language is English.
+      -- proxy = "socks5://127.0.0.1:3000", -- Proxies requests via https or socks.
+      -- temperature = 0.1,
+    },
+    build = function()
+      vim.notify("Please update the remote plugins by running ':UpdateRemotePlugins', then restart Neovim.")
+    end,
+    event = "VeryLazy",
+    keys = {
+      { "<leader>ccb", "<cmd>CopilotChatBuffer ", desc = "CopilotChat - Chat with current buffer" },
+      { "<leader>cce", "<cmd>CopilotChatExplain<cr>", desc = "CopilotChat - Explain code" },
+      { "<leader>cct", "<cmd>CopilotChatTests<cr>", desc = "CopilotChat - Generate tests" },
+      {
+        "<leader>ccT",
+        "<cmd>CopilotChatVsplitToggle<cr>",
+        desc = "CopilotChat - Toggle Vsplit", -- Toggle vertical split
+      },
+      {
+        "<leader>ccv",
+        ":CopilotChatVisual ",
+        mode = "x",
+        desc = "CopilotChat - Open in vertical split",
+      },
+      {
+        "<leader>ccx",
+        ":CopilotChatInPlace<cr>",
+        desc = "CopilotChat - Run in-place code",
+      },
+      {
+        "<leader>ccf",
+        "<cmd>CopilotChatFixDiagnostic<cr>", -- Get a fix for the diagnostic message under the cursor.
+        desc = "CopilotChat - Fix diagnostic",
+      },
+      {
+        "<leader>ccr",
+        "<cmd>CopilotChatReset<cr>", -- Reset chat history and clear buffer.
+        desc = "CopilotChat - Reset chat history and clear buffer",
+      },
+      {
+        "<leader>ccq",
+        function()
+          local input = vim.fn.input("Quick Chat: ")
+          if input ~= "" then
+            vim.cmd("CopilotChatBuffer " .. input)
+          end
+        end,
+        desc = "CopilotChat - Quick chat",
+      },
+    },
+  },
 
   -- Git related plugins
   'tpope/vim-fugitive',
@@ -223,6 +270,37 @@ require('lazy').setup({
         theme = 'onedark',
         component_separators = '|',
         section_separators = '',
+      },
+      sections = {
+        lualine_c = {
+          {
+            'filename',
+            file_status = true,      -- Displays file status (readonly status, modified status)
+            newfile_status = false,  -- Display new file status (new file means no write after created)
+            path = 1,                -- 0: Just the filename
+                                     -- 1: Relative path
+                                     -- 2: Absolute path
+                                     -- 3: Absolute path, with tilde as the home directory
+                                     -- 4: Filename and parent dir, with tilde as the home directory
+
+            shorting_target = 40,    -- Shortens path to leave 40 spaces in the window
+                                     -- for other components. (terrible name, any suggestions?)
+            symbols = {
+              modified = '[+]',      -- Text to show when the file is modified.
+              readonly = '[-]',      -- Text to show when the file is non-modifiable or readonly.
+              unnamed = '[No Name]', -- Text to show for unnamed buffers.
+              newfile = '[New]',     -- Text to show for newly created file before first write
+            }
+          }
+        }
+      },
+      inactive_sections = {
+        lualine_c = {
+          {
+            'filename',
+            path = 1,                -- 0: Just the filename
+          }
+        }
       },
     },
   },
@@ -432,6 +510,7 @@ vim.keymap.set('n', '<leader>sG', ':LiveGrepGitRoot<cr>', { desc = '[S]earch by 
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
 
+vim.keymap.set('n', '<leader>nt', ':tabnew<CR>', { desc = '[N]ew [T]ab', noremap = true, silent = true })
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
 -- Defer Treesitter setup after first render to improve startup time of 'nvim {filename}'
@@ -552,6 +631,7 @@ require('which-key').register {
   ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
   ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
   ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
+  ['<leader>n'] = { name = '[N]ew', _ = 'which_key_ignore' },
   ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
   ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
   ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
@@ -672,10 +752,20 @@ cmp.setup {
   },
 }
 
-vim.keymap.set('i', '<C-J>', 'copilot#Accept(\"<CR>\")', {
-    expr = true,
-    replace_keycodes = false
+-- Have copilot work in all filetypes ----
+vim.g.copilot_filetypes = {
+    ['*'] = true,
+}
+
+-- Accept copilot suggested code ---------
+vim.keymap.set('i', '<C-c>', 'copilot#Accept(\"<CR>\")', {
+  expr = true,
+  replace_keycodes = false
 })
-vim.g.copilot_no_tab_map = false
+
+-- Still working on this, doesn't work  --
+-- vim.g.copilot_map = '<C-y>'
+vim.g.copilot_no_tab_map = true
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

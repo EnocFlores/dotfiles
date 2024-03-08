@@ -3,7 +3,7 @@
 " Maintainer: The Vim Project <https://github.com/vim/vim>
 " Former Maintainer: Bram Moolenaar <Bram@vim.org> - RIP 2023 Aug 3
 " Editor: EnocFlores <https://github.com/EnocFlores>
-" Last Change: 2024 Jan 19
+" Last Change: 2024 Mar 06
 " 
 " This is loaded if no vimrc file was found.
 " Except when Vim is run with "-u NONE" or "-C".
@@ -124,9 +124,16 @@ set showcmd
 " === default (on versions compiled  === "
 " === with `+clipboard`)             === "
 " ====================================== "
+let os = system('uname -s')
+
 if exists("+clipboard")
-    set clipboard=unnamedplus
+    if os =~ 'Darwin'
+        set clipboard=unnamed
+    else
+        set clipboard=unnamedplus
+    endif
 else
+    set clipboard=unnamed
     echo "Your vim installation lacks +clipboard, you can remove this notification from your vimrc"
 endif
 
@@ -266,6 +273,100 @@ set includeexpr=substitute(v:fname,'^@\/','','')
 " === Just some JavaScript configs ===== "
 set path+=components,src
 set suffixesadd+=,/index.js,index.js
+
+" ====================================== "
+" === Have a status line that is     === "
+" === always active and will show    === "
+" === pane, mode, and file path      === "
+" ====================================== "
+
+" === Always have status line active === "
+set laststatus=2
+
+" === Function to show modes =========== "
+function! StatuslineMode()
+    let l:mode = mode()
+    if l:mode == 'n'
+        return 'NORMAL'
+    elseif l:mode == 'i'
+        return 'INSERT'
+    elseif l:mode == 'c'
+        return 'COMMAND'
+    elseif l:mode == 'v'
+        return 'VISUAL'
+    elseif l:mode == 'r'
+        return 'REPLACE'
+    elseif l:mode == 't'
+        return 'TERMINAL'
+    else
+        return toupper(l:mode)
+    endif
+endfunction
+
+" ====================================== "
+" === %n=buffer name, %r=read-only   === "
+" === %m=modified, %==left/right sep === "
+" === %y=file type, %l=line number   === "
+" === %0%c=coloumn number with 0 pad === "
+" === %p=position as percentage      === "
+" === %L=total lines in file         === "
+" ====================================== "
+set statusline=[%n]\ \|\ %{StatuslineMode()}\ \|\ %{expand('%:~:.')}\ %r%m%=%y\ \|\ %l,0%c\ \|\ %p%%\ %L
+
+" ====================================== "
+" === Remap Ctrl+h/j/k/l to change   === "
+" === between panes                  === "
+" ====================================== "
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+" ====================================== "
+" === Have tabs numbered and show    === "
+" === number of windows in each tab  === "
+" === as well as an indicator of any === "
+" === modified buffer in that tab    === "
+" ====================================== "
+highlight TabNumber ctermfg=11 guifg=#0000ff
+
+function! MyTabLine()
+    let s = ''
+    for i in range(tabpagenr('$'))
+        let winnr = tabpagewinnr(i + 1)
+        let buflist = tabpagebuflist(i + 1)
+        let bufnr = buflist[winnr - 1]
+        let file = bufname(bufnr)
+        let buftype = getbufvar(bufnr, '&buftype')
+        if buftype == 'nofile'
+            if file =~ '\/.'
+                let file = substitute(file, '.*\/\zs', '', '')
+            endif
+        else
+            let file = fnamemodify(file, ':t')
+        endif
+        if i + 1 == tabpagenr()
+            let s .= '%#TabLineSel#'
+        else
+            let s .= '%#TabLine#'
+        endif
+        let modified = 0
+        for buf in tabpagebuflist(i + 1)
+            if getbufvar(buf, '&modified')
+                let modified = 1
+                break
+            endif
+        endfor
+        let s .= ' ' . (i + 1) . ' ' . file . ' ' . tabpagewinnr(i + 1, '$') . 'w ' . (modified ? '[+] ' : '') . ' '
+        " let s .= ' ' . '%#Title#' . (i + 1) . '%#TabLine#' . ' ' . file . ' ' . tabpagewinnr(i + 1, '$') . 'w ' . (modified ? '[+] ' : '') . ' '
+        " let s .= ' ' . ('%#TabNumber#' . i + 1) . ' ' . file . ' ' . tabpagewinnr(i + 1, '$') . 'w ' . (modified ? '[+] ' : '') . ' '
+    endfor
+    let s .= '%T%#TabLineFill#%='
+    let s .= (tabpagenr('$') > 1 ? '%#TabLine#%999XX' : ' ')
+    return s
+endfunction
+
+set tabline=%!MyTabLine()
 
 
 
