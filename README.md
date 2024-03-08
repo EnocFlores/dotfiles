@@ -31,7 +31,7 @@ Should work with:
 - Linux (Debian/Ubuntu based)
 - OsX
 - Termux on Android
-- 
+
 | :warning: WARNING          |
 |:---------------------------|
 | It is dangerous to download random scripts from the internet without understanding them, proceed with caution |
