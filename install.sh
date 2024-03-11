@@ -64,13 +64,16 @@ replace_dotfiles() {
     # Ask user to copy dotfiles to home directory
     for file in .zshrc .vimrc .tmux.conf .config/alacritty/alacritty.toml .config/nvim/init.lua
     do
-        if cmp -s "$HOME/$file" "$file"; then
+        cmp -s "$HOME/$file" "$file"
+        cmpResult=$?
+        if [ $cmpResult -eq 0 ]; then
             echo "### $file files are identical"
-        else
+            continue
+        elif [ $cmpResult -eq 1 ];then
             echo "### $file files are different"
             read -p " -  Do you want to view the differences? (Y/n) " choice
             if [[ $choice != "n" && $choice != "N" ]]; then
-                colordiff "$HOME/$file" "$file"
+                diff --color "$HOME/$file" "$file"
                 read -p " -  Do you want to edit the differences in vimdiff? (y/N) " edit_choice
                 if [[ $edit_choice == "y" || $edit_choice == "Y" ]]; then
                     echo " -  Your local file is on the left, the remote file is on the right"
@@ -78,16 +81,20 @@ replace_dotfiles() {
                     vimdiff "$HOME/$file" "$file"
                 fi
             fi
-            read -p " -  Do you want to replace your local $file with the remote one? (y/N) " replace_choice
-            if [[ $replace_choice == "y" || $replace_choice == "Y" ]]; then
+        else
+            echo "The local file ~/$file does not exist!"
+        fi
+        read -p " -  Do you want to replace/create your local ~/$file with the remote one? (y/N) " replace_choice
+        if [[ $replace_choice == "y" || $replace_choice == "Y" ]]; then
+            if [ $cmpResult -ne 2 ];then
                 read -p " -  Do you want to make a backup of your local $file? (Y/n) " backup_choice
                 if [[ $backup_choice != "n" && $backup_choice != "N" ]]; then
                     cp "$HOME/$file" "$HOME/$file.backup"
-                    echo " -  Backup of local $file has been created at $HOME/$file.backup"
+                    echo " -  Backup of local ~/$file has been created at $HOME/$file.backup"
                 fi
-                cp "$file" "$HOME/$file"
-                echo " -  Local $file has been replaced with the remote one."
             fi
+            cp "$file" "$HOME/$file"
+            echo " -  Local ~/$file has been replaced with the remote one."
         fi
     done
 }
@@ -161,6 +168,8 @@ alacritty_installer() {
 
 neovim_installer() {
     case $PM in
+        "brew") $PM install neovim;;
+        "pkg") $PM install neovim;;
         "apt")
             if [[ $arch = "x86_64" ]]; then
                 curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
@@ -185,6 +194,7 @@ do
     if command -v $program &> /dev/null; then
         echo "You already have $program installed"
     elif [[ $program == "neovim" ]]; then
+        # neovim has a different program name, so we want to catch this before the other programs that command is the same name as their package
         if command -v nvim &> /dev/null; then
             echo "You already have $program installed"
         else
@@ -211,8 +221,6 @@ do
                     fi
                 elif [[ $program == "alacritty" ]]; then
                     alacritty_installer
-                elif [[ $program == "neovim" ]]; then
-                    neovim_installer
                 else
                     sudo $PM install $program
                     if [ $? -ne 0 ]; then
