@@ -115,10 +115,10 @@ italic = { style = "Italic" }  # Inherits family from normal, Default style: Ita
 bold_italic = { style = "Bold Italic" }  # Inherits family from normal, Default style: Bold Italic
 
 # Font size in points
-size = 12  # Default: 11.25
+size = 11.5  # Default: 12
 
 # Offset is extra space around each character
-offset = { x = 0, y = 0 }  # Default: x = 0, y = 0
+offset = { x = 1, y = 0 }  # Default: x = 0, y = 0
 
 # Glyph offset determines the locations of the glyphs within their cells
 glyph_offset = { x = 0, y = 0 }  # Default: x = 0, y = 0
@@ -194,20 +194,20 @@ black = "#000000"  # Default: #181818
 red = "#c91b00"  # Default: #ac4242
 green = "#00c200"  # Default: #90a959
 yellow = "#c7c400"  # Default: #f4bf75
-blue = "#0225c7"  # Default: #6a9fb5
+blue = "#0000b3"  # Default: #6a9fb5
 magenta = "#c930c7"  # Default: #aa759f
 cyan = "#00c5c7"  # Default: #75b5aa
 white = "#d8d8d8"  # Default: #d8d8d8
 
 # Bright colors
 [colors.bright]
-black = "#6b6b6b"  # Default: #6b6b6b
-red = "#ff6d67"  # Default: #c55555
+black = "#767676"  # Default: #6b6b6b
+red = "#ff1439"  # Default: #c55555
 green = "#39ff14"  # Default: #aac474
-yellow = "#fefb67"  # Default: #feca88
-blue = "#6871ff"  # Default: #82b8c8
-magenta = "#ff76ff"  # Default: #c28cb8
-cyan = "#5ffdff"  # Default: #93d3c3
+yellow = "#fbf719"  # Default: #feca88
+blue = "#1439ff"  # Default: #82b8c8
+magenta = "#f719fb"  # Default: #c28cb8
+cyan = "#19fbf7"  # Default: #93d3c3
 white = "#fffeff"  # Default: #f8f8f8
 
 # Dim colors
@@ -258,22 +258,22 @@ save_to_clipboard = false  # Default: false
 [cursor]
 
 # Cursor style
-style = { shape = "Block", blinking = "On" }  # Default: shape = "Block", blinking = "Off"
+style = { shape = "Block", blinking = "Always" }  # Default: shape = "Block", blinking = "Off"
 
 # Vi mode cursor style (falls back to the active value of the normal cursor if "None")
 vi_mode_style = "None"  # Default: "None"
 
 # Cursor blinking interval in milliseconds
-blink_interval = 750  # Default: 750
+blink_interval = 360  # Default: 750
 
 # Time after which cursor stops blinking, in seconds
-blink_timeout = 0  # Default: 5
+blink_timeout = 30  # Default: 5
 
 # When true, the cursor will be rendered as a hollow box when the window is not focused
 unfocused_hollow = true  # Default: true
 
 # Thickness of the cursor relative to the cell width
-thickness = 0.15  # Default: 0.15
+thickness = 0.22  # Default: 0.15
 
 ############
 # TERMINAL #
