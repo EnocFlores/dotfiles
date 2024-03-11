@@ -246,6 +246,17 @@ autocmd InsertEnter * :set norelativenumber
 autocmd InsertLeave * :set relativenumber
 
 " ====================================== "
+" === Change the cursor to beam in   === "
+" === insert mode and back to block  === "
+" === in command mode                === "
+" ====================================== "
+if has("autocmd")
+  au InsertEnter * silent execute "!echo -ne '\e[5 q'" | redraw!
+  au InsertLeave * silent execute "!echo -ne '\e[2 q'" | redraw!
+  au VimLeave * silent execute "!echo -ne '\e[2 q'" | redraw!
+endif
+
+" ====================================== "
 " === Do not recognize octal numbers === "
 " === for Ctrl-A and Ctrl-X, I have  === "
 " === personally never used them and === "

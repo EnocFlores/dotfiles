@@ -9,8 +9,8 @@ I used the default alacritty config and slowly moved over my iterm2 styles, just
 ### neovim
 For my neovim config I used kickstart([`https://github.com/nvim-lua/kickstart.nvim`](`https://github.com/nvim-lua/kickstart.nvim`)) as a starting point
 I have made modifications and added the following plugins in addition to what comes with kickstart:
-    copilot([`https://github.com/github/copilot.vim`](`https://github.com/github/copilot.vim`))
-    CopilotChat([`https://github.com/gptlang/CopilotChat.nvim`](`https://github.com/gptlang/CopilotChat.nvim`))
+- copilot([`https://github.com/github/copilot.vim`](https://github.com/github/copilot.vim))
+- CopilotChat([`https://github.com/gptlang/CopilotChat.nvim`](https://github.com/gptlang/CopilotChat.nvim))
 
 ## Scripts
 
@@ -32,9 +32,8 @@ Should work with:
 - OsX
 - Termux on Android
 
-| :warning: WARNING          |
-|:---------------------------|
-| It is dangerous to download random scripts from the internet without understanding them, proceed with caution |
+> [!WARNING]  
+> It is dangerous to download random scripts from the internet without understanding them, proceed with caution
 ```sh
 curl -O https://raw.githubusercontent.com/EnocFlores/dotfiles/main/install.sh
 chmod +x install.sh
