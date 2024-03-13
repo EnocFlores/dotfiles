@@ -2,7 +2,7 @@
 [user]
 # Please adapt and uncomment the following lines:
 	name = EnocFlores
-	email = enoc.flores.ef@gmail.com
+	email = $GIT_EMAIL
 [core]
 # excludesfile = \"$(echo $HOME/.gitignore_global)\"
 # excludesfile = /Users/enfloreshernandez/.gitignore_global
