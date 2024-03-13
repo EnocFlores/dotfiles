@@ -3,12 +3,21 @@
 
 
 
+# === Important system variables ======= #
+arch=$(uname -m)
+os=$(uname -s)
+device=$(uname -o)
+
+PROGRAM_CHECKS=""
+
+
+
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
 # !!!!!!!! Brew  Specific Start !!!!!!!! #
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
 
-if which brew > /dev/null; then
-    echo "brew is installed."
+if [ "$os" = "Darwin" ] && $(command -v brew &> /dev/null);then
+    PROGRAM_CHECKS="$PROGRAM_CHECKS\nbrew is installed"
 # === Add Homebrew commands to PATH  === #
     export PATH=/opt/homebrew/bin:$PATH
 # ====================================== #
@@ -18,8 +27,8 @@ if which brew > /dev/null; then
 # === the openssh command            === #
 # ====================================== #
     export PATH=$(brew --prefix openssh)/bin:$PATH
-else
-    echo "brew is not installed."
+elif [ "$os" = "Darwin" ]; then
+    PROGRAM_CHECKS="$PROGRAM_CHECKS\nbrew is not installed"
 fi
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
@@ -146,7 +155,7 @@ zle -N zle-keymap-select
 # === installation                   === #
 # ====================================== #
 
-if [[ -d "~/.tmux/plugins/tpm" ]]; then
+if [[ ! -d "$HOME/.tmux/plugins/tpm" ]]; then
     # If it doesn't exist, ask the user if they want to install tpm
     echo "The tpm plugin is not installed. Do you want to install it now? (y/n)"
     read answer
@@ -156,7 +165,7 @@ if [[ -d "~/.tmux/plugins/tpm" ]]; then
         git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
     fi
 else
-    echo "tpm is installed"
+    PROGRAM_CHECKS="$PROGRAM_CHECKS\ntpm is installed"
 fi
 
 # === Point NVM to config directory ==== #
@@ -175,32 +184,31 @@ export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || pr
 # ====================================== #
 
 # === FOR LATER USE ONCE TESTED ======== #
-if which nvm > /dev/null; then
-    echo "nvm is installed."
-else
-    echo "nvm is not installed."
-fi
+if command -v nvm &> /dev/null; then
+    PROGRAM_CHECKS="$PROGRAM_CHECKS\nnvm is installed"
+    autoload -U add-zsh-hook
+    load-nvmrc() {
+        local node_version="$(nvm version)"
+        local nvmrc_path="$(nvm_find_nvmrc)"
 
-autoload -U add-zsh-hook
-load-nvmrc() {
-    local node_version="$(nvm version)"
-    local nvmrc_path="$(nvm_find_nvmrc)"
+         if [ -n "$nvmrc_path" ]; then
+             local nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
 
-     if [ -n "$nvmrc_path" ]; then
-         local nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
-
-         if [ "$nvmrc_node_version" = "N/A" ]; then
-             nvm install
-         elif [ "$nvmrc_node_version" != "$node_version" ]; then
-            nvm use
+             if [ "$nvmrc_node_version" = "N/A" ]; then
+                 nvm install
+             elif [ "$nvmrc_node_version" != "$node_version" ]; then
+                nvm use
+            fi
+        elif [ "$node_version" != "$(nvm version default)" ]; then
+            echo "Reverting to nvm default version"
+            nvm use default
         fi
-    elif [ "$node_version" != "$(nvm version default)" ]; then
-        echo "Reverting to nvm default version"
-        nvm use default
-    fi
-}
-add-zsh-hook chpwd load-nvmrc
-load-nvmrc
+    }
+    add-zsh-hook chpwd load-nvmrc
+    load-nvmrc
+else
+    PROGRAM_CHECKS="$PROGRAM_CHECKS\nnvm is not installed"
+fi
 
 # ====================================== #
 # ============== ALIASES =============== #
@@ -219,6 +227,7 @@ alias editanv="vim ~/.config/nvim/init.lua"
 alias editatx="vim ~/.tmux.conf"
 alias editat="vim ~/.config/alacritty/alacritty.toml"
 alias editagt="vim ~/.config/kitty/kitty.conf"
+alias editaw="vim ~/.config/wezterm/wezterm.lua"
 alias vims="nvim -S Session.vim"
 alias icat="kitty +kitten icat"
 
@@ -228,12 +237,8 @@ alias icat="kitty +kitten icat"
 # !!!!!!!! System Specific Start !!!!!!! #
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
 
-arch=$(uname -m)
-os=$(uname -s)
-device=$(uname -o)
-
 if [ "$os" = "Linux" ]; then
-    echo "Your OS is Linux."
+    PROGRAM_CHECKS="Your OS is Linux$PROGRAM_CHECKS"
     alias copy="xclip -selection c"
     alias bat="batcat"
     if [ "$arch" = "x86_64" ]; then
@@ -241,10 +246,10 @@ if [ "$os" = "Linux" ]; then
     fi
     export PATH=/home/eknock/.local/bin:$PATH
 elif [ "$os" = "Darwin" ]; then
-    echo "Your OS is macOS."
+    PROGRAM_CHECKS="Your OS is macOS$PROGRAM_CHECKS"
     alias copy="pbcopy"
 else
-    echo "The operating system is not recognized."
+    PROGRAM_CHECKS="The operating system is not recognized$PROGRAM_CHECKS"
 fi
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
@@ -353,4 +358,5 @@ if ! pgrep "tmux" > /dev/null; then
         neofetch -L
         neofetch --off
     fi
+    echo "$PROGRAM_CHECKS"
 fi
