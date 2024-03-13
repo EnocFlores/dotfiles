@@ -2,37 +2,41 @@
 # This script will install/check necessary programs to setup and use these dotfiles, then it will replace your dotfiles
 
 {
+# If you fork the repo and decide to change this script to fit your own Github then change this variable to your github username:
+username="EnocFlores"
+
 # Note the architecture, OS, and device of user
 arch=$(uname -m)
 os=$(uname -s)
 device=$(uname -o)
 
+# Replace dotfiles function, establishes the directory to clone the dotfiles into, clones the dotfiles, and replaces the dotfiles in the home directory
 replace_dotfiles() {
     # Ask user if the creating of a Development branch is okay, otherwise they can choose the directory they want to clone repo into
-    if [ -d "$HOME/Development/EnocFlores" ]; then
-        echo "You already have ~/Development/EnocFlores dir, changing into there"
-        cd "$HOME/Development/EnocFlores"
+    if [ -d "$HOME/Development/$username" ]; then
+        echo "You already have ~/Development/$username dir, changing into there"
+        cd "$HOME/Development/$username"
     else
-        read -p "Would you like to create a new directory ~/Development/EnocFlores for the dotfiles? (y/n) " yn
+        read -p "Would you like to create a new directory ~/Development/$username for the dotfiles? (y/n) " yn
         case $yn in
             [Yy]* ) 
                 cd $HOME
                 if [ ! -d "Development" ]; then
                     mkdir Development
                     if [ ! -d "Development" ]; then
-                        echo "Failed to create directory"
+                        echo "Failed to create directory. Exiting."
                         exit 1
                     fi
                 fi
                 cd Development
-                if [ ! -d "EnocFlores" ]; then
-                    mkdir EnocFlores
-                    if [ ! -d "EnocFlores" ]; then
-                        echo "Failed to create directory"
+                if [ ! -d $username ]; then
+                    mkdir $username
+                    if [ ! -d $username ]; then
+                        echo "Failed to create directory. Exiting."
                         exit 1
                     fi
                 fi
-                cd EnocFlores;;
+                cd $username;;
             [Nn]* ) 
                 read -p "Please enter the full path of the existing directory where you'd like to clone the dotfiles: " dir
                 if [ -d "$dir" ]; then
@@ -43,16 +47,16 @@ replace_dotfiles() {
                     echo "Directory does not exist. Exiting."
                     exit 1
                 fi;;
-            * ) echo "Please answer yes or no."
+            * ) echo "Please answer yes or no, retry the script. Exiting."
                 exit 1;;
         esac
     fi
 
     # Clone the repository and move into it, unless it already exists then move into it and update it
     if [ ! -d "dotfiles" ]; then
-        git clone https://github.com/EnocFlores/dotfiles.git
+        git clone https://github.com/$username/dotfiles.git
         if [ $? -ne 0 ]; then
-            echo "Failed to clone repository"
+            echo "Failed to clone repository, check internet connection, make sure you have git installed then try again. Exiting."
             exit 1
         fi
         cd dotfiles
@@ -62,7 +66,7 @@ replace_dotfiles() {
     fi
 
     # Ask user to copy dotfiles to home directory
-    for file in .zshrc .vimrc .tmux.conf .config/alacritty/alacritty.toml .config/nvim/init.lua
+    for file in .zshrc .gitconfig .gitignore_global .vimrc .tmux.conf .config/alacritty/alacritty.toml .config/nvim/init.lua
     do
         cmp -s "$HOME/$file" "$file"
         cmpResult=$?
@@ -82,7 +86,7 @@ replace_dotfiles() {
                 fi
             fi
         else
-            echo "The local file ~/$file does not exist!"
+            echo "### The local file ~/$file does not exist!"
         fi
         read -p " -  Do you want to replace/create your local ~/$file with the remote one? (y/N) " replace_choice
         if [[ $replace_choice == "y" || $replace_choice == "Y" ]]; then
@@ -93,7 +97,18 @@ replace_dotfiles() {
                     echo " -  Backup of local ~/$file has been created at $HOME/$file.backup"
                 fi
             fi
+            if [ ! -d "$HOME/$(dirname $file)" ]; then
+                mkdir -p "$HOME/$(dirname $file)"
+                if [ $? -ne 0 ]; then
+                    echo "Failed to make directory for $file!"
+                else
+                    echo "Made directory: $HOME/$(dirname $file)"
+                fi
+            fi
             cp "$file" "$HOME/$file"
+            if [ $? -ne 0 ]; then
+                echo "Failed to copy file locally!"
+            fi
             echo " -  Local ~/$file has been replaced with the remote one."
         fi
     done
@@ -234,6 +249,29 @@ do
         esac
     fi
 done
+
+# Install Nerd Font
+
+fc-list | grep 'RobotoMono Nerd Font Mono' > /dev/null
+if [ $? -eq 0 ]; then
+    echo "You already have Nerd Font installed"
+elif [[ $PM == 'brew' ]]; then
+    brew tap homebrew/cask-fonts &&
+    brew install --cask font-roboto-mono-nerd-font
+else
+    cd $HOME/Downloads
+    if [ $? -ne 0 ]; then
+        echo "You do not have a Downloads directory, can not install font"
+        exit 1
+    fi
+    curl -fLo "RobotoMono.tar.xz" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/RobotoMono.tar.xz"
+    tar -xf RobotoMono.tar.xz
+    if [ ! -d $HOME/.fonts ];then
+        mkdir -p $HOME/.fonts
+    fi
+    mv *.ttf $HOME/.fonts/
+    fc-cache -f -v
+fi
 
 replace_dotfiles
 

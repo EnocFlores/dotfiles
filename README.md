@@ -7,10 +7,18 @@ Repo to quickly get started on new machines with my favorite configs
 I used the default alacritty config and slowly moved over my iterm2 styles, just recently transitioned so have only made very basic changes
 
 ### neovim
-For my neovim config I used kickstart([`https://github.com/nvim-lua/kickstart.nvim`](`https://github.com/nvim-lua/kickstart.nvim`)) as a starting point
+For my neovim config I used kickstart([`https://github.com/nvim-lua/kickstart.nvim`](https://github.com/nvim-lua/kickstart.nvim)) as a starting point
 I have made modifications and added the following plugins in addition to what comes with kickstart:
 - copilot([`https://github.com/github/copilot.vim`](https://github.com/github/copilot.vim))
 - CopilotChat([`https://github.com/gptlang/CopilotChat.nvim`](https://github.com/gptlang/CopilotChat.nvim))
+
+## Planned development:
+
+- have 3 dotfile options:
+    - dotfiles (for main workstations, completely set up a main device)
+    - dotfiles-light (for machines with a little more constraints due to hardware limitaions i.e. raspberry pi, other SBCs)
+    - dotfiles-headless (for headless machines)
+- make scripts POSIX compliant
 
 ## Scripts
 
