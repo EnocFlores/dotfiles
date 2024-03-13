@@ -122,6 +122,7 @@ brew_on_mac() {
         read -p "Your Mac doesn't have brew, would you like to install it? (y/N)" yn
         if [[ $yn == "y" || $yn == "Y" ]]; then
             /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            PM="brew"
         else
             echo "Not using a package manager with this script might cause problems, skipping to dotfile replacement..."
             replace_dotfiles
@@ -155,6 +156,7 @@ echo "Your package manager is set to $PM"
 # Alacritty and Neovim is a special case, where depending on where you are installing it from then you will have to use your package manager, appimage, or compile it
 alacritty_installer() {
     case $PM in
+        "brew") $PM install alacritty;;
         "apt")
             sudo apt install cmake pkg-config libfreetype6-dev libfontconfig1-dev libxcb-xfixes0-dev libxkbcommon-dev python3 gzip scdoc
             git clone https://github.com/alacritty/alacritty.git
