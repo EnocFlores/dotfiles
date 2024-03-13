@@ -14,7 +14,7 @@ fi
 
 git pull
 
-for file in .zshrc .vimrc .tmux.conf .config/alacritty/alacritty.toml .config/nvim/init.lua
+    for file in .zshrc .gitconfig .gitignore_global .vimrc .tmux.conf .config/alacritty/alacritty.toml .config/nvim/init.lua
 do
     cmp -s "$HOME/$file" "$file"
     cmpResult=$?
@@ -34,7 +34,7 @@ do
             fi
         fi
     else
-        echo "The local file ~/$file does not exist!"
+        echo "### The local file ~/$file does not exist!"
     fi
     read -p " -  Do you want to replace/create your local ~/$file with the remote one? (y/N) " replace_choice
     if [[ $replace_choice == "y" || $replace_choice == "Y" ]]; then
@@ -45,7 +45,18 @@ do
                 echo " -  Backup of local ~/$file has been created at $HOME/$file.backup"
             fi
         fi
+        if [ ! -d "$HOME/$(dirname $file)" ]; then
+            mkdir -p "$HOME/$(dirname $file)"
+            if [ $? -ne 0 ]; then
+                echo "Failed to make directory for $file!"
+            else
+                echo "Made directory: $HOME/$(dirname $file)"
+            fi
+        fi
         cp "$file" "$HOME/$file"
+        if [ $? -ne 0 ]; then
+            echo "Failed to copy file locally!"
+        fi
         echo " -  Local ~/$file has been replaced with the remote one."
     fi
 done
