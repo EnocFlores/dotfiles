@@ -10,6 +10,10 @@ arch=$(uname -m)
 os=$(uname -s)
 device=$(uname -o)
 
+# programs and dotfiles variables for easy access
+programs_list='alacritty git zsh neofetch tmux vim neovim'
+dotfiles_list='.zshrc .gitconfig .gitignore_global .vimrc .tmux.conf .config/alacritty/alacritty.toml .config/nvim/init.lua'
+
 # Replace dotfiles function, establishes the directory to clone the dotfiles into, clones the dotfiles, and replaces the dotfiles in the home directory
 replace_dotfiles() {
     # Ask user if the creating of a Development branch is okay, otherwise they can choose the directory they want to clone repo into
@@ -66,7 +70,7 @@ replace_dotfiles() {
     fi
 
     # Ask user to copy dotfiles to home directory
-    for file in .zshrc .gitconfig .gitignore_global .vimrc .tmux.conf .config/alacritty/alacritty.toml .config/nvim/init.lua
+    for file in $dotfiles_list
     do
         cmp -s "$HOME/$file" "$file"
         cmpResult=$?
@@ -206,7 +210,8 @@ neovim_installer() {
 }
 
 # Ask user to install widely availble programs
-for program in alacritty git zsh tmux vim neovim
+# for program in alacritty git zsh tmux vim neovim
+for program in $programs_list
 do
     if command -v $program &> /dev/null; then
         echo "You already have $program installed"
