@@ -67,6 +67,10 @@ replace_dotfiles() {
     else
         cd dotfiles
         git pull
+        if [ $? -ne 0 ]; then
+            echo "Failed to update repository, check internet connection, make sure you have git installed then try again. Exiting."
+            exit 1
+        fi
     fi
 
     # Ask user to copy dotfiles to home directory
@@ -165,7 +169,10 @@ alacritty_installer() {
             sudo apt install cmake pkg-config libfreetype6-dev libfontconfig1-dev libxcb-xfixes0-dev libxkbcommon-dev python3 gzip scdoc
             git clone https://github.com/alacritty/alacritty.git
             cd alacritty
-            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+            if [ ! command -v cargo &> /dev/null ]; then
+                curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+                . $HOME/.cargo/env
+            fi
             rustup override set stable
             rustup update stable
             cargo build --release
@@ -195,7 +202,7 @@ neovim_installer() {
             if [[ $arch = "x86_64" ]]; then
                 curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
                 chmod u+x nvim.appimage
-                mkdir -p /opt/nvim
+                sudo mkdir -p /opt/nvim
                 mv nvim.appimage /opt/nvim/nvim
             else
                 sudo apt-get install ninja-build gettext cmake unzip curl
