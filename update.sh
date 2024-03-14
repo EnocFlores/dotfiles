@@ -12,9 +12,11 @@ if [ "$current_dir" != "dotfiles" ]; then
     exit 1
 fi
 
+dotfiles_list='.zshrc .gitconfig .gitignore_global .vimrc .tmux.conf .config/alacritty/alacritty.toml .config/nvim/init.lua'
+
 git pull
 
-    for file in .zshrc .gitconfig .gitignore_global .vimrc .tmux.conf .config/alacritty/alacritty.toml .config/nvim/init.lua
+    for file in $dotfiles_list
 do
     cmp -s "$HOME/$file" "$file"
     cmpResult=$?
