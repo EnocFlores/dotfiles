@@ -203,7 +203,7 @@ neovim_installer() {
                 curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
                 chmod u+x nvim.appimage
                 sudo mkdir -p /opt/nvim
-                mv nvim.appimage /opt/nvim/nvim
+                sudo mv nvim.appimage /opt/nvim/nvim
             else
                 sudo apt-get install ninja-build gettext cmake unzip curl
                 git clone https://github.com/neovim/neovim
