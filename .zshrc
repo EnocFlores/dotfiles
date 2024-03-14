@@ -10,6 +10,8 @@ device=$(uname -o)
 
 PROGRAM_CHECKS=""
 
+fpath+=${ZDOTDIR:-~}/.zsh_functions
+
 
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
@@ -242,9 +244,9 @@ if [ "$os" = "Linux" ]; then
     alias copy="xclip -selection c"
     alias bat="batcat"
     if [ "$arch" = "x86_64" ]; then
-        # alias nvim="~/Downloads/Programs/nvim-linux64/bin/nvim"
+        export PATH=/opt/nvim/:$PATH
     fi
-    export PATH=/home/eknock/.local/bin:$PATH
+    export PATH=$HOME/.local/bin:$PATH
 elif [ "$os" = "Darwin" ]; then
     PROGRAM_CHECKS="Your OS is macOS$PROGRAM_CHECKS"
     alias copy="pbcopy"
