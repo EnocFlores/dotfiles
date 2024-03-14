@@ -4,7 +4,16 @@ Repo to quickly get started on new machines with my favorite configs
 ## Supported programs
 
 ### alacritty
-I used the default alacritty config and slowly moved over my iterm2 styles, just recently transitioned so have only made very basic changes
+Mostly the default alacritty config with my iterm2 styles
+
+### tmux
+Configured to use the following plugins:
+'tmux-plugins/tmux-sensible'
+'tmux-plugins/tmux-resurrect'
+'tmux-plugins/tmux-continuum'
+
+### vim
+Uses vim plug, has only nerdcommenter installed
 
 ### neovim
 For my neovim config I used kickstart([`https://github.com/nvim-lua/kickstart.nvim`](https://github.com/nvim-lua/kickstart.nvim)) as a starting point
@@ -27,11 +36,12 @@ This install script will ask to install:
 - alacritty
 - git
 - zsh
+- neofetch
 - tmux
 - vim
 - neovim
 
-This install script will attempt to install neovim, which installation can vary widely from OS and architecture
+Alacritty and neovim installation varies widely from OS and architecture, so it is not guaranteed that the install script will work for all systems
 
 The programs will be needed to use these dotfiles and their plugins
 

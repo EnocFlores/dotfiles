@@ -242,7 +242,7 @@ if [ "$os" = "Linux" ]; then
     alias copy="xclip -selection c"
     alias bat="batcat"
     if [ "$arch" = "x86_64" ]; then
-        alias nvim="~/Downloads/Programs/nvim-linux64/bin/nvim"
+        # alias nvim="~/Downloads/Programs/nvim-linux64/bin/nvim"
     fi
     export PATH=/home/eknock/.local/bin:$PATH
 elif [ "$os" = "Darwin" ]; then
