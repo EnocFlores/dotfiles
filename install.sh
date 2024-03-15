@@ -27,11 +27,11 @@ change_gitconfig() {
         echo "NOTE: You probably already ran the install script and changed the .gitconfig file!"
         return
     fi
-    sed -i ".backup" "s/GIT_NAME/$username/g" .gitconfig
+    sed -i".backup" -e "s/GIT_NAME/$username/g" .gitconfig
     if [ $? -eq 0 ];then
         echo "successfully changed .gitconfig name to $username"
     fi
-    sed -i "" "s/GIT_EMAIL/$email/g" .gitconfig
+    sed -i"" -e "s/GIT_EMAIL/$email/g" .gitconfig
     if [ $? -eq 0 ];then
         echo "successfully changed .gitconfig name to $email"
     fi
@@ -234,6 +234,7 @@ neovim_installer() {
                 git clone https://github.com/neovim/neovim
                 cd neovim && make CMAKE_BUILD_TYPE=Release
                 sudo make install
+                sudo mv neovim /usr/local/bin
                 cd $HOME
             fi
             ;;
