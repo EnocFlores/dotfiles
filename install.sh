@@ -12,12 +12,12 @@ os=$(uname -s)
 device=$(uname -o)
 
 # programs and dotfiles variables for easy access
-programs_list='git zsh neofetch tmux vim alacritty neovim lf chafa zellij wezterm'
+programs_list='git zsh neofetch vim btop tmux alacritty neovim lf chafa zellij wezterm'
 
 # ! TESTING ! A method to use dirname and basename to install programs that have a different package name than their command name, so far it is just one so not investing the time to get this working yet, just an idea
 special_snowflake_list='neovim/nvim'
 
-dotfiles_list='.zshrc .gitconfig .gitignore_global .tmux.conf .vimrc .config/alacritty/alacritty.toml .config/nvim/init.lua .config/lf/lfrc .config/zellij/config.kdl .config/wezterm/wezterm.lua'
+dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .tmux.conf .config/alacritty/alacritty.toml .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh .config/zellij/config.kdl .config/wezterm/wezterm.lua'
 nerd_font='RobotoMono'
 nerd_font_package='roboto-mono'
 
@@ -31,7 +31,7 @@ change_gitconfig() {
     if [ $? -eq 0 ];then
         echo "successfully changed .gitconfig name to $username"
     fi
-    sed -i"" -e "s/GIT_EMAIL/$email/g" .gitconfig
+    sed -i" " -e "s/GIT_EMAIL/$email/g" .gitconfig
     if [ $? -eq 0 ];then
         echo "successfully changed .gitconfig name to $email"
     fi
@@ -92,7 +92,7 @@ replace_dotfiles() {
         git pull
         if [ $? -ne 0 ]; then
             echo "!!! Failed to update repository, check internet connection, make sure you have git installed then try again. Exiting."
-            exit 1
+            # exit 1
         fi
     fi
 
@@ -164,27 +164,20 @@ brew_on_mac() {
     fi
 }
 
-# command -v brewster &> /dev/null
-# hasBrew=$?
-# if [ $hasBrew -eq 0 ]; then
-#     echo "Has brew!"
-# else
-#     echo "No Brew"
-# fi
-
 # Check for other package managers
-if [[ $os == "Darwin" ]]; then
-    brew_on_mac
-elif [[ "$device" = "Android" ]]; then
-    PM="pkg"
-elif command -v apt &> /dev/null; then
-    PM="apt"
-else
-    echo "!!! No supported package manager found. Exiting."
-    exit 1
-fi
-
-echo "##### Your package manager is set to $PM #####"
+assign_package_manager() {
+    if [[ $os == "Darwin" ]]; then
+        brew_on_mac
+    elif [[ "$device" = "Android" ]]; then
+        PM="pkg"
+    elif command -v apt &> /dev/null; then
+        PM="apt"
+    else
+        echo "!!! No supported package manager found. Exiting."
+        exit 1
+    fi
+    echo "##### Your package manager is set to $PM #####"
+}
 
 # Alacritty and Neovim is a special case, where depending on where you are installing it from then you will have to use your package manager, appimage, or compile it
 alacritty_installer() {
@@ -194,7 +187,8 @@ alacritty_installer() {
             sudo apt install cmake pkg-config libfreetype6-dev libfontconfig1-dev libxcb-xfixes0-dev libxkbcommon-dev python3 gzip scdoc
             git clone https://github.com/alacritty/alacritty.git
             cd alacritty
-            if [ ! command -v cargo &> /dev/null ]; then
+            command -v cargo &> /dev/null
+            if [ $? -ne 0 ]; then
                 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
                 . $HOME/.cargo/env
             fi
@@ -219,6 +213,7 @@ alacritty_installer() {
     esac
 }
 
+# Install neovim app image
 neovim_installer() {
     case $PM in
         "brew") $PM install neovim;;
@@ -242,6 +237,7 @@ neovim_installer() {
     esac
 }
 
+# Install lf binary
 lf_installer() {
     if [[ $arch = "x86_64" ]];then
         lf_os="amd64"
@@ -256,6 +252,7 @@ lf_installer() {
     sudo mv lf /usr/local/bin
 }
 
+# Install zellij binary for linux
 zellij_installer() {
     curl -fLo "zellij-$arch-unknown-linux-musl.tar.gz" "https://github.com/zellij-org/zellij/releases/latest/download/zellij-$arch-unknown-linux-musl.tar.gz"
     tar -xzf zellij-$arch-unknown-linux-musl.tar.gz
@@ -263,83 +260,101 @@ zellij_installer() {
     sudo mv zellij /usr/local/bin
 }
 
+# Build wezterm from source
 wezterm_installer() {
-    curl -LO https://github.com/wez/wezterm/releases/download/20240203-110809-5046fc22/WezTerm-20240203-110809-5046fc22-Ubuntu20.04.AppImage
-    chmod +x WezTerm-20240203-110809-5046fc22-Ubuntu20.04.AppImage
-    sudo mkdir -p /opt/wezterm
-    sudo mv WezTerm-20240203-110809-5046fc22-Ubuntu20.04.AppImage /opt/wezterm/wezterm
+    command -v cargo &> /dev/null
+    if [ $? -ne 0 ]; then
+        curl https://sh.rustup.rs -sSf | sh -s
+        . $HOME/.cargo/env
+    fi
+    curl -LO https://github.com/wez/wezterm/releases/download/20240203-110809-5046fc22/wezterm-20240203-110809-5046fc22-src.tar.gz
+    tar -xzf wezterm-20240203-110809-5046fc22-src.tar.gz
+    cd wezterm-20240203-110809-5046fc22
+    ./get-deps
+    cargo build --release
+    cargo run --release --bin wezterm -- start
 }
 
 # Ask user to install widely availble programs
-for program in $programs_list
-do
-    if command -v $program &> /dev/null; then
-        echo "### You already have $program installed"
-    elif [[ $program == "neovim" ]]; then
-        # neovim has a different program name, so we want to catch this before the other programs that command is the same name as their package
-        if command -v nvim &> /dev/null; then
+programs_installer() {
+    for program in $programs_list
+    do
+        if command -v $program &> /dev/null; then
             echo "### You already have $program installed"
+        elif [[ $program == "neovim" ]]; then
+            # neovim has a different program name, so we want to catch this before the other programs that command is the same name as their package
+            if command -v nvim &> /dev/null; then
+                echo "### You already have $program installed"
+            else
+                read -p "Would you like to install $program? (y/N) " yn
+                case $yn in
+                    [Yy]* ) 
+                        neovim_installer
+                        ;;
+                    [Nn]* ) echo "Skipping $program.";;
+                    * ) echo "Please answer yes or no.";;
+                esac
+            fi
+        elif [[ $device == "Android" && ( $program == "alacritty" || $program == "wezterm" ) ]]; then
+            echo "Skip!" &> /dev/null
         else
             read -p "Would you like to install $program? (y/N) " yn
             case $yn in
                 [Yy]* ) 
-                    neovim_installer
+                    if [[ $PM == "brew" || $PM == "pkg" ]]; then
+                        $PM install $program
+                        if [ $? -ne 0 ]; then
+                            echo "!!! Failed to install $program with $PM"
+                            exit 1
+                        fi
+                    elif [[ $program == "alacritty" ]]; then
+                        alacritty_installer
+                    elif [[ $program == "lf" ]]; then
+                        lf_installer
+                    elif [[ $program == "zellij" ]]; then
+                        zellij_installer
+                    elif [[ $program == "wezterm" ]]; then
+                        wezterm_installer
+                    else
+                        sudo $PM install $program
+                        if [ $? -ne 0 ]; then
+                            echo "!!! Failed to install $program with $PM"
+                            exit 1
+                        fi
+                    fi
                     ;;
                 [Nn]* ) echo "Skipping $program.";;
                 * ) echo "Please answer yes or no.";;
             esac
         fi
-    elif [[ $device == "Android" && ( $program == "alacritty" || $program == "wezterm" ) ]]; then
-        echo "Skip!" &> /dev/null
-    else
-        read -p "Would you like to install $program? (y/N) " yn
-        case $yn in
-            [Yy]* ) 
-                if [[ $PM == "brew" || $PM == "pkg" ]]; then
-                    $PM install $program
-                    if [ $? -ne 0 ]; then
-                        echo "!!! Failed to install $program with $PM"
-                        exit 1
-                    fi
-                elif [[ $program == "alacritty" ]]; then
-                    alacritty_installer
-                elif [[ $program == "lf" ]]; then
-                    lf_installer
-                elif [[ $program == "zellij" ]]; then
-                    zellij_installer
-                elif [[ $program == "wezterm" ]]; then
-                    wezterm_installer
-                else
-                    sudo $PM install $program
-                    if [ $? -ne 0 ]; then
-                        echo "!!! Failed to install $program with $PM"
-                        exit 1
-                    fi
-                fi
-                ;;
-            [Nn]* ) echo "Skipping $program.";;
-            * ) echo "Please answer yes or no.";;
-        esac
-    fi
-done
+    done
+}
 
 # Install Nerd Font
-
-fc-list | grep "$nerd_font Nerd Font Mono" > /dev/null
-if [ $? -eq 0 ]; then
-    echo "### You already have $nerd_font Nerd Font installed"
-elif [[ $PM == 'brew' ]]; then
-    brew tap homebrew/cask-fonts &&
-    brew install --cask font-$nerd_font_package-nerd-font
-else
-    curl -fLo "$nerd_font.tar.xz" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/$nerd_font.tar.xz"
-    tar -xf $nerd_font.tar.xz
-    if [ ! -d $HOME/.fonts ];then
-        mkdir -p $HOME/.fonts
+nerd_font_installer() {
+    fc-list | grep "$nerd_font Nerd Font Mono" > /dev/null
+    if [ $? -eq 0 ]; then
+        echo "### You already have $nerd_font Nerd Font installed"
+    elif [[ $PM == 'brew' ]]; then
+        brew tap homebrew/cask-fonts &&
+        brew install --cask font-$nerd_font_package-nerd-font
+    else
+        curl -fLo "$nerd_font.tar.xz" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/$nerd_font.tar.xz"
+        tar -xf $nerd_font.tar.xz
+        if [ ! -d $HOME/.fonts ];then
+            mkdir -p $HOME/.fonts
+        fi
+        mv *.ttf $HOME/.fonts/
+        fc-cache -f -v
     fi
-    mv *.ttf $HOME/.fonts/
-    fc-cache -f -v
-fi
+}
+
+# Run functions in order
+assign_package_manager
+
+programs_installer
+
+nerd_font_installer
 
 replace_dotfiles
 
