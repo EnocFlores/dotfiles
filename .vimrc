@@ -267,6 +267,7 @@ set nrformats-=octal
 " === netrw configs ==================== "
 " nnoremap <C-n> <Esc>:35Lexplore<cr> "Fails in nvim, so:
 nnoremap <C-n> <Esc>:Lexplore<cr>:vertical resize 35<cr>
+nnoremap <C-e> <Esc>:Explore<cr>
 let g:netrw_liststyle=3
 let g:netrw_altv=1
 let g:netrw_preview=1
