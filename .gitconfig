@@ -1,8 +1,8 @@
 # This is Git's per-user configuration file.
 [user]
 # Please adapt and uncomment the following lines:
-	name = EnocFlores
-	email = $GIT_EMAIL
+	name = GIT_NAME
+	email = GIT_EMAIL
 [core]
 # excludesfile = \"$(echo $HOME/.gitignore_global)\"
 # excludesfile = /Users/enfloreshernandez/.gitignore_global
