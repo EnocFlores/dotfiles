@@ -246,8 +246,7 @@ if [ "$os" = "Linux" ]; then
     if [ "$arch" = "x86_64" ]; then
         export PATH=/opt/nvim:$PATH
     fi
-    export PATH=$HOME/.cargo/env:$PATH
-    export PATH=/opt/wezterm:$PATH
+    export PATH=$HOME/.cargo/bin:$PATH
     export PATH=$HOME/.local/bin:$PATH
 elif [ "$os" = "Darwin" ]; then
     PROGRAM_CHECKS="Your OS is macOS$PROGRAM_CHECKS"

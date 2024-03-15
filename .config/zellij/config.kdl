@@ -257,22 +257,38 @@ plugins {
 //     dracula {
 //         fg 248 248 242
 //         bg 40 42 54
+//         black 0 0 0
 //         red 255 85 85
 //         green 80 250 123
 //         yellow 241 250 140
 //         blue 98 114 164
 //         magenta 255 121 198
-//         orange 255 184 108
 //         cyan 139 233 253
-//         black 0 0 0
 //         white 255 255 255
+//         orange 255 184 108
 //     }
 // }
+themes {
+ 	// example of how to set a theme in HEX format
+ 	eknock {
+ 		fg "#0059b3"
+ 		bg "#5a00b3"
+ 		black "#5a00b3"
+ 		red "#ff1439"
+ 		green "#39ff14"
+ 		yellow "#fbf719"
+ 		blue "#fbf719"
+ 		magenta "#f719fb"
+ 		cyan "#689D6A"
+ 		white "#ffffff"
+ 		orange "#ff793b"
+ 	}
+}
 
 // Choose the theme that is specified in the themes section.
 // Default: default
 //
-// theme "default"
+theme "eknock"
 
 // The name of the default layout to load on startup
 // Default: "default"
