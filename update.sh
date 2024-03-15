@@ -5,7 +5,7 @@
 {
 # First, check for differences in the local dotfiles to the remote dotfiles
 # Second, ask the user if they would like to view the differences
-# Third, ash the user if they would like to replace their dotfiles with remote dotfiles
+# Third, ask the user if they would like to replace their dotfiles with remote dotfiles
 current_dir=$(basename "$(pwd)")
 if [ "$current_dir" != "dotfiles" ]; then
     echo "Run this from the dotfiles repo"
