@@ -1,9 +1,10 @@
 #!/bin/bash
-# This script will install/check necessary programs to setup and use these dotfiles, then it will replace your dotfiles
+# This script will install/check necessary programs to setup and use these dotfiles
 
 {
-# If you fork the repo and decide to change this script to fit your own Github then change this variable to your github username:
+# If you fork the repo, then these variables make it easy to change this script for your own Github
 username="EnocFlores"
+email="EnocFlores@github.com"
 
 # Note the architecture, OS, and device of user
 arch=$(uname -m)
@@ -11,14 +12,36 @@ os=$(uname -s)
 device=$(uname -o)
 
 # programs and dotfiles variables for easy access
-programs_list='alacritty git zsh neofetch tmux vim neovim'
-dotfiles_list='.zshrc .gitconfig .gitignore_global .vimrc .tmux.conf .config/alacritty/alacritty.toml .config/nvim/init.lua'
+programs_list='git zsh neofetch tmux vim alacritty neovim lf chafa zellij wezterm'
+
+# ! TESTING ! A method to use dirname and basename to install programs that have a different package name than their command name, so far it is just one so not investing the time to get this working yet, just an idea
+special_snowflake_list='neovim/nvim'
+
+dotfiles_list='.zshrc .gitconfig .gitignore_global .tmux.conf .vimrc .config/alacritty/alacritty.toml .config/nvim/init.lua .config/lf/lfrc .config/zellij/config.kdl .config/wezterm/wezterm.lua'
+nerd_font='RobotoMono'
+nerd_font_package='roboto-mono'
+
+# Change .gitconfig file after cloning or updating the repo
+change_gitconfig() {
+    if [ -f .gitconfig.backup ]; then
+        echo "NOTE: You probably already ran the install script and changed the .gitconfig file!"
+        return
+    fi
+    sed -i ".backup" "s/GIT_NAME/$username/g" .gitconfig
+    if [ $? -eq 0 ];then
+        echo "successfully changed .gitconfig name to $username"
+    fi
+    sed -i "" "s/GIT_EMAIL/$email/g" .gitconfig
+    if [ $? -eq 0 ];then
+        echo "successfully changed .gitconfig name to $email"
+    fi
+}
 
 # Replace dotfiles function, establishes the directory to clone the dotfiles into, clones the dotfiles, and replaces the dotfiles in the home directory
 replace_dotfiles() {
     # Ask user if the creating of a Development branch is okay, otherwise they can choose the directory they want to clone repo into
     if [ -d "$HOME/Development/$username" ]; then
-        echo "You already have ~/Development/$username dir, changing into there"
+        echo "### You already have ~/Development/$username dir, changing into there"
         cd "$HOME/Development/$username"
     else
         read -p "Would you like to create a new directory ~/Development/$username for the dotfiles? (y/n) " yn
@@ -28,7 +51,7 @@ replace_dotfiles() {
                 if [ ! -d "Development" ]; then
                     mkdir Development
                     if [ ! -d "Development" ]; then
-                        echo "Failed to create directory. Exiting."
+                        echo "!!! Failed to create directory. Exiting."
                         exit 1
                     fi
                 fi
@@ -36,7 +59,7 @@ replace_dotfiles() {
                 if [ ! -d $username ]; then
                     mkdir $username
                     if [ ! -d $username ]; then
-                        echo "Failed to create directory. Exiting."
+                        echo "!!! Failed to create directory. Exiting."
                         exit 1
                     fi
                 fi
@@ -48,10 +71,10 @@ replace_dotfiles() {
                 elif [ -d "$HOME/$dir" ]; then
                     cd "$HOME/$dir"
                 else
-                    echo "Directory does not exist. Exiting."
+                    echo "!!! Directory does not exist. Exiting."
                     exit 1
                 fi;;
-            * ) echo "Please answer yes or no, retry the script. Exiting."
+            * ) echo "!!! Please answer yes or no, retry the script. Exiting."
                 exit 1;;
         esac
     fi
@@ -60,7 +83,7 @@ replace_dotfiles() {
     if [ ! -d "dotfiles" ]; then
         git clone https://github.com/$username/dotfiles.git
         if [ $? -ne 0 ]; then
-            echo "Failed to clone repository, check internet connection, make sure you have git installed then try again. Exiting."
+            echo "!!! Failed to clone repository, check internet connection, make sure you have git installed then try again. Exiting."
             exit 1
         fi
         cd dotfiles
@@ -68,10 +91,12 @@ replace_dotfiles() {
         cd dotfiles
         git pull
         if [ $? -ne 0 ]; then
-            echo "Failed to update repository, check internet connection, make sure you have git installed then try again. Exiting."
+            echo "!!! Failed to update repository, check internet connection, make sure you have git installed then try again. Exiting."
             exit 1
         fi
     fi
+
+    change_gitconfig
 
     # Ask user to copy dotfiles to home directory
     for file in $dotfiles_list
@@ -155,11 +180,11 @@ elif [[ "$device" = "Android" ]]; then
 elif command -v apt &> /dev/null; then
     PM="apt"
 else
-    echo "No supported package manager found. Exiting."
+    echo "!!! No supported package manager found. Exiting."
     exit 1
 fi
 
-echo "Your package manager is set to $PM"
+echo "##### Your package manager is set to $PM #####"
 
 # Alacritty and Neovim is a special case, where depending on where you are installing it from then you will have to use your package manager, appimage, or compile it
 alacritty_installer() {
@@ -190,7 +215,7 @@ alacritty_installer() {
             echo 'fpath+=${ZDOTDIR:-~}/.zsh_functions' >> ${ZDOTDIR:-~}/.zshrc
             cp extra/completions/_alacritty ${ZDOTDIR:-~}/.zsh_functions/_alacritty
             ;;
-        *) echo "Package manager not yet supported"
+        *) echo "NOTE: Package manager not yet supported"
     esac
 }
 
@@ -212,20 +237,47 @@ neovim_installer() {
                 cd $HOME
             fi
             ;;
-        *) echo "Package manager not yet supported"
+        *) echo "NOTE: Package manager not yet supported"
     esac
 }
 
+lf_installer() {
+    if [[ $arch = "x86_64" ]];then
+        lf_os="amd64"
+    elif [[ $arch = "aarch64" ]];then
+        lf_os="arm64"
+    else
+        echo "NOTE: Architecture not supported by this script at this time, skipping..."
+        return
+    fi
+    curl -fLo "lf-linux-$lf_os.tar.gz" "https://github.com/gokcehan/lf/releases/latest/download/lf-linux-$lf_os.tar.gz"
+    tar -xzf lf-linux-$lf_os.tar.gz
+    sudo mv lf /usr/local/bin
+}
+
+zellij_installer() {
+    curl -fLo "zellij-$arch-unknown-linux-musl.tar.gz" "https://github.com/zellij-org/zellij/releases/latest/download/zellij-$arch-unknown-linux-musl.tar.gz"
+    tar -xzf zellij-$arch-unknown-linux-musl.tar.gz
+    chmod +x zellij
+    sudo mv zellij /usr/local/bin
+}
+
+wezterm_installer() {
+    curl -LO https://github.com/wez/wezterm/releases/download/20240203-110809-5046fc22/WezTerm-20240203-110809-5046fc22-Ubuntu20.04.AppImage
+    chmod +x WezTerm-20240203-110809-5046fc22-Ubuntu20.04.AppImage
+    sudo mkdir -p /opt/wezterm
+    sudo mv WezTerm-20240203-110809-5046fc22-Ubuntu20.04.AppImage /opt/wezterm/wezterm
+}
+
 # Ask user to install widely availble programs
-# for program in alacritty git zsh tmux vim neovim
 for program in $programs_list
 do
     if command -v $program &> /dev/null; then
-        echo "You already have $program installed"
+        echo "### You already have $program installed"
     elif [[ $program == "neovim" ]]; then
         # neovim has a different program name, so we want to catch this before the other programs that command is the same name as their package
         if command -v nvim &> /dev/null; then
-            echo "You already have $program installed"
+            echo "### You already have $program installed"
         else
             read -p "Would you like to install $program? (y/N) " yn
             case $yn in
@@ -236,7 +288,7 @@ do
                 * ) echo "Please answer yes or no.";;
             esac
         fi
-    elif [[ $device == "Android" && ( $program == "alacritty" || $program == "kitty" ) ]]; then
+    elif [[ $device == "Android" && ( $program == "alacritty" || $program == "wezterm" ) ]]; then
         echo "Skip!" &> /dev/null
     else
         read -p "Would you like to install $program? (y/N) " yn
@@ -245,15 +297,21 @@ do
                 if [[ $PM == "brew" || $PM == "pkg" ]]; then
                     $PM install $program
                     if [ $? -ne 0 ]; then
-                        echo "Failed to install $program with $PM"
+                        echo "!!! Failed to install $program with $PM"
                         exit 1
                     fi
                 elif [[ $program == "alacritty" ]]; then
                     alacritty_installer
+                elif [[ $program == "lf" ]]; then
+                    lf_installer
+                elif [[ $program == "zellij" ]]; then
+                    zellij_installer
+                elif [[ $program == "wezterm" ]]; then
+                    wezterm_installer
                 else
                     sudo $PM install $program
                     if [ $? -ne 0 ]; then
-                        echo "Failed to install $program with $PM"
+                        echo "!!! Failed to install $program with $PM"
                         exit 1
                     fi
                 fi
@@ -266,20 +324,15 @@ done
 
 # Install Nerd Font
 
-fc-list | grep 'RobotoMono Nerd Font Mono' > /dev/null
+fc-list | grep "$nerd_font Nerd Font Mono" > /dev/null
 if [ $? -eq 0 ]; then
-    echo "You already have Nerd Font installed"
+    echo "### You already have $nerd_font Nerd Font installed"
 elif [[ $PM == 'brew' ]]; then
     brew tap homebrew/cask-fonts &&
-    brew install --cask font-roboto-mono-nerd-font
+    brew install --cask font-$nerd_font_package-nerd-font
 else
-    cd $HOME/Downloads
-    if [ $? -ne 0 ]; then
-        echo "You do not have a Downloads directory, can not install font"
-        exit 1
-    fi
-    curl -fLo "RobotoMono.tar.xz" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/RobotoMono.tar.xz"
-    tar -xf RobotoMono.tar.xz
+    curl -fLo "$nerd_font.tar.xz" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/$nerd_font.tar.xz"
+    tar -xf $nerd_font.tar.xz
     if [ ! -d $HOME/.fonts ];then
         mkdir -p $HOME/.fonts
     fi
