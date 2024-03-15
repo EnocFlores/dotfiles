@@ -12,7 +12,7 @@ if [ "$current_dir" != "dotfiles" ]; then
     exit 1
 fi
 
-dotfiles_list='.zshrc .gitconfig .gitignore_global .vimrc .tmux.conf .config/alacritty/alacritty.toml .config/nvim/init.lua'
+dotfiles_list='.zshrc .gitconfig .gitignore_global .tmux.conf .vimrc .config/alacritty/alacritty.toml .config/nvim/init.lua .config/lf/lfrc .config/zellij/config.kdl .config/wezterm/wezterm.lua'
 
 git pull
 

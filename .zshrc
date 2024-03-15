@@ -228,10 +228,10 @@ alias editav="vim ~/.vimrc"
 alias editanv="vim ~/.config/nvim/init.lua"
 alias editatx="vim ~/.tmux.conf"
 alias editat="vim ~/.config/alacritty/alacritty.toml"
-alias editagt="vim ~/.config/kitty/kitty.conf"
 alias editaw="vim ~/.config/wezterm/wezterm.lua"
+alias editaz="vim ~/.config/zellij/config.kdl"
 alias vims="nvim -S Session.vim"
-alias icat="kitty +kitten icat"
+alias icat="wezterm imgcat"
 
 
 
@@ -244,7 +244,7 @@ if [ "$os" = "Linux" ]; then
     alias copy="xclip -selection c"
     alias bat="batcat"
     if [ "$arch" = "x86_64" ]; then
-        export PATH=/opt/nvim/:$PATH
+        export PATH=/opt/nvim:$PATH
     fi
     export PATH=$HOME/.local/bin:$PATH
 elif [ "$os" = "Darwin" ]; then
