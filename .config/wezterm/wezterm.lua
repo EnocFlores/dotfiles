@@ -1,3 +1,8 @@
+-- EnocFlores <https://github.com/EnocFlores>
+-- Last Change: 2024.03.19
+
+
+
 -- Pull in the wezterm API
 local wezterm = require 'wezterm'
 local act = wezterm.action
@@ -18,7 +23,7 @@ config.font = wezterm.font('RobotoMono Nerd Font Mono', { weight = 'Regular' })
 config.font_size = 11.5
 
 -- Window
-config.window_decorations = "TITLE | RESIZE"
+config.window_decorations = "RESIZE"
 config.use_resize_increments = true
 config.hide_tab_bar_if_only_one_tab = true
 config.enable_scroll_bar = false
