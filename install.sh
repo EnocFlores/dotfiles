@@ -1,4 +1,9 @@
 #!/bin/bash
+# EnocFlores <https://github.com/EnocFlores>
+# Last Change: 2024.03.19
+
+
+
 # This script will install/check necessary programs to setup and use these dotfiles
 
 {
@@ -12,12 +17,12 @@ os=$(uname -s)
 device=$(uname -o)
 
 # programs and dotfiles variables for easy access
-programs_list='git zsh neofetch vim btop tmux alacritty neovim lf chafa zellij wezterm'
+programs_list='git zsh neofetch vim btop tmux neovim lf chafa alacritty zellij wezterm'
 
 # ! TESTING ! A method to use dirname and basename to install programs that have a different package name than their command name, so far it is just one so not investing the time to get this working yet, just an idea
 special_snowflake_list='neovim/nvim'
 
-dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .tmux.conf .config/alacritty/alacritty.toml .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh .config/zellij/config.kdl .config/wezterm/wezterm.lua'
+dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .tmux.conf .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh .config/alacritty/alacritty.toml .config/zellij/config.kdl .config/wezterm/wezterm.lua'
 nerd_font='RobotoMono'
 nerd_font_package='roboto-mono'
 
@@ -92,7 +97,7 @@ replace_dotfiles() {
         git pull
         if [ $? -ne 0 ]; then
             echo "!!! Failed to update repository, check internet connection, make sure you have git installed then try again. Exiting."
-            # exit 1
+            exit 1
         fi
     fi
 
@@ -273,6 +278,11 @@ wezterm_installer() {
     ./get-deps
     cargo build --release
     cargo run --release --bin wezterm -- start
+    sudo ln -s target/release/wezterm /usr/local/bin/wezterm
+    sudo cp assets/icon/wezterm-icon.svg /usr/share/pixmaps/WezTerm.svg
+    sed -i" " -e "s/org.wezfurlong.wezterm/WezTerm/g" assets/wezterm.desktop
+    sudo desktop-file-install assets/wezterm.desktop
+    sudo update-desktop-database
 }
 
 # Ask user to install widely availble programs
@@ -295,7 +305,7 @@ programs_installer() {
                     * ) echo "Please answer yes or no.";;
                 esac
             fi
-        elif [[ $device == "Android" && ( $program == "alacritty" || $program == "wezterm" ) ]]; then
+        elif [[ $device == "Android" && ( $program == "alacritty" || $program == "wezterm"  || $program == "btop" ) ]]; then
             echo "Skip!" &> /dev/null
         else
             read -p "Would you like to install $program? (y/N) " yn
