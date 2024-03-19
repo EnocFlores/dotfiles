@@ -4,6 +4,4 @@
 	name = GIT_NAME
 	email = GIT_EMAIL
 [core]
-# excludesfile = \"$(echo $HOME/.gitignore_global)\"
-# excludesfile = /Users/enfloreshernandez/.gitignore_global
     excludesfile = ~/.gitignore_global

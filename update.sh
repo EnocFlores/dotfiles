@@ -1,4 +1,8 @@
 #!/bin/bash
+# EnocFlores <https://github.com/EnocFlores>
+# Last Change: 2024.03.19
+
+
 
 # Now that you have this repository cloned, you can update your configs to the latest changes of the remote repository
 
@@ -12,7 +16,7 @@ if [ "$current_dir" != "dotfiles" ]; then
     exit 1
 fi
 
-dotfiles_list='.zshrc .gitconfig .gitignore_global .tmux.conf .vimrc .config/alacritty/alacritty.toml .config/nvim/init.lua .config/lf/lfrc .config/zellij/config.kdl .config/wezterm/wezterm.lua'
+dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .tmux.conf .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh .config/alacritty/alacritty.toml .config/zellij/config.kdl .config/wezterm/wezterm.lua'
 
 git pull
 
