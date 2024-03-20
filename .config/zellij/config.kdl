@@ -271,6 +271,20 @@ plugins {
 themes {
  	// example of how to set a theme in HEX format
  	eknock {
+ 		fg "#30c7c9"        //Tab Colors
+ 		bg "#000000"        //Background Selection Color
+ 		black "#5a00b3"     //Background Statusline Color
+ 		red "#ff793b"       //The mode key on tabs
+ 		green "#f719fb"     //Selected tab, mode, and pane
+ 		yellow "#fbf719"    //NO SE, NOT SURE
+ 		blue "#fbf719"      //NO SE, NOT SURE
+ 		magenta "#ff793b"   //Session Manager Key
+ 		cyan "#19fbf7"      //Session Manager Tab Names
+ 		white "#39ff14"     //Titles over bg
+ 		orange "#39ff14"    //Modifier keys and mode pane border
+ 	}
+
+ 	eknock-backup {
  		fg "#0059b3"
  		bg "#5a00b3"
  		black "#5a00b3"
