@@ -12,7 +12,7 @@
 # Third, ask the user if they would like to replace their dotfiles with remote dotfiles
 current_dir=$(basename "$(pwd)")
 if [ "$current_dir" != "dotfiles" ]; then
-    echo "Run this from the dotfiles repo"
+    echo -e "\033[41m\033[1m\033[37mError: Run this from the dotfiles repo \033[0m"
     exit 1
 fi
 
@@ -20,15 +20,15 @@ dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf
 
 git pull
 
-    for file in $dotfiles_list
+for file in $dotfiles_list
 do
     cmp -s "$HOME/$file" "$file"
     cmpResult=$?
     if [ $cmpResult -eq 0 ]; then
-        echo "### $file files are identical"
+        echo -e "\033[7m\033[1m### $file files are identical \033[0m"
         continue
     elif [ $cmpResult -eq 1 ];then
-        echo "### $file files are different"
+        echo -e "\033[7m\033[1m### $file files are different \033[0m"
         read -p " -  Do you want to view the differences? (Y/n) " choice
         if [[ $choice != "n" && $choice != "N" ]]; then
             diff --color "$HOME/$file" "$file"
@@ -40,7 +40,7 @@ do
             fi
         fi
     else
-        echo "### The local file ~/$file does not exist!"
+        echo -e "\033[7m\033[1m### The local file ~/$file does not exist! \033[0m"
     fi
     read -p " -  Do you want to replace/create your local ~/$file with the remote one? (y/N) " replace_choice
     if [[ $replace_choice == "y" || $replace_choice == "Y" ]]; then
@@ -54,14 +54,14 @@ do
         if [ ! -d "$HOME/$(dirname $file)" ]; then
             mkdir -p "$HOME/$(dirname $file)"
             if [ $? -ne 0 ]; then
-                echo "Failed to make directory for $file!"
+                echo -e "\033[41mError: Failed to make directory for $file! \033[0m"
             else
                 echo "Made directory: $HOME/$(dirname $file)"
             fi
         fi
         cp "$file" "$HOME/$file"
         if [ $? -ne 0 ]; then
-            echo "Failed to copy file locally!"
+            echo -e "\033[41m\033[1m\033[37mError: Failed to copy file locally! \033[0m"
         fi
         echo " -  Local ~/$file has been replaced with the remote one."
     fi
