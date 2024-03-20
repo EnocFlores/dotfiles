@@ -29,16 +29,16 @@ nerd_font_package='roboto-mono'
 # Change .gitconfig file after cloning or updating the repo
 change_gitconfig() {
     if [ -f .gitconfig.backup ]; then
-        echo "NOTE: You probably already ran the install script and changed the .gitconfig file!"
+        echo -e "\033[43mNOTE: You probably already ran the install script and changed the .gitconfig file! \033[0m"
         return
     fi
     sed -i".backup" -e "s/GIT_NAME/$username/g" .gitconfig
     if [ $? -eq 0 ];then
-        echo "successfully changed .gitconfig name to $username"
+        echo " -  successfully changed .gitconfig name to $username"
     fi
-    sed -i" " -e "s/GIT_EMAIL/$email/g" .gitconfig
+    sed -i".trash" -e "s/GIT_EMAIL/$email/g" .gitconfig
     if [ $? -eq 0 ];then
-        echo "successfully changed .gitconfig name to $email"
+        echo " -  successfully changed .gitconfig name to $email"
     fi
 }
 
@@ -46,7 +46,7 @@ change_gitconfig() {
 replace_dotfiles() {
     # Ask user if the creating of a Development branch is okay, otherwise they can choose the directory they want to clone repo into
     if [ -d "$HOME/Development/$username" ]; then
-        echo "### You already have ~/Development/$username dir, changing into there"
+        echo -e "\n\033[7m\033[1m### You already have ~/Development/$username dir, changing into there \033[0m"
         cd "$HOME/Development/$username"
     else
         read -p "Would you like to create a new directory ~/Development/$username for the dotfiles? (y/n) " yn
@@ -56,7 +56,7 @@ replace_dotfiles() {
                 if [ ! -d "Development" ]; then
                     mkdir Development
                     if [ ! -d "Development" ]; then
-                        echo "!!! Failed to create directory. Exiting."
+                        echo -e "\033[41m\033[1m\033[37mError: Failed to create directory. Exiting. \033[0m"
                         exit 1
                     fi
                 fi
@@ -64,7 +64,7 @@ replace_dotfiles() {
                 if [ ! -d $username ]; then
                     mkdir $username
                     if [ ! -d $username ]; then
-                        echo "!!! Failed to create directory. Exiting."
+                        echo -e "\033[41m\033[1m\033[37mError: Failed to create directory. Exiting. \033[0m"
                         exit 1
                     fi
                 fi
@@ -76,10 +76,10 @@ replace_dotfiles() {
                 elif [ -d "$HOME/$dir" ]; then
                     cd "$HOME/$dir"
                 else
-                    echo "!!! Directory does not exist. Exiting."
+                    echo -e "\033[41m\033[1m\033[37mError: Directory does not exist. Exiting. \033[0m"
                     exit 1
                 fi;;
-            * ) echo "!!! Please answer yes or no, retry the script. Exiting."
+            * ) echo -e "\033[41m\033[1m\033[37mError: Please answer yes or no, retry the script. Exiting. \033[0m"
                 exit 1;;
         esac
     fi
@@ -88,7 +88,7 @@ replace_dotfiles() {
     if [ ! -d "dotfiles" ]; then
         git clone https://github.com/$username/dotfiles.git
         if [ $? -ne 0 ]; then
-            echo "!!! Failed to clone repository, check internet connection, make sure you have git installed then try again. Exiting."
+            echo -e "\033[41m\033[1m\033[37mError: Failed to clone repository, check internet connection, make sure you have git installed or that you have the right permissions set then try again. Exiting. \033[0m"
             exit 1
         fi
         cd dotfiles
@@ -96,7 +96,7 @@ replace_dotfiles() {
         cd dotfiles
         git pull
         if [ $? -ne 0 ]; then
-            echo "!!! Failed to update repository, check internet connection, make sure you have git installed then try again. Exiting."
+            echo -e "\033[41m\033[1m\033[37mError: Failed to update repository, check internet connection, make sure you have git installed then try again. Exiting. \033[0m"
             exit 1
         fi
     fi
@@ -109,10 +109,10 @@ replace_dotfiles() {
         cmp -s "$HOME/$file" "$file"
         cmpResult=$?
         if [ $cmpResult -eq 0 ]; then
-            echo "### $file files are identical"
+            echo -e "\033[7m\033[1m### $file files are identical \033[0m"
             continue
         elif [ $cmpResult -eq 1 ];then
-            echo "### $file files are different"
+            echo -e "\033[7m\033[1m### $file files are different \033[0m"
             read -p " -  Do you want to view the differences? (Y/n) " choice
             if [[ $choice != "n" && $choice != "N" ]]; then
                 diff --color "$HOME/$file" "$file"
@@ -124,7 +124,7 @@ replace_dotfiles() {
                 fi
             fi
         else
-            echo "### The local file ~/$file does not exist!"
+            echo -e "\033[7m\033[1m### The local file ~/$file does not exist! \033[0m"
         fi
         read -p " -  Do you want to replace/create your local ~/$file with the remote one? (y/N) " replace_choice
         if [[ $replace_choice == "y" || $replace_choice == "Y" ]]; then
@@ -138,14 +138,14 @@ replace_dotfiles() {
             if [ ! -d "$HOME/$(dirname $file)" ]; then
                 mkdir -p "$HOME/$(dirname $file)"
                 if [ $? -ne 0 ]; then
-                    echo "Failed to make directory for $file!"
+                    echo -e "\033[41mError: Failed to make directory for $file! \033[0m"
                 else
                     echo "Made directory: $HOME/$(dirname $file)"
                 fi
             fi
             cp "$file" "$HOME/$file"
             if [ $? -ne 0 ]; then
-                echo "Failed to copy file locally!"
+                echo -e "\033[41m\033[1m\033[37mError: Failed to copy file locally! \033[0m"
             fi
             echo " -  Local ~/$file has been replaced with the remote one."
         fi
@@ -162,7 +162,7 @@ brew_on_mac() {
             /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
             PM="brew"
         else
-            echo "Not using a package manager with this script might cause problems, skipping to dotfile replacement..."
+            echo -e "\033[43mNote: Not using a package manager with this script might cause problems, skipping to dotfile replacement... \033[0m"
             replace_dotfiles
             exit 0
         fi
@@ -178,10 +178,10 @@ assign_package_manager() {
     elif command -v apt &> /dev/null; then
         PM="apt"
     else
-        echo "!!! No supported package manager found. Exiting."
+        echo -e "\033[41m\033[1m\033[37mError: No supported package manager found. Exiting. \033[0m"
         exit 1
     fi
-    echo "##### Your package manager is set to $PM #####"
+    echo -e "\033[7m\033[1m##### Your package manager is set to $PM ##### \033[0m"
 }
 
 # Alacritty and Neovim is a special case, where depending on where you are installing it from then you will have to use your package manager, appimage, or compile it
@@ -214,7 +214,7 @@ alacritty_installer() {
             echo 'fpath+=${ZDOTDIR:-~}/.zsh_functions' >> ${ZDOTDIR:-~}/.zshrc
             cp extra/completions/_alacritty ${ZDOTDIR:-~}/.zsh_functions/_alacritty
             ;;
-        *) echo "NOTE: Package manager not yet supported"
+        *) echo -e "\033[43mNOTE: Package manager not yet supported \033[0m"
     esac
 }
 
@@ -238,7 +238,7 @@ neovim_installer() {
                 cd $HOME
             fi
             ;;
-        *) echo "NOTE: Package manager not yet supported"
+        *) echo -e "\033[43mNOTE: Package manager not yet supported \033[0m"
     esac
 }
 
@@ -249,7 +249,7 @@ lf_installer() {
     elif [[ $arch = "aarch64" ]];then
         lf_os="arm64"
     else
-        echo "NOTE: Architecture not supported by this script at this time, skipping..."
+        echo -e "\033[43mNOTE: Architecture not supported by this script at this time, skipping... \033[0m"
         return
     fi
     curl -fLo "lf-linux-$lf_os.tar.gz" "https://github.com/gokcehan/lf/releases/latest/download/lf-linux-$lf_os.tar.gz"
@@ -290,11 +290,11 @@ programs_installer() {
     for program in $programs_list
     do
         if command -v $program &> /dev/null; then
-            echo "### You already have $program installed"
+            echo -e "\033[7m\033[1m### You already have $program installed \033[0m"
         elif [[ $program == "neovim" ]]; then
             # neovim has a different program name, so we want to catch this before the other programs that command is the same name as their package
             if command -v nvim &> /dev/null; then
-                echo "### You already have $program installed"
+                echo -e "\033[7m\033[1m### You already have $program installed \033[0m"
             else
                 read -p "Would you like to install $program? (y/N) " yn
                 case $yn in
@@ -314,7 +314,7 @@ programs_installer() {
                     if [[ $PM == "brew" || $PM == "pkg" ]]; then
                         $PM install $program
                         if [ $? -ne 0 ]; then
-                            echo "!!! Failed to install $program with $PM"
+                            echo -e "\033[41m\033[1m\033[37mError: Failed to install $program with $PM \033[0m"
                             exit 1
                         fi
                     elif [[ $program == "alacritty" ]]; then
@@ -328,7 +328,7 @@ programs_installer() {
                     else
                         sudo $PM install $program
                         if [ $? -ne 0 ]; then
-                            echo "!!! Failed to install $program with $PM"
+                            echo -e "\033[41m\033[1m\033[37mError: Failed to install $program with $PM \033[0m"
                             exit 1
                         fi
                     fi
@@ -344,7 +344,7 @@ programs_installer() {
 nerd_font_installer() {
     fc-list | grep "$nerd_font Nerd Font Mono" > /dev/null
     if [ $? -eq 0 ]; then
-        echo "### You already have $nerd_font Nerd Font installed"
+        echo -e "\033[7m\033[1m### You already have $nerd_font Nerd Font installed \033[0m"
     elif [[ $PM == 'brew' ]]; then
         brew tap homebrew/cask-fonts &&
         brew install --cask font-$nerd_font_package-nerd-font

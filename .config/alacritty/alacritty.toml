@@ -83,7 +83,7 @@ decorations_theme_variant = "None"  # Default: "None"
 resize_increments = false  # Default: false
 
 # Option as Alt (macOS only)
-option_as_alt = "None"  # Default: "None"
+option_as_alt = "Both"  # Default: "None"
 
 #############
 # SCROLLING #
