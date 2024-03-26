@@ -82,12 +82,10 @@ HISTSIZE=1000
 SAVEHIST=10000
 HISTFILE=~/.zsh_history
 
-# ====================================== #
-# === Set some env variables for     === #
-# === editors                        === #
-# ====================================== #
+# === Set some env variables =========== #
 export EDITOR='vim'
 export VISUAL='vim'
+export LSCOLORS="Gefxcxdxbxegedabagacad"
 
 # ====================================== #
 # === Show git branch names in shell === #
@@ -104,7 +102,8 @@ parse_git_branch() {
 if [ "$TERM" = "linux" ];then
     export PS1='%K{0}%B%F{2} %n@%m %f%b%k%K{4} %B%F{6} %1~%f%b %k%K{5}%B%F{5}$(parse_git_branch)%f%b %B%F{2}%# %k %f%b'
 else
-    export PS1='%B%K{016}%F{2} %n@%m %f%k%K{017} %F{cyan} %1~%f %k%K{053}%F{201}$(parse_git_branch)%f %F{2}%#%f %k%F{053} %f%b'
+    # export PS1='%B%K{016}%F{2} %n@%m %f%k%K{017} %F{cyan} %1~%f %k%K{053}%F{201}$(parse_git_branch)%f %F{2}%#%f %k%F{053} %f%b'
+    export PS1='%B%K{0}%F{2} %n@%m %f%k%K{4} %F{cyan} %1~%f %k%K{5}%F{201}$(parse_git_branch)%f %F{2}%#%f %k%b%F{5} %f'
 fi
 if (( $(tput cols) <= 80 )); then
     PROMPT="${PROMPT}"$'\n'
