@@ -105,6 +105,9 @@ syntax on
 " === Enable line numbers ============== "
 set number
 
+" === Wrap text so you can see it all=== "
+set wrap
+
 " ====================================== "
 " === Enable cursor position to      === "
 " === always be displayed            === "
@@ -379,6 +382,45 @@ function! MyTabLine()
 endfunction
 
 set tabline=%!MyTabLine()
+
+" ====================================== "
+" === surround.vim exists, but I do  === "
+" === not want more plugins than     === "
+" === those I really can't implement === "
+" === this is nowhere near advanced  === "
+" === as the plugin but it is simple === "
+" === enough for my use case         === "
+" === Limitation: Only works in the  === "
+" === regular line mode, not V or C-v=== "
+" ====================================== "
+function! SurroundWith(char)
+  " Define pairs
+  let sPairs = { '(' : '( ', '[' : '[ ', '{' : '{ ', ')' : '(', ']' : '[', '}' : '{', '<' : '<> ', '>' : '<>' }
+  let ePairs = { '(' : ' )', '[' : ' ]', '{' : ' }', '<' : ' </>', '>' : '</>' }
+  " yank the selected text into the unnamed register
+  normal! gvd
+  " replace the selected text with the character
+  normal! c
+  " execute 'normal! i' . a:char
+  if has_key(sPairs, a:char)
+    execute 'normal! i' . sPairs[a:char]
+  else
+    execute 'normal! i' . a:char
+  endif
+  " paste the yanked text
+  normal! p
+  " insert the character at the end
+  " execute 'normal! a' . a:char
+  if has_key(ePairs, a:char)
+    execute 'normal! a' . ePairs[a:char]
+  else
+    execute 'normal! a' . a:char
+  endif
+  " move the cursor to the end of the line
+  " normal! $
+endfunction
+
+vnoremap <silent> s :<C-u>call SurroundWith(nr2char(getchar()))<CR>
 
 
 

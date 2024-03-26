@@ -1,2 +1,3 @@
 # Ignore my vim session setup file on all git repos
 Session.vim
+*vim/
