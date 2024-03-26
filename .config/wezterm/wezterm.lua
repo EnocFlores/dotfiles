@@ -63,8 +63,8 @@ config.colors = {
     '#c91b00',
     '#00c200',
     '#c7c400',
-    '#0000b3',
-    '#c930c7',
+    '#000080',  -- Blue, old blue: #0000b3
+    '#5a00b3',  -- Magenta, old: #5a00b3
     '#00c5c7',
     '#d8d8d8',
   },
@@ -111,6 +111,8 @@ config.cursor_blink_rate = 360
 config.cursor_thickness = '200%'
 
 -- Key Assignments
+config.send_composed_key_when_left_alt_is_pressed = false
+config.send_composed_key_when_right_alt_is_pressed = false
 config.disable_default_key_bindings = true
 config.keys = {
     { key = 'Tab', mods = 'CTRL', action = act.ActivateTabRelative(1) },

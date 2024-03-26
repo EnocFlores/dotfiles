@@ -195,8 +195,8 @@ black = "#000000"  # Default: #181818
 red = "#c91b00"  # Default: #ac4242
 green = "#00c200"  # Default: #90a959
 yellow = "#c7c400"  # Default: #f4bf75
-blue = "#0000b3"  # Default: #6a9fb5
-magenta = "#c930c7"  # Default: #aa759f
+blue = "#000080"  # Default: #0000b3
+magenta = "#5a00b3"  # Default: #c930c7
 cyan = "#00c5c7"  # Default: #75b5aa
 white = "#d8d8d8"  # Default: #d8d8d8
 
