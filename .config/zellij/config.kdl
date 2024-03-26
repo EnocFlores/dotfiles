@@ -6,6 +6,10 @@ keybinds clear-defaults=true {
     }
     locked {
         bind "Ctrl g" { SwitchToMode "Normal"; }
+        bind "Alt h" "Alt Left" { MoveFocusOrTab "Left"; }
+        bind "Alt l" "Alt Right" { MoveFocusOrTab "Right"; }
+        bind "Alt j" "Alt Down" { MoveFocus "Down"; }
+        bind "Alt k" "Alt Up" { MoveFocus "Up"; }
     }
     resize {
         bind "Ctrl n" { SwitchToMode "Normal"; }
@@ -28,8 +32,10 @@ keybinds clear-defaults=true {
         bind "k" "Up" { MoveFocus "Up"; }
         bind "p" { SwitchFocus; }
         bind "n" { NewPane; SwitchToMode "Normal"; }
-        bind "d" { NewPane "Down"; SwitchToMode "Normal"; }
-        bind "r" { NewPane "Right"; SwitchToMode "Normal"; }
+        bind "-" { NewPane "Down"; SwitchToMode "Normal"; }
+        bind "|" { NewPane "Right"; SwitchToMode "Normal"; }
+        /* bind "d" { NewPane "Down"; SwitchToMode "Normal"; } */
+        /* bind "r" { NewPane "Right"; SwitchToMode "Normal"; } */
         bind "x" { CloseFocus; SwitchToMode "Normal"; }
         bind "f" { ToggleFocusFullscreen; SwitchToMode "Normal"; }
         bind "z" { TogglePaneFrames; SwitchToMode "Normal"; }
@@ -180,7 +186,7 @@ keybinds clear-defaults=true {
         bind "Ctrl y" { SwitchToMode "Move"; }
     }
     shared_except "tmux" "locked" {
-        bind "Ctrl b" { SwitchToMode "Tmux"; }
+        /* bind "Ctrl b" { SwitchToMode "Tmux"; } */
     }
 }
 
@@ -271,6 +277,34 @@ plugins {
 themes {
  	// example of how to set a theme in HEX format
  	eknock {
+ 		fg 5            //Tab Colors
+ 		bg 4            //Background Selection Color
+ 		black 0 0 0     //Background Statusline Color
+ 		red 14       //The mode key on tabs
+ 		green 13     //Selected tab, mode, and pane
+ 		yellow "#fbf719"    //NO SE, NOT SURE
+ 		blue "#fbf719"      //NO SE, NOT SURE
+ 		magenta "#ff793b"   //Session Manager Key
+ 		cyan "#19fbf7"      //Session Manager Tab Names
+ 		white "#39ff14"     //Titles over bg
+ 		orange "#39ff14"    //Modifier keys and mode pane border
+ 	}
+
+ 	eknock-darker {
+ 		fg "#5a00b3"        //Tab Colors
+ 		bg "#000000"        //Background Selection Color
+ 		black "#000000"     //Background Statusline Color
+ 		red "#b7ffb7"       //The mode key on tabs
+ 		green "#0000b3"     //Selected tab, mode, and pane
+ 		yellow "#fbf719"    //NO SE, NOT SURE
+ 		blue "#fbf719"      //NO SE, NOT SURE
+ 		magenta "#ff793b"   //Session Manager Key
+ 		cyan "#19fbf7"      //Session Manager Tab Names
+ 		white "#39ff14"     //Titles over bg
+ 		orange "#39ff14"    //Modifier keys and mode pane border
+ 	}
+
+ 	eknock-backup {
  		fg "#30c7c9"        //Tab Colors
  		bg "#000000"        //Background Selection Color
  		black "#5a00b3"     //Background Statusline Color
@@ -282,20 +316,6 @@ themes {
  		cyan "#19fbf7"      //Session Manager Tab Names
  		white "#39ff14"     //Titles over bg
  		orange "#39ff14"    //Modifier keys and mode pane border
- 	}
-
- 	eknock-backup {
- 		fg "#0059b3"
- 		bg "#5a00b3"
- 		black "#5a00b3"
- 		red "#ff1439"
- 		green "#39ff14"
- 		yellow "#fbf719"
- 		blue "#fbf719"
- 		magenta "#f719fb"
- 		cyan "#689D6A"
- 		white "#ffffff"
- 		orange "#ff793b"
  	}
 }
 
