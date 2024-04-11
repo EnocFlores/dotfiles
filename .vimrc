@@ -343,7 +343,8 @@ nnoremap <C-l> <C-w>l
 " === as well as an indicator of any === "
 " === modified buffer in that tab    === "
 " ====================================== "
-highlight TabNumber ctermfg=11 guifg=#0000ff
+" highlight TabNumber ctermfg=11 guifg=#0000ff ctermbg=NONE guibg=NONE
+highlight TabNumber ctermfg=13 guifg=#0000ff
 
 function! MyTabLine()
     let s = ''
@@ -372,8 +373,10 @@ function! MyTabLine()
                 break
             endif
         endfor
-        let s .= ' ' . (i + 1) . ' ' . file . ' ' . tabpagewinnr(i + 1, '$') . 'w ' . (modified ? '[+] ' : '') . ' '
+        " let s .= ' ' . (i + 1) . ' ' . file . ' ' . tabpagewinnr(i + 1, '$') . 'w ' . (modified ? '[+] ' : '') . ' '
+        let s .= ' ' . (i + 1) . ' ' . '%#TabNumber#' . file . ' ' . tabpagewinnr(i + 1, '$') . 'w ' . (modified ? '[+] ' : '') . ' '
         " let s .= ' ' . '%#Title#' . (i + 1) . '%#TabLine#' . ' ' . file . ' ' . tabpagewinnr(i + 1, '$') . 'w ' . (modified ? '[+] ' : '') . ' '
+        " let s .= ' ' . '%#TabNumber#' . (i + 1) . '%#TabLine#' . ' ' . file . ' ' . tabpagewinnr(i + 1, '$') . 'w ' . (modified ? '[+] ' : '') . ' '
         " let s .= ' ' . ('%#TabNumber#' . i + 1) . ' ' . file . ' ' . tabpagewinnr(i + 1, '$') . 'w ' . (modified ? '[+] ' : '') . ' '
     endfor
     let s .= '%T%#TabLineFill#%='

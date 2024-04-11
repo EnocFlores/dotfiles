@@ -1,5 +1,5 @@
 -- EnocFlores <https://github.com/EnocFlores>
--- Last Change: 2024.03.07             
+-- Last Change: 2024.03.28             
 -- Special thanks to TJ from nvim-lua on github for their Kickstart.nvim project
 -- https://github.com/nvim-lua/kickstart.nvim
 
@@ -73,63 +73,172 @@ require('lazy').setup({
   -- NOTE: First, some plugins that don't require any configuration
 
 -- Add Github Copilot and Copilot chat  --
-  'github/copilot.vim',
+  -- 'github/copilot.vim',
+
+------------------------------------------
+-- Use alternative copilot that uses    --
+-- lua that is better optimized         --
+------------------------------------------
+  {
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    event = "InsertEnter",
+    config = function()
+      require('copilot').setup({
+        panel = {
+          enabled = true,
+          auto_refresh = false,
+          keymap = {
+            jump_prev = "[[",
+            jump_next = "]]",
+            accept = "<CR>",
+            refresh = "gr",
+            open = "<M-CR>"
+          },
+          layout = {
+            position = "bottom", -- | top | left | right
+            ratio = 0.4
+          },
+        },
+        suggestion = {
+          enabled = true,
+          auto_trigger = true,
+          debounce = 75,
+          keymap = {
+            accept = "<C-c>",
+            accept_word = false,
+            accept_line = false,
+            next = "<C-v>",
+            prev = "<C-x>",
+            dismiss = "<C-]>",
+          },
+        },
+        filetypes = {
+          ["*"] = true,
+          ["."] = true,
+          yaml = true,
+          markdown = true,
+          help = false,
+          gitcommit = false,
+          gitrebase = false,
+          hgcommit = false,
+          -- svn = false,
+          -- cvs = false,
+        },
+        copilot_node_command = 'node', -- Node.js version must be > 18.x
+        server_opts_overrides = {},
+      })
+      -- require("copilot.suggestion").toggle_auto_trigger()
+    end,
+  },
+
+------------------------------------------
+-- Use new version of CopilotChat that  --
+-- is now written in lua                --
+------------------------------------------
   {
     "CopilotC-Nvim/CopilotChat.nvim",
+    branch = "canary",
+    dependencies = {
+      { "zbirenbaum/copilot.lua" }, -- or github/copilot.vim
+      { "nvim-lua/plenary.nvim" }, -- for curl, log wrapper
+    },
     opts = {
-      show_help = "yes", -- Show help text for CopilotChatInPlace, default: yes
-      debug = false, -- Enable or disable debug mode, the log file will be in ~/.local/state/nvim/CopilotChat.nvim.log
-      disable_extra_info = 'no', -- Disable extra information (e.g: system prompt) in the response.
-      language = "English" -- Copilot answer language settings when using default prompts. Default language is English.
-      -- proxy = "socks5://127.0.0.1:3000", -- Proxies requests via https or socks.
-      -- temperature = 0.1,
-    },
-    build = function()
-      vim.notify("Please update the remote plugins by running ':UpdateRemotePlugins', then restart Neovim.")
-    end,
-    event = "VeryLazy",
-    keys = {
-      { "<leader>ccb", "<cmd>CopilotChatBuffer ", desc = "CopilotChat - Chat with current buffer" },
-      { "<leader>cce", "<cmd>CopilotChatExplain<cr>", desc = "CopilotChat - Explain code" },
-      { "<leader>cct", "<cmd>CopilotChatTests<cr>", desc = "CopilotChat - Generate tests" },
-      {
-        "<leader>ccT",
-        "<cmd>CopilotChatVsplitToggle<cr>",
-        desc = "CopilotChat - Toggle Vsplit", -- Toggle vertical split
-      },
-      {
-        "<leader>ccv",
-        ":CopilotChatVisual ",
-        mode = "x",
-        desc = "CopilotChat - Open in vertical split",
-      },
-      {
-        "<leader>ccx",
-        ":CopilotChatInPlace<cr>",
-        desc = "CopilotChat - Run in-place code",
-      },
-      {
-        "<leader>ccf",
-        "<cmd>CopilotChatFixDiagnostic<cr>", -- Get a fix for the diagnostic message under the cursor.
-        desc = "CopilotChat - Fix diagnostic",
-      },
-      {
-        "<leader>ccr",
-        "<cmd>CopilotChatReset<cr>", -- Reset chat history and clear buffer.
-        desc = "CopilotChat - Reset chat history and clear buffer",
-      },
-      {
-        "<leader>ccq",
-        function()
-          local input = vim.fn.input("Quick Chat: ")
-          if input ~= "" then
-            vim.cmd("CopilotChatBuffer " .. input)
-          end
-        end,
-        desc = "CopilotChat - Quick chat",
+      debug = true, -- Enable debugging
+      -- See Configuration section for rest
+      mappings = {
+        complete = {
+          detail = 'Use @<Tab> or /<Tab> for options.',
+          insert ='<Tab>',
+        },
+        close = {
+          normal = 'q',
+          insert = '<C-c>'
+        },
+        reset = {
+          normal ='<C-r>',
+          insert = '<C-r>'
+        },
+        submit_prompt = {
+          normal = '<CR>',
+          insert = '<C-m>'
+        },
+        accept_diff = {
+          normal = '<C-y>',
+          insert = '<C-y>'
+        },
+        yank_diff = {
+          normal = 'gy',
+        },
+        show_diff = {
+          normal = 'gd'
+        },
+        show_system_prompt = {
+          normal = 'gp'
+        },
+        show_user_selection = {
+          normal = 'gs'
+        },
       },
     },
+    -- See Commands section for default commands if you want to lazy load on them
   },
+  -- {
+  --   "CopilotC-Nvim/CopilotChat.nvim",
+  --   opts = {
+  --     show_help = "yes", -- Show help text for CopilotChatInPlace, default: yes
+  --     debug = false, -- Enable or disable debug mode, the log file will be in ~/.local/state/nvim/CopilotChat.nvim.log
+  --     disable_extra_info = 'no', -- Disable extra information (e.g: system prompt) in the response.
+  --     language = "English" -- Copilot answer language settings when using default prompts. Default language is English.
+  --     -- proxy = "socks5://127.0.0.1:3000", -- Proxies requests via https or socks.
+  --     -- temperature = 0.1,
+  --   },
+  --   build = function()
+  --     vim.notify("Please update the remote plugins by running ':UpdateRemotePlugins', then restart Neovim.")
+  --   end,
+  --   event = "VeryLazy",
+  --   keys = {
+  --     { "<leader>ccb", "<cmd>CopilotChatBuffer ", desc = "CopilotChat - Chat with current buffer" },
+  --     { "<leader>cce", "<cmd>CopilotChatExplain<cr>", desc = "CopilotChat - Explain code" },
+  --     { "<leader>cct", "<cmd>CopilotChatTests<cr>", desc = "CopilotChat - Generate tests" },
+  --     {
+  --       "<leader>ccT",
+  --       "<cmd>CopilotChatVsplitToggle<cr>",
+  --       desc = "CopilotChat - Toggle Vsplit", -- Toggle vertical split
+  --     },
+  --     {
+  --       "<leader>ccv",
+  --       ":CopilotChatVisual ",
+  --       mode = "x",
+  --       desc = "CopilotChat - Open in vertical split",
+  --     },
+  --     {
+  --       "<leader>ccx",
+  --       ":CopilotChatInPlace<cr>",
+  --       desc = "CopilotChat - Run in-place code",
+  --     },
+  --     {
+  --       "<leader>ccf",
+  --       "<cmd>CopilotChatFixDiagnostic<cr>", -- Get a fix for the diagnostic message under the cursor.
+  --       desc = "CopilotChat - Fix diagnostic",
+  --     },
+  --     {
+  --       "<leader>ccr",
+  --       "<cmd>CopilotChatReset<cr>", -- Reset chat history and clear buffer.
+  --       desc = "CopilotChat - Reset chat history and clear buffer",
+  --     },
+  --     {
+  --       "<leader>ccq",
+  --       function()
+  --         local input = vim.fn.input("Quick Chat: ")
+  --         if input ~= "" then
+  --           vim.cmd("CopilotChatBuffer " .. input)
+  --         end
+  --       end,
+  --       desc = "CopilotChat - Quick chat",
+  --     },
+  --   },
+  -- },
 
   -- Git related plugins
   'tpope/vim-fugitive',
@@ -254,10 +363,46 @@ require('lazy').setup({
   {
     -- Theme inspired by Atom
     'navarasu/onedark.nvim',
+    -- priority = 1000,
+    -- config = function()
+    --   vim.cmd.colorscheme 'onedark'
+    -- end,
+  },
+
+  {
+    -- Theme inspired by purple
+    'yassinebridi/vim-purpura',
+    -- priority = 1000,
+    -- config = function()
+    --   vim.cmd.colorscheme 'purpura'
+    -- end,
+  },
+
+  {
+    -- Theme inspired by foxes
+    'edeneast/nightfox.nvim',
+    -- priority = 1000,
+    -- config = function()
+    --   vim.cmd.colorscheme 'duskfox'
+    -- end,
+  },
+
+  {
+    -- Theme inspired by purple and flow
+    'embark-theme/vim',
     priority = 1000,
     config = function()
-      vim.cmd.colorscheme 'onedark'
+      vim.cmd.colorscheme 'embark'
     end,
+  },
+
+  {
+    -- Theme inspired by tokyo night in purple rain
+    'yashranjan1/purple-rain.nvim',
+    -- priority = 1000,
+    -- config = function()
+    --   vim.cmd.colorscheme 'purple-rain'
+    -- end,
   },
 
   {
@@ -267,7 +412,7 @@ require('lazy').setup({
     opts = {
       options = {
         icons_enabled = false,
-        theme = 'onedark',
+        theme = 'auto',
         component_separators = '|',
         section_separators = '',
       },
@@ -752,20 +897,7 @@ cmp.setup {
   },
 }
 
--- Have copilot work in all filetypes ----
-vim.g.copilot_filetypes = {
-    ['*'] = true,
-}
-
--- Accept copilot suggested code ---------
-vim.keymap.set('i', '<C-c>', 'copilot#Accept(\"<CR>\")', {
-  expr = true,
-  replace_keycodes = false
-})
-
--- Still working on this, doesn't work  --
--- vim.g.copilot_map = '<C-y>'
-vim.g.copilot_no_tab_map = true
+vim.api.nvim_command('silent! delcommand CopilotAuth')
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
