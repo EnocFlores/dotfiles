@@ -17,7 +17,7 @@ os=$(uname -s)
 device=$(uname -o)
 
 # programs and dotfiles variables for easy access
-programs_list='git zsh neofetch vim btop tmux neovim lf chafa alacritty zellij wezterm'
+programs_list='curl git zsh neofetch vim btop tmux neovim lf chafa alacritty zellij wezterm'
 
 # ! TESTING ! A method to use dirname and basename to install programs that have a different package name than their command name, so far it is just one so not investing the time to get this working yet, just an idea
 special_snowflake_list='neovim/nvim'
