@@ -49,7 +49,7 @@ replace_dotfiles() {
         echo -e "\n\033[7m\033[1m### You already have ~/Development/$username dir, changing into there \033[0m"
         cd "$HOME/Development/$username"
     else
-        read -p "Would you like to create a new directory ~/Development/$username for the dotfiles? (y/n) " yn
+        read -p "Would you like to create a new directory ~/Development/$username for the dotfiles? [y/n] " yn
         case $yn in
             [Yy]* ) 
                 cd $HOME
@@ -113,10 +113,10 @@ replace_dotfiles() {
             continue
         elif [ $cmpResult -eq 1 ];then
             echo -e "\033[7m\033[1m### $file files are different \033[0m"
-            read -p " -  Do you want to view the differences? (Y/n) " choice
+            read -p " -  Do you want to view the differences? [Y/n] " choice
             if [[ $choice != "n" && $choice != "N" ]]; then
                 diff --color "$HOME/$file" "$file"
-                read -p " -  Do you want to edit the differences in vimdiff? (y/N) " edit_choice
+                read -p " -  Do you want to edit the differences in vimdiff? [y/N] " edit_choice
                 if [[ $edit_choice == "y" || $edit_choice == "Y" ]]; then
                     echo " -  Your local file is on the left, the remote file is on the right"
                     read -p " -   -  Press enter to continue"
@@ -126,10 +126,10 @@ replace_dotfiles() {
         else
             echo -e "\033[7m\033[1m### The local file ~/$file does not exist! \033[0m"
         fi
-        read -p " -  Do you want to replace/create your local ~/$file with the remote one? (y/N) " replace_choice
+        read -p " -  Do you want to replace/create your local ~/$file with the remote one? [y/N] " replace_choice
         if [[ $replace_choice == "y" || $replace_choice == "Y" ]]; then
             if [ $cmpResult -ne 2 ];then
-                read -p " -  Do you want to make a backup of your local $file? (Y/n) " backup_choice
+                read -p " -  Do you want to make a backup of your local $file? [Y/n] " backup_choice
                 if [[ $backup_choice != "n" && $backup_choice != "N" ]]; then
                     cp "$HOME/$file" "$HOME/$file.backup"
                     echo " -  Backup of local ~/$file has been created at $HOME/$file.backup"
@@ -157,7 +157,8 @@ brew_on_mac() {
     if command -v brew &> /dev/null; then
         PM="brew"
     else
-        read -p "Your Mac doesn't have brew, would you like to install it? (y/N)" yn
+        echo -e "\033[7m\033[1m### Your Mac doesn't have brew, would you like to install it? [y/N] \033[0m"
+        read yn
         if [[ $yn == "y" || $yn == "Y" ]]; then
             /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
             PM="brew"
@@ -296,7 +297,8 @@ programs_installer() {
             if command -v nvim &> /dev/null; then
                 echo -e "\033[7m\033[1m### You already have $program installed \033[0m"
             else
-                read -p "Would you like to install $program? (y/N) " yn
+                echo -e "\033[7m\033[1m### Would you like to install $program? [y/N] \033[0m"
+                read yn
                 case $yn in
                     [Yy]* ) 
                         neovim_installer
@@ -308,7 +310,8 @@ programs_installer() {
         elif [[ $device == "Android" && ( $program == "alacritty" || $program == "wezterm"  || $program == "btop" ) ]]; then
             echo "Skip!" &> /dev/null
         else
-            read -p "Would you like to install $program? (y/N) " yn
+            echo -e "\033[7m\033[1m### Would you like to install $program? [y/N] \033[0m"
+            read yn
             case $yn in
                 [Yy]* ) 
                     if [[ $PM == "brew" || $PM == "pkg" ]]; then
