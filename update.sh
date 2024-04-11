@@ -29,10 +29,10 @@ do
         continue
     elif [ $cmpResult -eq 1 ];then
         echo -e "\033[7m\033[1m### $file files are different \033[0m"
-        read -p " -  Do you want to view the differences? (Y/n) " choice
+        read -p " -  Do you want to view the differences? [Y/n] " choice
         if [[ $choice != "n" && $choice != "N" ]]; then
             diff --color "$HOME/$file" "$file"
-            read -p " -  Do you want to edit the differences in vimdiff? (y/N) " edit_choice
+            read -p " -  Do you want to edit the differences in vimdiff? [y/N] " edit_choice
             if [[ $edit_choice == "y" || $edit_choice == "Y" ]]; then
                 echo " -  Your local file is on the left, the remote file is on the right"
                 read -p " -   -  Press enter to continue"
@@ -42,10 +42,10 @@ do
     else
         echo -e "\033[7m\033[1m### The local file ~/$file does not exist! \033[0m"
     fi
-    read -p " -  Do you want to replace/create your local ~/$file with the remote one? (y/N) " replace_choice
+    read -p " -  Do you want to replace/create your local ~/$file with the remote one? [y/N] " replace_choice
     if [[ $replace_choice == "y" || $replace_choice == "Y" ]]; then
         if [ $cmpResult -ne 2 ];then
-            read -p " -  Do you want to make a backup of your local $file? (Y/n) " backup_choice
+            read -p " -  Do you want to make a backup of your local $file? [Y/n] " backup_choice
             if [[ $backup_choice != "n" && $backup_choice != "N" ]]; then
                 cp "$HOME/$file" "$HOME/$file.backup"
                 echo " -  Backup of local ~/$file has been created at $HOME/$file.backup"
