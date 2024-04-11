@@ -12,7 +12,13 @@ PROGRAM_CHECKS=""
 
 fpath+=${ZDOTDIR:-~}/.zsh_functions
 
-
+# === Rust ============================= #
+if [[ ! -d "$HOME/.cargo/bin" ]]; then
+    PROGRAM_CHECKS="$PROGRAM_CHECKS\ncargo is not installed"
+else
+    PROGRAM_CHECKS="$PROGRAM_CHECKS\ncargo is installed"
+    export PATH=$HOME/.cargo/bin:$PATH
+fi
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
 # !!!!!!!! Brew  Specific Start !!!!!!!! #
@@ -85,6 +91,7 @@ HISTFILE=~/.zsh_history
 # === Set some env variables =========== #
 export EDITOR='vim'
 export VISUAL='vim'
+export LS_COLORS="Gefxcxdxbxegedabagacad"
 export LSCOLORS="Gefxcxdxbxegedabagacad"
 
 # ====================================== #
@@ -215,20 +222,21 @@ fi
 # ============== ALIASES =============== #
 # ====================================== #
 
-# === Edit zsh File ==================== #
+# === Edit various config files ======== #
 alias edita="vim ~/.zshrc"
-
-# === Basic aliases ==================== #
-alias ls="ls --color=auto"
-alias cls="clear"
-alias python="python3.11"
-alias diff="diff --color"
 alias editav="vim ~/.vimrc"
 alias editanv="vim ~/.config/nvim/init.lua"
 alias editatx="vim ~/.tmux.conf"
 alias editat="vim ~/.config/alacritty/alacritty.toml"
 alias editaw="vim ~/.config/wezterm/wezterm.lua"
 alias editaz="vim ~/.config/zellij/config.kdl"
+
+# === Basic aliases ==================== #
+alias resource="source ~/.zshrc"
+alias ls="ls --color=auto"
+alias cls="clear"
+alias python="python3.11"
+alias diff="diff --color"
 alias vims="nvim -S Session.vim"
 alias icat="wezterm imgcat"
 
@@ -245,7 +253,6 @@ if [ "$os" = "Linux" ]; then
     if [ "$arch" = "x86_64" ]; then
         export PATH=/opt/nvim:$PATH
     fi
-    export PATH=$HOME/.cargo/bin:$PATH
     export PATH=$HOME/.local/bin:$PATH
 elif [ "$os" = "Darwin" ]; then
     PROGRAM_CHECKS="Your OS is macOS$PROGRAM_CHECKS"
@@ -263,6 +270,7 @@ fi
 # === EnocFlores (git base repo) ======= #
 alias cdEF="cd ~/Development/EnocFlores"
 alias cdTEST="cd ~/Development/Test"
+alias cd\.="cd ~/Development/EnocFlores/dotfiles"
 
 # === Git (shortened git commands) ===== #
 alias gs="git status"
