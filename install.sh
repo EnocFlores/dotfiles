@@ -235,7 +235,7 @@ neovim_installer() {
                 git clone https://github.com/neovim/neovim
                 cd neovim && make CMAKE_BUILD_TYPE=Release
                 sudo make install
-                sudo mv neovim /usr/local/bin
+                sudo mv build/bin/nvim /usr/local/bin/
                 cd $HOME
             fi
             ;;
@@ -279,7 +279,7 @@ wezterm_installer() {
     ./get-deps
     cargo build --release
     cargo run --release --bin wezterm -- start
-    sudo ln -s target/release/wezterm /usr/local/bin/wezterm
+    sudo ln -s $HOME/wezterm-20240203-110809-5046fc22/target/release/wezterm /usr/local/bin/wezterm
     sudo cp assets/icon/wezterm-icon.svg /usr/share/pixmaps/WezTerm.svg
     sed -i" " -e "s/org.wezfurlong.wezterm/WezTerm/g" assets/wezterm.desktop
     sudo desktop-file-install assets/wezterm.desktop
@@ -343,15 +343,28 @@ programs_installer() {
     done
 }
 
+change_shell() {
+    echo -e "\033[7m\033[1m### Do you want to change your shell to zsh? (most things in this script won't work if you don't) [Y/n] \033[0m"
+    read yn
+    case $yn in
+        [Nn]* )
+            echo "Don't forget to add all there right configs to your preferred shell!";;
+        * )
+            chsh -s /usr/bin/zsh;;
+    esac
+}
+
 # Install Nerd Font
 nerd_font_installer() {
     fc-list | grep "$nerd_font Nerd Font Mono" > /dev/null
     if [ $? -eq 0 ]; then
         echo -e "\033[7m\033[1m### You already have $nerd_font Nerd Font installed \033[0m"
     elif [[ $PM == 'brew' ]]; then
+        echo -e "\033[7m\033[1m### Installing $nerd_font Nerd Font \033[0m"
         brew tap homebrew/cask-fonts &&
         brew install --cask font-$nerd_font_package-nerd-font
     else
+        echo -e "\033[7m\033[1m### Downloading and installing $nerd_font Nerd Font \033[0m"
         curl -fLo "$nerd_font.tar.xz" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/$nerd_font.tar.xz"
         tar -xf $nerd_font.tar.xz
         if [ ! -d $HOME/.fonts ];then
@@ -366,6 +379,8 @@ nerd_font_installer() {
 assign_package_manager
 
 programs_installer
+
+change_shell
 
 nerd_font_installer
 
