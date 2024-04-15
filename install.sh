@@ -26,6 +26,29 @@ dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf
 nerd_font='RobotoMono'
 nerd_font_package='roboto-mono'
 
+setup="desktop"
+
+# Note: For headless server no terminal emulator should be installed (alacritty and wezterm), and installing the font is not necessary
+setup_type() {
+    echo "Do you want to run a full desktop setup or a server setup? [desktop/server]"
+    read setup
+    if [[ $setup == "desktop" ]]; then
+        setup="desktop"
+        programs_list='curl git zsh neofetch vim btop tmux neovim lf chafa alacritty zellij wezterm'
+        dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .tmux.conf .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh .config/alacritty/alacritty.toml .config/zellij/config.kdl .config/wezterm/wezterm.lua'
+    elif [[ $setup == "server" ]]; then
+        setup="server"
+        programs_list='curl git zsh neofetch vim btop tmux neovim lf chafa'
+        dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .tmux.conf .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh'
+    else
+        echo "Invalid option. Please run the script again and choose either 'desktop' or 'server'."
+        exit 1
+    fi
+}
+
+setup_type
+
+
 # Change .gitconfig file after cloning or updating the repo
 change_gitconfig() {
     if [ -f .gitconfig.backup ]; then
@@ -279,7 +302,7 @@ wezterm_installer() {
     ./get-deps
     cargo build --release
     cargo run --release --bin wezterm -- start
-    sudo ln -s $HOME/wezterm-20240203-110809-5046fc22/target/release/wezterm /usr/local/bin/wezterm
+    sudo ln -s $PWD/target/release/wezterm /usr/local/bin/wezterm
     sudo cp assets/icon/wezterm-icon.svg /usr/share/pixmaps/WezTerm.svg
     sed -i" " -e "s/org.wezfurlong.wezterm/WezTerm/g" assets/wezterm.desktop
     sudo desktop-file-install assets/wezterm.desktop
@@ -351,7 +374,7 @@ change_shell() {
             [Nn]* )
                 echo "Don't forget to add all there right configs to your preferred shell!";;
             * )
-                chsh -s /usr/bin/zsh;;
+                chsh -s /bin/zsh;;
         esac
     fi
 }
@@ -380,13 +403,16 @@ nerd_font_installer() {
 # Run functions in order
 assign_package_manager
 
-programs_installer
-
-change_shell
-
-nerd_font_installer
-
-replace_dotfiles
+if [[ $setup == "desktop" ]]; then
+    programs_installer
+    change_shell
+    nerd_font_installer
+    replace_dotfiles
+elif [[ $setup == "server" ]]; then
+    programs_installer
+    change_shell
+    replace_dotfiles
+fi
 
 exit 0
 }
