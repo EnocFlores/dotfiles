@@ -344,14 +344,16 @@ programs_installer() {
 }
 
 change_shell() {
-    echo -e "\033[7m\033[1m### Do you want to change your shell to zsh? (most things in this script won't work if you don't) [Y/n] \033[0m"
-    read yn
-    case $yn in
-        [Nn]* )
-            echo "Don't forget to add all there right configs to your preferred shell!";;
-        * )
-            chsh -s /usr/bin/zsh;;
-    esac
+    if [[ "$(basename $SHELL)" != "zsh" ]]; then
+        echo -e "\033[7m\033[1m### Do you want to change your shell to zsh? (most things in this script won't work if you don't) [Y/n] \033[0m"
+        read yn
+        case $yn in
+            [Nn]* )
+                echo "Don't forget to add all there right configs to your preferred shell!";;
+            * )
+                chsh -s /usr/bin/zsh;;
+        esac
+    fi
 }
 
 # Install Nerd Font
