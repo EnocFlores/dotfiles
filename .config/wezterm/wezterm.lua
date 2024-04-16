@@ -23,6 +23,8 @@ config.font = wezterm.font('RobotoMono Nerd Font Mono', { weight = 'Regular' })
 config.font_size = 11.5
 
 -- Window
+config.initial_cols = 100
+config.initial_rows = 100
 config.window_decorations = "RESIZE"
 config.use_resize_increments = true
 config.hide_tab_bar_if_only_one_tab = true
