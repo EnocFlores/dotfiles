@@ -137,7 +137,7 @@ if exists("+clipboard")
     endif
 else
     set clipboard=unnamed
-    echo "Your vim installation lacks +clipboard, you can remove this notification from your vimrc"
+    echo "Your vim installation lacks +clipboard, you can remove this notification from your vimrc or install vim-gtk"
 endif
 
 " ====================================== "
