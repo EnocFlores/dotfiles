@@ -17,7 +17,7 @@ os=$(uname -s)
 device=$(uname -o)
 
 # programs and dotfiles variables for easy access
-programs_list='curl git zsh neofetch vim btop tmux neovim lf chafa alacritty zellij wezterm'
+programs_list='curl git jq zsh chafa neofetch vim btop tmux neovim lf alacritty zellij wezterm'
 
 # ! TESTING ! A method to use dirname and basename to install programs that have a different package name than their command name, so far it is just one so not investing the time to get this working yet, just an idea
 special_snowflake_list='neovim/nvim'
@@ -34,11 +34,9 @@ setup_type() {
     read setup
     if [[ $setup == "desktop" ]]; then
         setup="desktop"
-        programs_list='curl git zsh neofetch vim btop tmux neovim lf chafa alacritty zellij wezterm'
-        dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .tmux.conf .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh .config/alacritty/alacritty.toml .config/zellij/config.kdl .config/wezterm/wezterm.lua'
     elif [[ $setup == "server" ]]; then
         setup="server"
-        programs_list='curl git zsh neofetch vim btop tmux neovim lf chafa'
+        programs_list='curl git jq zsh chafa neofetch vim btop tmux neovim lf'
         dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .tmux.conf .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh'
     else
         echo "Invalid option. Please run the script again and choose either 'desktop' or 'server'."
@@ -296,6 +294,7 @@ wezterm_installer() {
         curl https://sh.rustup.rs -sSf | sh -s
         . $HOME/.cargo/env
     fi
+    github_version=$(curl --silent "https://api.github.com/repos/wez/wezterm/releases/latest" | jq -r .tag_name)
     curl -LO https://github.com/wez/wezterm/releases/download/20240203-110809-5046fc22/wezterm-20240203-110809-5046fc22-src.tar.gz
     tar -xzf wezterm-20240203-110809-5046fc22-src.tar.gz
     cd wezterm-20240203-110809-5046fc22
@@ -307,6 +306,18 @@ wezterm_installer() {
     sed -i" " -e "s/org.wezfurlong.wezterm/WezTerm/g" assets/wezterm.desktop
     sudo desktop-file-install assets/wezterm.desktop
     sudo update-desktop-database
+}
+
+# WIP
+chafa_installer(){
+    sudo $PM install build-essential make autoconf automake libtool pkg-config libglib2.0-dev libfreetype6-dev libjpeg-dev librsvg2-dev libtiff5-dev libwebp-dev gtk-doc-tools
+    github_version=$(curl --silent "https://api.github.com/repos/hpjansson/chafa/releases/latest" | jq -r .tag_name)
+    current_version=$(chafa --version | head -n 1 | awk '{print $NF}')
+    git clone https://github.com/hpjansson/chafa.git
+    cd chafa
+    ./autogen.sh
+    make
+    sudo ln -s $PWD/tools/chafa/chafa /usr/local/bin/chafa
 }
 
 # Ask user to install widely availble programs
@@ -351,6 +362,8 @@ programs_installer() {
                         zellij_installer
                     elif [[ $program == "wezterm" ]]; then
                         wezterm_installer
+                    elif [[ $program == "chafa" ]]; then
+                        chafa_installer
                     else
                         sudo $PM install $program
                         if [ $? -ne 0 ]; then

@@ -176,10 +176,30 @@ else
     PROGRAM_CHECKS="$PROGRAM_CHECKS\ntpm is installed"
 fi
 
+
+
 # === Point NVM to config directory ==== #
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# ====================================== #
+# === node version manager checker   === #
+# === and installer                  === #
+# ====================================== #
+if ! command -v nvm &> /dev/null; then
+    # If nvm is not installed then prompt user to install
+    echo "nvm is not installed, would you like to install it?"
+    read answer
+
+    if [ "$answer" = "y" ]; then
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+    else
+        PROGRAM_CHECKS="$PROGRAM_CHECKS\nnvm is not installed"
+    fi
+else
+    PROGRAM_CHECKS="$PROGRAM_CHECKS\nnvm is installed"
+fi
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
 # !!! place this after nvm           !!! #
@@ -193,7 +213,6 @@ export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || pr
 
 # === FOR LATER USE ONCE TESTED ======== #
 if command -v nvm &> /dev/null; then
-    PROGRAM_CHECKS="$PROGRAM_CHECKS\nnvm is installed"
     autoload -U add-zsh-hook
     load-nvmrc() {
         local node_version="$(nvm version)"
@@ -214,8 +233,6 @@ if command -v nvm &> /dev/null; then
     }
     add-zsh-hook chpwd load-nvmrc
     load-nvmrc
-else
-    PROGRAM_CHECKS="$PROGRAM_CHECKS\nnvm is not installed"
 fi
 
 # ====================================== #
