@@ -51,34 +51,34 @@ config.macos_window_background_blur = 20
 -- Colors
 config.colors = {
   -- The default text color
-  foreground = '#b7ffb7',
+  foreground = '#b7ffb7',   -- white green fg
   -- The default background color
-  background = '#200045',
+  background = '#200045',   -- background purple
 
   -- the foreground color of selected text
-  selection_fg = 'black',
+  selection_fg = '#b7ffb7',
   -- the background color of selected text
-  selection_bg = '#fffacd',
+  selection_bg = '#200045',
 
   ansi = {
-    '#000000',
-    '#c91b00',
-    '#00c200',
-    '#c7c400',
-    '#000080',  -- Blue, old blue: #0000b3
-    '#5a00b3',  -- Magenta, old: #5a00b3
-    '#00c5c7',
-    '#d8d8d8',
+    '#000000',  --  0 black
+    '#c91b00',  --  1 blood red
+    '#00c200',  --  2 grass green
+    '#c7c400',  --  3 dry yellow
+    '#000080',  --  4 navy blue, old blue: #0000b3
+    '#5a00b3',  --  5 supreme purple, old: #5a00b3
+    '#00c5c7',  --  6 dull cyan
+    '#d8d8d8',  --  7 dull white
   },
   brights = {
-    '#767676',
-    '#ff1439',
-    '#39ff14',
-    '#fbf719',
-    '#1439ff',
-    '#f719fb',
-    '#19fbf7',
-    '#fffeff',
+    '#767676',  --  8 grey
+    '#ff1439',  --  9 highlighter red
+    '#39ff14',  -- 10 highlighter green
+    '#fbf719',  -- 11 highlighter yellow
+    '#1439ff',  -- 12 electric blue
+    '#f719fb',  -- 13 bright magenta
+    '#19fbf7',  -- 14 bright cyan
+    '#fffeff',  -- 15 bright white
   },
 
   -- Arbitrary colors of the palette in the range from 16 to 255
