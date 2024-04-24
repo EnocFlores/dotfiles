@@ -22,7 +22,7 @@ programs_list='curl git jq zsh chafa neofetch vim btop tmux neovim lf alacritty 
 # ! TESTING ! A method to use dirname and basename to install programs that have a different package name than their command name, so far it is just one so not investing the time to get this working yet, just an idea
 special_snowflake_list='neovim/nvim'
 
-dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .tmux.conf .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh .config/alacritty/alacritty.toml .config/zellij/config.kdl .config/wezterm/wezterm.lua'
+dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .config/btop/themes/perox-enurple.theme .tmux.conf .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh .config/alacritty/alacritty.toml .config/zellij/config.kdl .config/wezterm/wezterm.lua'
 nerd_font='RobotoMono'
 nerd_font_package='roboto-mono'
 
@@ -34,10 +34,13 @@ setup_type() {
     read setup
     if [[ $setup == "desktop" ]]; then
         setup="desktop"
+
+        #Will have to move later so that update script reads this correctly with source .env
+        echo "SETUP_SCRIPT_ENV=desktop" > .env
     elif [[ $setup == "server" ]]; then
         setup="server"
         programs_list='curl git jq zsh chafa neofetch vim btop tmux neovim lf'
-        dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .tmux.conf .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh'
+        dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .config/btop/themes/perox-enurple.theme .tmux.conf .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh'
     else
         echo "Invalid option. Please run the script again and choose either 'desktop' or 'server'."
         exit 1
@@ -113,6 +116,7 @@ replace_dotfiles() {
             exit 1
         fi
         cd dotfiles
+        echo "SETUP_SCRIPT_ENV=$setup" > .env
     else
         cd dotfiles
         git pull
@@ -313,8 +317,9 @@ chafa_installer(){
     sudo $PM install build-essential make autoconf automake libtool pkg-config libglib2.0-dev libfreetype6-dev libjpeg-dev librsvg2-dev libtiff5-dev libwebp-dev gtk-doc-tools
     github_version=$(curl --silent "https://api.github.com/repos/hpjansson/chafa/releases/latest" | jq -r .tag_name)
     current_version=$(chafa --version | head -n 1 | awk '{print $NF}')
-    git clone https://github.com/hpjansson/chafa.git
-    cd chafa
+    curl -fLo "chafa-1.14.0.tar.gz" "https://github.com/hpjansson/chafa/archive/refs/tags/1.14.0.tar.gz"
+    tar -zsf chafa-1.14.0.tar.gz
+    cd chafa-1.14.0
     ./autogen.sh
     make
     sudo ln -s $PWD/tools/chafa/chafa /usr/local/bin/chafa

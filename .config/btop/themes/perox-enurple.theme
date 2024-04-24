@@ -1,0 +1,131 @@
+#Perox_Enurple
+
+#by Enoc Flores
+#used Pete Allebone's HotPurpleTrafficLight as template
+
+# Main background, empty for terminal default, need to be empty if you want transparent background
+# theme[main_bg]="#000000"  # HEX black
+theme[main_bg]="\x1b[0;40m" # HEX black
+
+# Main text color
+# theme[main_fg]="#d1d1e0"  # HEX dull white
+theme[main_fg]="\x1b[92m"   # ANSI bright green
+
+# Title color for boxes
+# theme[title]="#d1d1e0"    # HEX dull white
+theme[title]="\x1b[92m"     # ANSI bright green
+
+# Highlight color for keyboard shortcuts
+# theme[hi_fg]="#9933ff"    # HEX hot purple
+theme[hi_fg]="\x1b[95m"      # ANSI bright magenta
+# theme[hi_fg]="#f719fb"      # ANSI bright magenta
+
+# Background color of selected item in processes box
+# theme[selected_bg]="#6666ff"
+theme[selected_bg]="\x1b[101m" # ANSI red
+# theme[selected_bg]="#c91b00" # ANSI red
+
+# Foreground color of selected item in processes box
+# theme[selected_fg]="#d1d1e0" # HEX dull white
+theme[selected_fg]="\x1b[92m"    # ANSI bright green
+# theme[selected_fg]="#d1d1e0"    # ANSI bright green
+
+# Color of inactive/disabled text
+# theme[inactive_fg]="#9999ff"    # HEX pale purple
+theme[inactive_fg]="\x1b[90m"    # ANSI grey
+
+# Color of text appearing on top of graphs, i.e uptime and current network graph scaling
+theme[graph_text]="#9933ff"     # HEX hot purple
+
+# Background color of the percentage meters
+# theme[meter_bg]="#4d4dff"       # HEX purple blue
+theme[meter_bg]="\x1b[90m"      # ANSI grey
+
+# Misc colors for processes box including mini cpu graphs, details memory graph and details status text
+theme[proc_misc]="#9933ff"      # HEX purple blue
+
+# Cpu box outline color
+# theme[cpu_box]="#a64dff"    # HEX purple
+# theme[proc_box]="#5a00b3"   # HEX supreme purple
+theme[proc_box]="#9933ff"   # HEX hot purple
+
+# Memory/disks box outline color
+# theme[mem_box]="#a64dff"    # HEX purple
+# theme[proc_box]="#5a00b3"   # HEX supreme purple
+theme[proc_box]="#9933ff"   # HEX hot purple
+
+# Net up/down box outline color
+# theme[net_box]="#a64dff"    # HEX purple
+# theme[proc_box]="#5a00b3"   # HEX supreme purple
+theme[proc_box]="#9933ff"   # HEX hot purple
+
+# Processes box outline color
+# theme[proc_box]="#a64dff"   # HEX purple
+# theme[proc_box]="#5a00b3"   # HEX supreme purple
+theme[proc_box]="#9933ff"   # HEX hot purple
+
+# Box divider line and small boxes line color
+theme[div_line]="#4d4dff"   # HEX purple blue
+
+# Temperature graph colors
+theme[temp_start]="#00ff00"
+theme[temp_mid]="#ff9933"
+theme[temp_end]="#ff0000"
+
+# CPU graph colors
+theme[cpu_start]="#00ff00"
+theme[cpu_mid]="#ccff66"
+theme[cpu_end]="#ff0000"
+
+# Mem/Disk free meter
+theme[free_end]="#00ff00"
+theme[free_mid]="#ccff66"
+theme[free_start]="#ff0000"
+
+# Mem/Disk cached meter
+theme[cached_start]="#00ff00"
+theme[cached_mid]="#ccff66"
+theme[cached_end]="#ff0000"
+
+# Mem/Disk available meter
+theme[available_start]="#ff0000"
+theme[available_mid]="#ccff66"
+theme[available_end]="#00ff00"
+
+# Mem/Disk used meter
+theme[used_start]="#00ff00"
+theme[used_mid]="#ccff66"
+theme[used_end]="#ff0000"
+
+# Download graph colors
+# theme[download_start]="#00ff00"
+# theme[download_mid]="#ff9933"
+# theme[download_end]="#ff0000"
+theme[download_start]="#000080"
+theme[download_mid]="#1439ff"
+theme[download_end]="#ffffff"
+# theme[download_start]="\x1b[34m"
+# theme[download_mid]="\x1b[94m"
+# theme[download_end]="\x1b[97m"
+
+# Upload graph colors
+# theme[upload_start]="#00ff00"
+# theme[upload_mid]="#ff9933"
+# theme[upload_end]="#ff0000"
+theme[upload_start]="#5a00b3"
+theme[upload_mid]="#f719fb"
+theme[upload_end]="#ffffff"
+# theme[upload_start]="\x1b[35m"
+# theme[upload_mid]="\x1b[95m"
+# theme[upload_end]="\x1b[97m"
+
+# Process box color gradient for threads, mem and cpu usage
+# theme[process_start]="#9999ff"
+# theme[process_mid]="#4d4dff"
+# theme[process_end]="#a64dff"
+# theme[process_start]="#00ff00"  # HEX green
+# theme[process_mid]="#fbf719"    # HEX yellow
+# theme[process_end]="#ff0000"    # HEX red
+theme[process_start]="\x1b[32m"  # ANSI green
+theme[process_mid]="\x1b[33m"    # ANSI yellow
+theme[process_end]="\x1b[31m"    # ANSI red

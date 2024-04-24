@@ -165,7 +165,7 @@ zle -N zle-keymap-select
 
 if [[ ! -d "$HOME/.tmux/plugins/tpm" ]]; then
     # If it doesn't exist, ask the user if they want to install tpm
-    echo "The tpm plugin is not installed. Do you want to install it now? (y/n)"
+    echo "The tpm plugin is not installed. Do you want to install it now? [y/N]"
     read answer
 
     if [ "$answer" = "y" ]; then
@@ -175,8 +175,6 @@ if [[ ! -d "$HOME/.tmux/plugins/tpm" ]]; then
 else
     PROGRAM_CHECKS="$PROGRAM_CHECKS\ntpm is installed"
 fi
-
-
 
 # === Point NVM to config directory ==== #
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
@@ -189,7 +187,7 @@ export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || pr
 # ====================================== #
 if ! command -v nvm &> /dev/null; then
     # If nvm is not installed then prompt user to install
-    echo "nvm is not installed, would you like to install it?"
+    echo "nvm is not installed, would you like to install it? [y/N]"
     read answer
 
     if [ "$answer" = "y" ]; then
@@ -256,6 +254,10 @@ alias python="python3.11"
 alias diff="diff --color"
 alias vims="nvim -S Session.vim"
 alias icat="wezterm imgcat"
+alias top="btop -p 3"
+alias btop="btop -p 1"
+alias tlock="tmux setw prefix None"
+alias tunlock="tmux setw prefix C-t"
 
 alias vMount='f() { cryfs $1 ~/Vaults/$(basename $1) };f'
 alias vUnmount='f() { cryfs-unmount ~/Vaults/$1 };f'
@@ -366,6 +368,9 @@ function showFgColors {
 alias colorsBG='showBgColors'
 alias colorsFG='showFgColors'
 
+show_color() {
+    perl -e 'foreach $a(@ARGV){print "\e[48:2::".join(":",unpack("C*",pack("H*",$a)))."m \e[49m "};print "\n"' "$@"
+}
 # ====================================== #
 # ============ ALIASES END ============= #
 # ====================================== #
