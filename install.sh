@@ -15,6 +15,7 @@ email="EnocFlores@github.com"
 arch=$(uname -m)
 os=$(uname -s)
 device=$(uname -o)
+current_dir=$(pwd)
 
 # programs and dotfiles variables for easy access
 programs_list='curl git jq zsh chafa neofetch vim btop tmux neovim lf alacritty zellij wezterm'
@@ -73,7 +74,8 @@ replace_dotfiles() {
         echo -e "\n\033[7m\033[1m### You already have ~/Development/$username dir, changing into there \033[0m"
         cd "$HOME/Development/$username"
     else
-        read -p "Would you like to create a new directory ~/Development/$username for the dotfiles? [y/n] " yn
+        echo -e "\033[7m\033[1m###Would you like to create a new directory ~/Development/$username for the dotfiles? [y/n] \033[0m"
+        read yn
         case $yn in
             [Yy]* ) 
                 cd $HOME
@@ -239,8 +241,9 @@ alacritty_installer() {
             mkdir -p ${ZDOTDIR:-~}/.zsh_functions
             echo 'fpath+=${ZDOTDIR:-~}/.zsh_functions' >> ${ZDOTDIR:-~}/.zshrc
             cp extra/completions/_alacritty ${ZDOTDIR:-~}/.zsh_functions/_alacritty
+            cd $current_dir
             ;;
-        *) echo -e "\033[43mNOTE: Package manager not yet supported \033[0m"
+        *) echo -e "\033[43mNOTE: Package manager not yet supported \033[0m";;
     esac
 }
 
@@ -261,10 +264,10 @@ neovim_installer() {
                 cd neovim && make CMAKE_BUILD_TYPE=Release
                 sudo make install
                 sudo mv build/bin/nvim /usr/local/bin/
-                cd $HOME
+                cd $current_dir
             fi
             ;;
-        *) echo -e "\033[43mNOTE: Package manager not yet supported \033[0m"
+        *) echo -e "\033[43mNOTE: Package manager not yet supported \033[0m";;
     esac
 }
 
@@ -310,6 +313,7 @@ wezterm_installer() {
     sed -i" " -e "s/org.wezfurlong.wezterm/WezTerm/g" assets/wezterm.desktop
     sudo desktop-file-install assets/wezterm.desktop
     sudo update-desktop-database
+    cd $current_dir
 }
 
 # WIP
@@ -321,8 +325,11 @@ chafa_installer(){
     tar -xzf chafa-1.14.0.tar.gz
     cd chafa-1.14.0
     ./autogen.sh
+    ./autogen.sh
     make
+    sudo rm /usr/loca/bin/chafa
     sudo ln -s $PWD/tools/chafa/chafa /usr/local/bin/chafa
+    cd $current_dir
 }
 
 # Ask user to install widely availble programs
