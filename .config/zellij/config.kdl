@@ -276,21 +276,37 @@ plugins {
 //     }
 // }
 themes {
- 	// example of how to set a theme in HEX format
+ 	// eknock, uses mostly terminal colors to color zellij, since I've set this colors myslef your experience my vary
  	eknock {
- 		fg 5            //Tab Colors
- 		bg 4            //Background Selection Color
- 		black 0 0 0     //Background Statusline Color
- 		red 14       //The mode key on tabs
- 		green 13     //Selected tab, mode, and pane
- 		yellow "#fbf719"    //NO SE, NOT SURE
- 		blue "#fbf719"      //NO SE, NOT SURE
+ 		fg 5                //Tab Colors
+ 		bg 4                //Background Selection Color
+ 		black 0 0 0         //Background Statusline Color
+ 		red 14              //The mode key on tabs
+ 		green 13            //Selected tab, mode, and pane
+ 		yellow 11           //NO SE, NOT SURE
+ 		blue 11             //NO SE, NOT SURE
  		magenta "#ff793b"   //Session Manager Key
- 		cyan "#19fbf7"      //Session Manager Tab Names
- 		white "#39ff14"     //Titles over bg
- 		orange "#39ff14"    //Modifier keys and mode pane border
+ 		cyan 14             //Session Manager Tab Names
+ 		white 10            //Titles over bg
+ 		orange 10           //Modifier keys and mode pane border
  	}
 
+    // eknock-hex, the same as eknock, but this will look just like I intended it to be
+ 	eknock-hex {
+ 		fg "#5a00b3"        //Tab Colors                        //ANSI purple
+ 		bg "#000080"        //Background Selection Color        //ANSI blue
+ 		black 0 0 0         //Background Statusline Color       //RGB black
+ 		red "#19fbf7"       //The mode key on tabs              //ANSI bright cyan
+ 		green "#f719fb"     //Selected tab, mode, and pane      //ANSI bright magenta
+ 		yellow "#fbf719"    //NO SE, NOT SURE                   //ANSI bright yellow
+ 		blue "#fbf719"      //NO SE, NOT SURE                   //ANSI bright yellow
+ 		magenta "#ff793b"   //Session Manager Key               //HEX highlighter orange
+ 		cyan "#19fbf7"      //Session Manager Tab Names         //ANSI bright cyan
+ 		white "#39ff14"     //Titles over bg                    //ANSI bright green
+ 		orange "#39ff14"    //Modifier keys and mode pane border//ANSI bright green
+ 	}
+
+    // forgot what this looks like, WIP
  	eknock-darker {
  		fg "#5a00b3"        //Tab Colors
  		bg "#000000"        //Background Selection Color
@@ -305,6 +321,7 @@ themes {
  		orange "#39ff14"    //Modifier keys and mode pane border
  	}
 
+    // backup of my first theme, not recommended
  	eknock-backup {
  		fg "#30c7c9"        //Tab Colors
  		bg "#000000"        //Background Selection Color
