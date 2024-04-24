@@ -318,7 +318,7 @@ chafa_installer(){
     github_version=$(curl --silent "https://api.github.com/repos/hpjansson/chafa/releases/latest" | jq -r .tag_name)
     current_version=$(chafa --version | head -n 1 | awk '{print $NF}')
     curl -fLo "chafa-1.14.0.tar.gz" "https://github.com/hpjansson/chafa/archive/refs/tags/1.14.0.tar.gz"
-    tar -zsf chafa-1.14.0.tar.gz
+    tar -xzf chafa-1.14.0.tar.gz
     cd chafa-1.14.0
     ./autogen.sh
     make
