@@ -5,11 +5,59 @@
 
 ## Supported programs
 
+### [curl](https://github.com/curl/curl)
+> Written in C
+
+Used to download files from the internet, I use it to download source code of the programs that this script installs
+
+> Installation
+> | OS/Device | Method |
+> | --- | --- |
+> | Debian/Ubuntu | `package manager: apt` |
+> | OsX | `package manager: brew` |
+> | Termux | `package manager: pkg` |
+
+### [git](https://github.com/git/git)
+> Written in C
+
+Used for version control, I have a global gitignore file and a global gitconfig file
+
+> Installation
+> | OS/Device | Method |
+> | --- | --- |
+> | Debian/Ubuntu | `package manager: apt` |
+> | OsX | `package manager: brew` |
+> | Termux | `package manager: pkg` |
+
+### [jq]()
+> Written in C
+
+Used for parsing json files, the install script will use it to parse the github api for the latest release of applications
+
+> Installation
+> | OS/Device | Method |
+> | --- | --- |
+> | Debian/Ubuntu | `package manager: apt` |
+> | OsX | `package manager: brew` |
+> | Termux | `package manager: pkg` |
+
 ### [zsh](https://github.com/ohmyzsh/ohmyzsh)
 > Written in shell code
 
 My personal prompt: user@machine, parent folder, and git branch
 Several aliases and functions
+
+> Installation
+> | OS/Device | Method |
+> | --- | --- |
+> | Debian/Ubuntu | `package manager: apt` |
+> | OsX | `package manager: brew` |
+> | Termux | `package manager: pkg` |
+
+### [chafa](https://github.com/hpjansson/chafa)
+> Written in C
+
+A terminal image viewer, I use it with lf and wezterm
 
 > Installation
 > | OS/Device | Method |
@@ -101,10 +149,10 @@ A pretty nice file manager that I use when viewing images on my system withing t
 > | OsX | `package manager: brew` |
 > | Termux | `package manager: pkg` |
 
-### [chafa](https://github.com/hpjansson/chafa)
+### [cava](https://github.com/karlstav/cava)
 > Written in C
 
-A terminal image viewer, I use it with lf and wezterm
+A terminal audio visualizer, I use it to visualize audio from my system
 
 > Installation
 > | OS/Device | Method |
@@ -154,10 +202,11 @@ My new main terminal emulator, allows me to see images
 ## Planned development:
 
 - have 3 dotfile options:
-    - dotfiles (for main workstations, completely set up a new main device)
-    - dotfiles-light (for machines with a little more constraints due to hardware limitaions i.e. raspberry pi, other SBCs)
-    - dotfiles-headless (for headless machines)
-- make scripts POSIX compliant
+    - desktop (for main workstations, completely set up a new main device)
+    - light (for machines with a little more constraints due to hardware limitaions i.e. raspberry pi, other SBCs)
+    - server(headless) (for headless machines)
+- Support for Fedora, Arch, and Nix package managers
+- ~~make scripts POSIX compliant~~(keeping it in bash for the advanced features)
 
 ---
 
@@ -171,18 +220,24 @@ Should work with:
 
 ### `install.sh` script
 This install script will ask to install:
+- curl
 - git
+- jq
 - zsh
+- chafa
 - neofetch
 - vim
 - btop
 - tmux
 - neovim
 - lf
-- chafa
+- cava
 - alacritty
 - zellij
 - wezterm
+
+> [!NOTE]
+> cava, alacritty, zellij, and wezterm are excluded from the server(headless) option
 
 Alacritty and neovim installation varies widely from OS and architecture, so it is not guaranteed that the install script will work for all systems
 
