@@ -1,6 +1,6 @@
 #!/bin/bash
 # EnocFlores <https://github.com/EnocFlores>
-# Last Change: 2024.03.19
+# Last Change: 2024.04.26
 
 
 
@@ -11,47 +11,96 @@
 username="EnocFlores"
 email="EnocFlores@github.com"
 
-# Note the architecture, OS, and device of user
+# Note the architecture, OS, device, and current path of the user
 arch=$(uname -m)
 os=$(uname -s)
 device=$(uname -o)
-current_dir=$(pwd)
+current_path=$(pwd)
 
 # programs and dotfiles variables for easy access
-programs_list='curl git jq zsh chafa neofetch vim btop tmux neovim lf alacritty zellij wezterm'
+programs_list='curl git jq zsh chafa neofetch vim btop tmux neovim lf cava alacritty zellij wezterm'
 
-# ! TESTING ! A method to use dirname and basename to install programs that have a different package name than their command name, so far it is just one so not investing the time to get this working yet, just an idea
-special_snowflake_list='neovim/nvim'
+# ! TESTING ! A method to use dirname and basename to install programs that have a different package name than their command name, so far it is just one so not investing the time to get this working yet, just an idea, but this might also later be used to specify how the application can be installed
+special_snowflake_list='curl/curl git/git jq/jq zsh/zsh chafa/chafa neofetch/neofetch vim/vim btop/btop tmux/tmux neovim/nvim lf/lf alacritty/alacritty zellij/zellij wezterm/wezterm'
 
-dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .config/btop/themes/perox-enurple.theme .tmux.conf .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh .config/alacritty/alacritty.toml .config/zellij/config.kdl .config/wezterm/wezterm.lua'
+dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .config/btop/themes/perox-enurple.theme .tmux.conf .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh .config/cava/config .config/alacritty/alacritty.toml .config/zellij/config.kdl .config/wezterm/wezterm.lua'
 nerd_font='RobotoMono'
 nerd_font_package='roboto-mono'
 
 setup="desktop"
 
+# Function to choose what sort of setup to run for installer
 # Note: For headless server no terminal emulator should be installed (alacritty and wezterm), and installing the font is not necessary
 setup_type() {
+    if [ -f .env ]; then
+        source .env
+        setup=$SETUP_SCRIPT_ENV
+        echo -e "\n\033[7m\033[1m##### Running $setup version of the script! #####\033[0m"
+        return
+    fi
     echo "Do you want to run a full desktop setup or a server setup? [desktop/server]"
     read setup
     if [[ $setup == "desktop" ]]; then
         setup="desktop"
-
-        #Will have to move later so that update script reads this correctly with source .env
-        echo "SETUP_SCRIPT_ENV=desktop" > .env
+        echo -e "\n\033[7m\033[1m##### Running $setup version of the script! #####\033[0m"
     elif [[ $setup == "server" ]]; then
         setup="server"
         programs_list='curl git jq zsh chafa neofetch vim btop tmux neovim lf'
         dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .config/btop/themes/perox-enurple.theme .tmux.conf .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh'
+        echo -e "\n\033[7m\033[1m##### Running $setup version of the script! #####\033[0m"
     else
-        echo "Invalid option. Please run the script again and choose either 'desktop' or 'server'."
+        echo -e "\033[41m\033[1m\033[37mError: Invalid option. Please run the script again and choose either 'desktop' or 'server'. Exiting... \033[0m"
         exit 1
     fi
 }
 
-setup_type
+# Function to create a directory
+create_directory() {
+    dir=$1
+    if [ ! -d "$dir" ]; then
+        mkdir -p "$dir"
+        if [ ! -d "$dir" ]; then
+            echo -e "\033[41m\033[1m\033[37mError: Failed to create directory. Exiting... \033[0m"
+            exit 1
+        fi
+    fi
+}
 
+# Function to change directory
+change_directory() {
+    dir=$1
+    if [ -d "$dir" ]; then
+        cd "$dir"
+    elif [ -d "$HOME/$dir" ]; then
+        cd "$HOME/$dir"
+    else
+        echo -e "\033[41m\033[1m\033[37mError: Directory does not exist. Exiting... \033[0m"
+        exit 1
+    fi
+}
 
-# Change .gitconfig file after cloning or updating the repo
+# Function to clone or update the repository
+clone_or_update_repo() {
+    if [ ! -d "dotfiles" ]; then
+        git clone https://github.com/$username/dotfiles.git
+        if [ $? -ne 0 ]; then
+            echo -e "\033[41m\033[1m\033[37mError: Failed to clone repository, check internet connection, make sure you have git installed, that the repo exists or that you have the right permissions set then try again. Exiting... \033[0m"
+            exit 1
+        fi
+        cd dotfiles
+        echo "SETUP_SCRIPT_ENV=$setup" > .env
+    else
+        cd dotfiles
+        git pull
+        if [ $? -ne 0 ]; then
+            echo -e "\033[41m\033[1m\033[37mError: Failed to update repository, check internet connection, make sure you have git installed, that the repo exists or that you have the right permissions set then try again. Exiting... \033[0m"
+            exit 1
+        fi
+        echo "SETUP_SCRIPT_ENV=$setup" > .env
+    fi
+}
+
+# Function to change .gitconfig file after cloning or updating the repo
 change_gitconfig() {
     if [ -f .gitconfig.backup ]; then
         echo -e "\033[43mNOTE: You probably already ran the install script and changed the .gitconfig file! \033[0m"
@@ -67,119 +116,141 @@ change_gitconfig() {
     fi
 }
 
-# Replace dotfiles function, establishes the directory to clone the dotfiles into, clones the dotfiles, and replaces the dotfiles in the home directory
-replace_dotfiles() {
-    # Ask user if the creating of a Development branch is okay, otherwise they can choose the directory they want to clone repo into
+# Function to create or move into desired repo branch, clone or update the repository
+setup_dotfiles_repo() {
     if [ -d "$HOME/Development/$username" ]; then
         echo -e "\n\033[7m\033[1m### You already have ~/Development/$username dir, changing into there \033[0m"
         cd "$HOME/Development/$username"
     else
-        echo -e "\033[7m\033[1m###Would you like to create a new directory ~/Development/$username for the dotfiles? [y/n] \033[0m"
+        echo -e "\033[7m\033[1m### Would you like to create a new directory ~/Development/$username for the dotfiles? [y/n] \033[0m"
         read yn
         case $yn in
             [Yy]* ) 
-                cd $HOME
-                if [ ! -d "Development" ]; then
-                    mkdir Development
-                    if [ ! -d "Development" ]; then
-                        echo -e "\033[41m\033[1m\033[37mError: Failed to create directory. Exiting. \033[0m"
-                        exit 1
-                    fi
+                if [ ! -d "$HOME/Development/$username" ]; then
+                    create_directory "$HOME/Development/$username"
                 fi
-                cd Development
-                if [ ! -d $username ]; then
-                    mkdir $username
-                    if [ ! -d $username ]; then
-                        echo -e "\033[41m\033[1m\033[37mError: Failed to create directory. Exiting. \033[0m"
-                        exit 1
-                    fi
-                fi
-                cd $username;;
+                change_directory $HOME/Development/$username;;
             [Nn]* ) 
                 read -p "Please enter the full path of the existing directory where you'd like to clone the dotfiles: " dir
-                if [ -d "$dir" ]; then
-                    cd "$dir"
-                elif [ -d "$HOME/$dir" ]; then
-                    cd "$HOME/$dir"
-                else
-                    echo -e "\033[41m\033[1m\033[37mError: Directory does not exist. Exiting. \033[0m"
-                    exit 1
-                fi;;
-            * ) echo -e "\033[41m\033[1m\033[37mError: Please answer yes or no, retry the script. Exiting. \033[0m"
+                change_directory "$dir";;
+            * ) echo -e "\033[41m\033[1m\033[37mError: Please answer yes or no, retry the script. Exiting... \033[0m"
                 exit 1;;
         esac
     fi
 
-    # Clone the repository and move into it, unless it already exists then move into it and update it
-    if [ ! -d "dotfiles" ]; then
-        git clone https://github.com/$username/dotfiles.git
-        if [ $? -ne 0 ]; then
-            echo -e "\033[41m\033[1m\033[37mError: Failed to clone repository, check internet connection, make sure you have git installed or that you have the right permissions set then try again. Exiting. \033[0m"
-            exit 1
-        fi
-        cd dotfiles
-        echo "SETUP_SCRIPT_ENV=$setup" > .env
-    else
-        cd dotfiles
-        git pull
-        if [ $? -ne 0 ]; then
-            echo -e "\033[41m\033[1m\033[37mError: Failed to update repository, check internet connection, make sure you have git installed then try again. Exiting. \033[0m"
-            exit 1
+    clone_or_update_repo
+    change_gitconfig
+}
+
+# Function to check if the script is run from the dotfiles repo
+check_directory() {
+    local current_dir=$(basename "$(pwd)")
+    if [ "$current_dir" != "dotfiles" ]; then
+        echo -e "\033[41m\033[1m\033[37mError: Run this from the dotfiles repo \033[0m"
+        exit 1
+    fi
+}
+
+# Function to compare files
+compare_files() {
+    cmp -s "$HOME/$1" "$1"
+    cmpResult=$?
+    echo $cmpResult
+}
+
+# Function to edit differences
+edit_differences() {
+    local file=$1
+    read -p " -  Do you want to edit the differences in vimdiff? [y/N] " edit_choice
+    if [[ $edit_choice == "y" || $edit_choice == "Y" ]]; then
+        echo " -  Your local file is on the left, the remote file is on the right"
+        read -p " -   -  Press enter to continue"
+        vimdiff "$HOME/$file" "$file"
+    fi
+}
+
+# Function to view differences
+view_differences() {
+    local file=$1
+    read -p " -  Do you want to view the differences? [Y/n] " choice
+    if [[ $choice != "n" && $choice != "N" ]]; then
+        diff --color "$HOME/$file" "$file"
+        edit_differences "$file"
+    fi
+}
+
+# Function to backup files
+backup_files() {
+    local file=$1
+    local cmpResult=$2
+    if [ $cmpResult -ne 2 ];then
+        read -p " -  Do you want to make a backup of your local $file? [Y/n] " backup_choice
+        if [[ $backup_choice != "n" && $backup_choice != "N" ]]; then
+            cp "$HOME/$file" "$HOME/$file.backup"
+            echo " -  Backup of local ~/$file has been created at $HOME/$file.backup"
         fi
     fi
+}
 
-    change_gitconfig
+# Function to copy files
+copy_files() {
+    local file=$1
+    local goal=$2
+    if [ ! -d "$HOME/$(dirname $file)" ]; then
+        mkdir -p "$HOME/$(dirname $file)"
+        if [ $? -ne 0 ]; then
+            echo -e "\033[41mError: Failed to make directory for $file! \033[0m"
+        else
+            echo "Made directory: $HOME/$(dirname $file)"
+        fi
+    fi
+    cp "$file" "$HOME/$file"
+    if [ $? -ne 0 ]; then
+        echo -e "\033[41m\033[1m\033[37mError: Failed to copy file locally! \033[0m"
+    fi
+    echo " -  Local ~/$file has been ${goal}d with the remote one."
+}
 
-    # Ask user to copy dotfiles to home directory
+# Function to replace files
+replace_files() {
+    local file=$1
+    local cmpResult=$2
+    local goal=$3
+    read -p " -  Do you want to $goal your local ~/$file with the remote one? [y/N] " replace_choice
+    if [[ $replace_choice == "y" || $replace_choice == "Y" ]]; then
+        backup_files "$file" "$cmpResult"
+        copy_files "$file" "$goal"
+    fi
+}
+
+# Function to handle file differences
+handle_differences() {
+    local file=$1
+    local cmpResult=$2
+    if [ $cmpResult -eq 0 ]; then
+        echo -e "\033[7m\033[1m### $file files are identical \033[0m"
+    elif [ $cmpResult -eq 1 ];then
+        echo -e "\033[7m\033[1m### $file files are different \033[0m"
+        view_differences "$file"
+        replace_files "$file" "$cmpResult" "replace"
+    else
+        echo -e "\033[7m\033[1m### The local file ~/$file does not exist! \033[0m"
+        replace_files "$file" "$cmpResult" "create"
+    fi
+}
+
+# Function to setup dotfiles repo and compare dotfiles and ask user if they want to replace or create them
+replace_dotfiles() {
+    setup_dotfiles_repo
+
     for file in $dotfiles_list
     do
-        cmp -s "$HOME/$file" "$file"
-        cmpResult=$?
-        if [ $cmpResult -eq 0 ]; then
-            echo -e "\033[7m\033[1m### $file files are identical \033[0m"
-            continue
-        elif [ $cmpResult -eq 1 ];then
-            echo -e "\033[7m\033[1m### $file files are different \033[0m"
-            read -p " -  Do you want to view the differences? [Y/n] " choice
-            if [[ $choice != "n" && $choice != "N" ]]; then
-                diff --color "$HOME/$file" "$file"
-                read -p " -  Do you want to edit the differences in vimdiff? [y/N] " edit_choice
-                if [[ $edit_choice == "y" || $edit_choice == "Y" ]]; then
-                    echo " -  Your local file is on the left, the remote file is on the right"
-                    read -p " -   -  Press enter to continue"
-                    vimdiff "$HOME/$file" "$file"
-                fi
-            fi
-        else
-            echo -e "\033[7m\033[1m### The local file ~/$file does not exist! \033[0m"
-        fi
-        read -p " -  Do you want to replace/create your local ~/$file with the remote one? [y/N] " replace_choice
-        if [[ $replace_choice == "y" || $replace_choice == "Y" ]]; then
-            if [ $cmpResult -ne 2 ];then
-                read -p " -  Do you want to make a backup of your local $file? [Y/n] " backup_choice
-                if [[ $backup_choice != "n" && $backup_choice != "N" ]]; then
-                    cp "$HOME/$file" "$HOME/$file.backup"
-                    echo " -  Backup of local ~/$file has been created at $HOME/$file.backup"
-                fi
-            fi
-            if [ ! -d "$HOME/$(dirname $file)" ]; then
-                mkdir -p "$HOME/$(dirname $file)"
-                if [ $? -ne 0 ]; then
-                    echo -e "\033[41mError: Failed to make directory for $file! \033[0m"
-                else
-                    echo "Made directory: $HOME/$(dirname $file)"
-                fi
-            fi
-            cp "$file" "$HOME/$file"
-            if [ $? -ne 0 ]; then
-                echo -e "\033[41m\033[1m\033[37mError: Failed to copy file locally! \033[0m"
-            fi
-            echo " -  Local ~/$file has been replaced with the remote one."
-        fi
+        cmpResult=$(compare_files "$file")
+        handle_differences "$file" "$cmpResult"
     done
 }
 
-# Install Homebrew on Mac if it is not already installed
+# Function to install Homebrew on Mac if it is not already installed
 brew_on_mac() {
     if command -v brew &> /dev/null; then
         PM="brew"
@@ -197,7 +268,7 @@ brew_on_mac() {
     fi
 }
 
-# Check for other package managers
+# Function to check for what package manager the user is using
 assign_package_manager() {
     if [[ $os == "Darwin" ]]; then
         brew_on_mac
@@ -206,13 +277,14 @@ assign_package_manager() {
     elif command -v apt &> /dev/null; then
         PM="apt"
     else
-        echo -e "\033[41m\033[1m\033[37mError: No supported package manager found. Exiting. \033[0m"
+        echo -e "\033[41m\033[1m\033[37mError: No supported package manager found. Exiting... \033[0m"
         exit 1
     fi
-    echo -e "\033[7m\033[1m##### Your package manager is set to $PM ##### \033[0m"
+    echo -e "\033[7m\033[1m#### Your package manager is set to $PM #### \033[0m"
 }
 
-# Alacritty and Neovim is a special case, where depending on where you are installing it from then you will have to use your package manager, appimage, or compile it
+# NOTE: The installers for the programs below are because for some of these programs we need the latest version of this is the only way to install them, it can vary from using your package manager, using an appimage, or compiling the program from source
+# Build alacritty from source
 alacritty_installer() {
     case $PM in
         "brew") $PM install alacritty;;
@@ -241,13 +313,13 @@ alacritty_installer() {
             mkdir -p ${ZDOTDIR:-~}/.zsh_functions
             echo 'fpath+=${ZDOTDIR:-~}/.zsh_functions' >> ${ZDOTDIR:-~}/.zshrc
             cp extra/completions/_alacritty ${ZDOTDIR:-~}/.zsh_functions/_alacritty
-            cd $current_dir
+            cd $current_path
             ;;
         *) echo -e "\033[43mNOTE: Package manager not yet supported \033[0m";;
     esac
 }
 
-# Install neovim app image
+# Install neovim app image or if arm then build from source
 neovim_installer() {
     case $PM in
         "brew") $PM install neovim;;
@@ -264,7 +336,7 @@ neovim_installer() {
                 cd neovim && make CMAKE_BUILD_TYPE=Release
                 sudo make install
                 sudo mv build/bin/nvim /usr/local/bin/
-                cd $current_dir
+                cd $current_path
             fi
             ;;
         *) echo -e "\033[43mNOTE: Package manager not yet supported \033[0m";;
@@ -313,7 +385,7 @@ wezterm_installer() {
     sed -i" " -e "s/org.wezfurlong.wezterm/WezTerm/g" assets/wezterm.desktop
     sudo desktop-file-install assets/wezterm.desktop
     sudo update-desktop-database
-    cd $current_dir
+    cd $current_path
 }
 
 # WIP
@@ -329,10 +401,10 @@ chafa_installer(){
     make
     sudo rm /usr/loca/bin/chafa
     sudo ln -s $PWD/tools/chafa/chafa /usr/local/bin/chafa
-    cd $current_dir
+    cd $current_path
 }
 
-# Ask user to install widely availble programs
+# Ask user to install programs
 programs_installer() {
     for program in $programs_list
     do
@@ -415,6 +487,7 @@ nerd_font_installer() {
         brew install --cask font-$nerd_font_package-nerd-font
     else
         echo -e "\033[7m\033[1m### Downloading and installing $nerd_font Nerd Font \033[0m"
+        mkdir nerd-font && cd nerd-font
         curl -fLo "$nerd_font.tar.xz" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/$nerd_font.tar.xz"
         tar -xf $nerd_font.tar.xz
         if [ ! -d $HOME/.fonts ];then
@@ -422,22 +495,32 @@ nerd_font_installer() {
         fi
         mv *.ttf $HOME/.fonts/
         fc-cache -f -v
+        cd $current_path
     fi
 }
 
 # Run functions in order
-assign_package_manager
+install_script() {
+    setup_type
+    assign_package_manager
 
-if [[ $setup == "desktop" ]]; then
-    programs_installer
-    change_shell
-    nerd_font_installer
-    replace_dotfiles
-elif [[ $setup == "server" ]]; then
-    programs_installer
-    change_shell
-    replace_dotfiles
+    if [[ $setup == "desktop" ]]; then
+        programs_installer
+        change_shell
+        nerd_font_installer
+        replace_dotfiles
+    elif [[ $setup == "server" ]]; then
+        programs_installer
+        change_shell
+        replace_dotfiles
+    fi
+
+    exit 0
+}
+
+current_dir=$(basename "$current_path")
+if [ "$current_dir" != "dotfiles" ]; then
+    install_script
 fi
 
-exit 0
 }
