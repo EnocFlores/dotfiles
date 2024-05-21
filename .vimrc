@@ -102,6 +102,15 @@ syntax on
 " vnoremap gh <ESC>
 " set timeoutlen=150
 
+" ====================================== "
+" === Sets a timeout for key codes   === "
+" === Currently set to 100ms until   === "
+" === it just registers as a         === "
+" === standalone key press           === "
+" ====================================== "
+" set ttimeout
+" set ttimeoutlen=150
+
 " === Enable line numbers ============== "
 set number
 
@@ -136,7 +145,7 @@ if exists("+clipboard")
         set clipboard=unnamedplus
     endif
 else
-    set clipboard=unnamed
+    set clipboard=unnamedplus
     echo "Your vim installation lacks +clipboard, you can remove this notification from your vimrc or install vim-gtk"
 endif
 
@@ -266,6 +275,15 @@ endif
 " === don't plan to yet              === "
 " ====================================== "
 set nrformats-=octal
+
+" ====================================== "
+" === By default vim usually unloads === "
+" === a buffer from memory when      === "
+" === opening another file, this     === "
+" === setting allows vim to just hide=== "
+" === it, you can :bNext or Ctrl+o   === "
+" ====================================== "
+set hidden
 
 " === netrw configs ==================== "
 " nnoremap <C-n> <Esc>:35Lexplore<cr> "Fails in nvim, so:
@@ -516,26 +534,10 @@ endif
 let c_comment_strings=1
 
 " ====================================== "
-" === Sets a timeout for key codes   === "
-" === Currently set to 100ms until   === "
-" === it just registers as a         === "
-" === standalone key press           === "
+" === Remove Q from setting into Ex  === "
+" === mode and instead remap it to gq=== "
+" === Q will instead format lines    === "
 " ====================================== "
-set ttimeout
-set ttimeoutlen=100
-
-" ====================================== "
-" === For Win32 GUI: remove 't' flag === "
-" === from 'guioptions': no tearoff  === "
-" === menu entries.                  === "
-" === Don't personally use windows   === "
-" === but I kept it just in case     === "
-" ====================================== "
-if has('win32')
-  set guioptions-=t
-endif
-
-" Don't use Q for Ex mode, use it for formatting.  Except for Select mode.
 " Revert with ":unmap Q".
 map Q gq
 sunmap Q
