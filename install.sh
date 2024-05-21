@@ -7,9 +7,10 @@
 # This script will install/check necessary programs to setup and use these dotfiles
 
 {
-# If you fork the repo, then these variables make it easy to change this script for your own Github
+testing=1
+# If you fork the repo, then these variables make it easy to change this script for your own Github, make sure to replace this with your actual Github username
 username="EnocFlores"
-email="EnocFlores@github.com"
+email="${username}@users.noreply.github.com"
 
 # Note the architecture, OS, device, and current path of the user
 arch=$(uname -m)
@@ -36,10 +37,10 @@ setup_type() {
         source .env
         setup=$SETUP_SCRIPT_ENV
         echo -e "\n\033[7m\033[1m##### Running $setup version of the script! #####\033[0m"
-        return
+    else
+        echo "Do you want to run a full desktop setup or a server setup? [desktop/server]"
+        read setup
     fi
-    echo "Do you want to run a full desktop setup or a server setup? [desktop/server]"
-    read setup
     if [[ $setup == "desktop" ]]; then
         setup="desktop"
         echo -e "\n\033[7m\033[1m##### Running $setup version of the script! #####\033[0m"
@@ -92,7 +93,7 @@ clone_or_update_repo() {
     else
         cd dotfiles
         git pull
-        if [ $? -ne 0 ]; then
+        if [ $? -ne 0 ] && [ $testing -ne 0 ]; then
             echo -e "\033[41m\033[1m\033[37mError: Failed to update repository, check internet connection, make sure you have git installed, that the repo exists or that you have the right permissions set then try again. Exiting... \033[0m"
             exit 1
         fi
@@ -106,6 +107,7 @@ change_gitconfig() {
         echo -e "\033[43mNOTE: You probably already ran the install script and changed the .gitconfig file! \033[0m"
         return
     fi
+    local email="$(curl --silent 'https://api.github.com/users/EnocFlores' | jq -r .id)+$email"
     sed -i".backup" -e "s/GIT_NAME/$username/g" .gitconfig
     if [ $? -eq 0 ];then
         echo " -  successfully changed .gitconfig name to $username"
@@ -116,20 +118,20 @@ change_gitconfig() {
     fi
 }
 
-# Function to create or move into desired repo branch, clone or update the repository
-setup_dotfiles_repo() {
+# Function to create Development repo or move into desired repo branch, clone or update the repository
+setup_development_repo() {
     if [ -d "$HOME/Development/$username" ]; then
-        echo -e "\n\033[7m\033[1m### You already have ~/Development/$username dir, changing into there \033[0m"
-        cd "$HOME/Development/$username"
+        echo -e "\n\033[7m\033[1m### You already have ~/Development/$username dir, going \$HOME(~/) \033[0m"
+        cd "$HOME"
     else
-        echo -e "\033[7m\033[1m### Would you like to create a new directory ~/Development/$username for the dotfiles? [y/n] \033[0m"
+        echo -e "\033[7m\033[1m### Would you like to create a new Development directory ~/Development/$username? [y/n] \033[0m"
         read yn
         case $yn in
             [Yy]* ) 
                 if [ ! -d "$HOME/Development/$username" ]; then
                     create_directory "$HOME/Development/$username"
                 fi
-                change_directory $HOME/Development/$username;;
+                change_directory $HOME;;
             [Nn]* ) 
                 read -p "Please enter the full path of the existing directory where you'd like to clone the dotfiles: " dir
                 change_directory "$dir";;
@@ -241,7 +243,7 @@ handle_differences() {
 
 # Function to setup dotfiles repo and compare dotfiles and ask user if they want to replace or create them
 replace_dotfiles() {
-    setup_dotfiles_repo
+    setup_development_repo
 
     for file in $dotfiles_list
     do
