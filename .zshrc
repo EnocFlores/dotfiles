@@ -270,61 +270,63 @@ else
     PROGRAM_CHECKS="$PROGRAM_CHECKS\ntpm is installed"
 fi
 
-# === Point NVM to config directory ==== #
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+if [ "$device" != "Android" ]; then
+    # === Point NVM to config directory ==== #
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-# ====================================== #
-# === node version manager checker   === #
-# === and installer                  === #
-# ====================================== #
-if ! command -v nvm &> /dev/null; then
-    # If nvm is not installed then prompt user to install
-    echo "nvm is not installed, would you like to install it? [y/N]"
-    read answer
+    # ====================================== #
+    # === node version manager checker   === #
+    # === and installer                  === #
+    # ====================================== #
+    if ! command -v nvm &> /dev/null; then
+        # If nvm is not installed then prompt user to install
+        echo "nvm is not installed, would you like to install it? [y/N]"
+        read answer
 
-    if [ "$answer" = "y" ]; then
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-    else
-        PROGRAM_CHECKS="$PROGRAM_CHECKS\nnvm is not installed"
-    fi
-else
-    PROGRAM_CHECKS="$PROGRAM_CHECKS\nnvm is installed"
-fi
-
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
-# !!! place this after nvm           !!! #
-# !!! initialization                 !!! #
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
-# ====================================== #
-# === Changes npm version depending  === #
-# === on .nvm file (if it exists in  === #
-# === current directory/repo)        === #
-# ====================================== #
-
-# === FOR LATER USE ONCE TESTED ======== #
-if command -v nvm &> /dev/null; then
-    autoload -U add-zsh-hook
-    load-nvmrc() {
-        local node_version="$(nvm version)"
-        local nvmrc_path="$(nvm_find_nvmrc)"
-
-         if [ -n "$nvmrc_path" ]; then
-             local nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
-
-             if [ "$nvmrc_node_version" = "N/A" ]; then
-                 nvm install
-             elif [ "$nvmrc_node_version" != "$node_version" ]; then
-                nvm use
-            fi
-        elif [ "$node_version" != "$(nvm version default)" ]; then
-            echo "Reverting to nvm default version"
-            nvm use default
+        if [ "$answer" = "y" ]; then
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+        else
+            PROGRAM_CHECKS="$PROGRAM_CHECKS\nnvm is not installed"
         fi
-    }
-    add-zsh-hook chpwd load-nvmrc
-    load-nvmrc
+    else
+        PROGRAM_CHECKS="$PROGRAM_CHECKS\nnvm is installed"
+    fi
+
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
+    # !!! place this after nvm           !!! #
+    # !!! initialization                 !!! #
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
+    # ====================================== #
+    # === Changes npm version depending  === #
+    # === on .nvm file (if it exists in  === #
+    # === current directory/repo)        === #
+    # ====================================== #
+
+    # === FOR LATER USE ONCE TESTED ======== #
+    if command -v nvm &> /dev/null; then
+        autoload -U add-zsh-hook
+        load-nvmrc() {
+            local node_version="$(nvm version)"
+            local nvmrc_path="$(nvm_find_nvmrc)"
+
+             if [ -n "$nvmrc_path" ]; then
+                 local nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
+
+                 if [ "$nvmrc_node_version" = "N/A" ]; then
+                     nvm install
+                 elif [ "$nvmrc_node_version" != "$node_version" ]; then
+                    nvm use
+                fi
+            elif [ "$node_version" != "$(nvm version default)" ]; then
+                echo "Reverting to nvm default version"
+                nvm use default
+            fi
+        }
+        add-zsh-hook chpwd load-nvmrc
+        load-nvmrc
+    fi
 fi
 
 # ====================================== #
