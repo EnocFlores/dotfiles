@@ -3,5 +3,7 @@
 # Please adapt and uncomment the following lines:
 	name = GIT_NAME
 	email = GIT_EMAIL
+[init]
+	defaultBranch = main
 [core]
     excludesfile = ~/.gitignore_global
