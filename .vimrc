@@ -136,11 +136,23 @@ set showcmd
 " === default (on versions compiled  === "
 " === with `+clipboard`)             === "
 " ====================================== "
-let os = system('uname -s')
+let device = system('uname -o')
 
 if exists("+clipboard")
-    if os =~ 'Darwin'
+    if device =~ 'Darwin'
         set clipboard=unnamed
+    elseif device =~ 'Android'
+        " Copy to clipboard command
+        command! -range=% -nargs=0 CopyToClipboard :<line1>,<line2>w !termux-clipboard-set
+        " Paste from clipboard command
+        command! PasteFromClipboard :r !termux-clipboard-get
+
+        " Copy to clipboard keymap
+        nnoremap <leader>y :CopyToClipboard<CR>
+        vnoremap <leader>y :CopyToClipboard<CR>
+        " Paste from clipboard keymap
+        nnoremap <leader>p :PasteFromClipboard<CR>
+        vnoremap <leader>p :PasteFromClipboard<CR>
     else
         set clipboard=unnamedplus
     endif
