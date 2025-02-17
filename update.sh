@@ -17,7 +17,8 @@ check_directory
 git pull
 setup_type
 echo "SETUP_SCRIPT_ENV=$setup" > .env
-for file in $dotfiles_list
+
+for file in $(get_dotfiles)
 do
     cmpResult=$(compare_files "$file")
     handle_differences "$file" "$cmpResult"

@@ -3,15 +3,41 @@
 Q: What is this?
 A: This is a temporary or permanant place for documenting things outside of the README, at least for now until I figure out git wiki
 
-## Programs
+## Extensions
 
-### firefox
+### Vimium
+
+```vim
+# Insert your preferred key mappings here.
+unmap r
+
+# Unmap z and x
+unmap zH
+unmap zL
+unmap z
+unmap x
+
+# Remap u and d to C-u and C-d, add C-f and C-b
+unmap u
+unmap d
+map <c-u> scrollPageUp
+map <c-d> scrollPageDown
+map <c-b> scrollFullPageUp
+map <c-f> scrollFullPageDown
+
+# Use dd for deleting a tab
+map dd removeTab
+```
+
+
+## firefox
 
 Turn off esc shortcut to exit fullscreen:
 go to: `about:config`
 set `browser.fullscreen.exit_on_escape` to`false` 
 
-### tldr
+
+## tldr
 
 There are two well known tldr programs
 [tldr](https://github.com/tldr-pages/tldr)
@@ -20,11 +46,11 @@ and
 
 tldr is a js program and tealdeer is written in rust
 
-### geeqie
+## geeqie
 
 Geeqie is an image viewer that can be used to find duplicate images
 
-### mdbook
+## mdbook
 
 mdbook is a tool for creating books from markdown files, it could be used as an alternative to confluence
 
@@ -80,8 +106,4 @@ M-z: Zoom into the current window (make it the main window)
 M-S-f: Toggle floating for the current window
 
 M-C-o: Move focus to the next monitor
-
-
-
-
 
