@@ -1,5 +1,5 @@
 -- EnocFlores <https://github.com/EnocFlores>
--- Last Change: 2024.03.28             
+-- Last Change: 2025.02.16             
 -- Special thanks to TJ from nvim-lua on github for their Kickstart.nvim project
 -- https://github.com/nvim-lua/kickstart.nvim
 
@@ -118,6 +118,7 @@ require('lazy').setup({
           ["."] = true,
           yaml = true,
           markdown = true,
+          json = true,
           help = false,
           gitcommit = false,
           gitrebase = false,
@@ -138,13 +139,25 @@ require('lazy').setup({
 ------------------------------------------
   {
     "CopilotC-Nvim/CopilotChat.nvim",
-    branch = "canary",
+    branch = "main",
     dependencies = {
       { "zbirenbaum/copilot.lua" }, -- or github/copilot.vim
       { "nvim-lua/plenary.nvim" }, -- for curl, log wrapper
     },
     opts = {
-      debug = true, -- Enable debugging
+      model = 'claude-3.5-sonnet', -- Default model to use, see ':CopilotChatModels' for available models (can be specified manually in prompt via $)
+
+      window = {
+        layout = 'float',
+      },
+
+      show_help = true, -- Shows help message as virtual lines when waiting for user input
+      debug = true, -- Enable or disable debug mode, the log file will be in ~/.local/state/nvim/CopilotChat.nvim.log
+      show_folds = false, -- Shows folds for sections in chat
+
+      question_header = '## THE USER ',
+      answer_header = '## CATILA ',
+
       -- See Configuration section for rest
       mappings = {
         complete = {
@@ -173,72 +186,19 @@ require('lazy').setup({
         show_diff = {
           normal = 'gd'
         },
-        show_system_prompt = {
-          normal = 'gp'
+        show_info = {
+          normal = 'gi'
         },
-        show_user_selection = {
-          normal = 'gs'
+        show_context = {
+          normal = 'gc'
         },
       },
     },
     -- See Commands section for default commands if you want to lazy load on them
   },
-  -- {
-  --   "CopilotC-Nvim/CopilotChat.nvim",
-  --   opts = {
-  --     show_help = "yes", -- Show help text for CopilotChatInPlace, default: yes
-  --     debug = false, -- Enable or disable debug mode, the log file will be in ~/.local/state/nvim/CopilotChat.nvim.log
-  --     disable_extra_info = 'no', -- Disable extra information (e.g: system prompt) in the response.
-  --     language = "English" -- Copilot answer language settings when using default prompts. Default language is English.
-  --     -- proxy = "socks5://127.0.0.1:3000", -- Proxies requests via https or socks.
-  --     -- temperature = 0.1,
-  --   },
-  --   build = function()
-  --     vim.notify("Please update the remote plugins by running ':UpdateRemotePlugins', then restart Neovim.")
-  --   end,
-  --   event = "VeryLazy",
-  --   keys = {
-  --     { "<leader>ccb", "<cmd>CopilotChatBuffer ", desc = "CopilotChat - Chat with current buffer" },
-  --     { "<leader>cce", "<cmd>CopilotChatExplain<cr>", desc = "CopilotChat - Explain code" },
-  --     { "<leader>cct", "<cmd>CopilotChatTests<cr>", desc = "CopilotChat - Generate tests" },
-  --     {
-  --       "<leader>ccT",
-  --       "<cmd>CopilotChatVsplitToggle<cr>",
-  --       desc = "CopilotChat - Toggle Vsplit", -- Toggle vertical split
-  --     },
-  --     {
-  --       "<leader>ccv",
-  --       ":CopilotChatVisual ",
-  --       mode = "x",
-  --       desc = "CopilotChat - Open in vertical split",
-  --     },
-  --     {
-  --       "<leader>ccx",
-  --       ":CopilotChatInPlace<cr>",
-  --       desc = "CopilotChat - Run in-place code",
-  --     },
-  --     {
-  --       "<leader>ccf",
-  --       "<cmd>CopilotChatFixDiagnostic<cr>", -- Get a fix for the diagnostic message under the cursor.
-  --       desc = "CopilotChat - Fix diagnostic",
-  --     },
-  --     {
-  --       "<leader>ccr",
-  --       "<cmd>CopilotChatReset<cr>", -- Reset chat history and clear buffer.
-  --       desc = "CopilotChat - Reset chat history and clear buffer",
-  --     },
-  --     {
-  --       "<leader>ccq",
-  --       function()
-  --         local input = vim.fn.input("Quick Chat: ")
-  --         if input ~= "" then
-  --           vim.cmd("CopilotChatBuffer " .. input)
-  --         end
-  --       end,
-  --       desc = "CopilotChat - Quick chat",
-  --     },
-  --   },
-  -- },
+
+  -- VScode Language server
+  {'neoclide/coc.nvim', branch = 'release'},
 
   -- Git related plugins
   'tpope/vim-fugitive',
@@ -266,22 +226,23 @@ require('lazy').setup({
     },
   },
 
-  {
-    -- Autocompletion
-    'hrsh7th/nvim-cmp',
-    dependencies = {
-      -- Snippet Engine & its associated nvim-cmp source
-      'L3MON4D3/LuaSnip',
-      'saadparwaiz1/cmp_luasnip',
+  -- COMMENTED OUT FOR COC-nvim
+  -- {
+  --   -- Autocompletion
+  --   'hrsh7th/nvim-cmp',
+  --   dependencies = {
+  --     -- Snippet Engine & its associated nvim-cmp source
+  --     'L3MON4D3/LuaSnip',
+  --     'saadparwaiz1/cmp_luasnip',
 
-      -- Adds LSP completion capabilities
-      'hrsh7th/cmp-nvim-lsp',
-      'hrsh7th/cmp-path',
+  --     -- Adds LSP completion capabilities
+  --     'hrsh7th/cmp-nvim-lsp',
+  --     'hrsh7th/cmp-path',
 
-      -- Adds a number of user-friendly snippets
-      'rafamadriz/friendly-snippets',
-    },
-  },
+  --     -- Adds a number of user-friendly snippets
+  --     'rafamadriz/friendly-snippets',
+  --   },
+  -- },
 
   -- Useful plugin to show you pending keybinds.
   { 'folke/which-key.nvim', opts = {} },
@@ -656,13 +617,22 @@ vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { de
 vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
 
 vim.keymap.set('n', '<leader>nt', ':tabnew<CR>', { desc = '[N]ew [T]ab', noremap = true, silent = true })
+
+-- Toggles
+vim.keymap.set('n', '<leader>ta', ':CopilotChatToggle<CR>', { desc = '[T]oggle [A]i Chat (Copilot)', noremap = true })
+vim.keymap.set('n', '<leader>tc', ':set cursorcolumn!<CR>', { desc = '[T]oggle [C]ursor column', noremap = true })
+vim.keymap.set('n', '<leader>tr', ':set relativenumber!<CR>', { desc = '[T]oggle [R]elativenumber', noremap = true })
+vim.keymap.set('n', '<leader>ts', ':set spell!<CR>', { desc = '[T]oggle [S]pelling', noremap = true })
+vim.keymap.set('n', '<leader>tw', ':set wrap!<CR>', { desc = '[T]oggle [W]rap', noremap = true })
+
+
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
 -- Defer Treesitter setup after first render to improve startup time of 'nvim {filename}'
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
+    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash', 'diff', 'terraform' },
 
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
     auto_install = false,
@@ -771,23 +741,40 @@ local on_attach = function(_, bufnr)
 end
 
 -- document existing key chains
-require('which-key').register {
-  ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
-  ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
-  ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
-  ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
-  ['<leader>n'] = { name = '[N]ew', _ = 'which_key_ignore' },
-  ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
-  ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
-  ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
-  ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
-}
+-- require('which-key').register {
+--   ['<leader>c'] = { name = '[C]ode', _ = 'which_key_ignore' },
+--   ['<leader>d'] = { name = '[D]ocument', _ = 'which_key_ignore' },
+--   ['<leader>g'] = { name = '[G]it', _ = 'which_key_ignore' },
+--   ['<leader>h'] = { name = 'Git [H]unk', _ = 'which_key_ignore' },
+--   ['<leader>n'] = { name = '[N]ew', _ = 'which_key_ignore' },
+--   ['<leader>r'] = { name = '[R]ename', _ = 'which_key_ignore' },
+--   ['<leader>s'] = { name = '[S]earch', _ = 'which_key_ignore' },
+--   ['<leader>t'] = { name = '[T]oggle', _ = 'which_key_ignore' },
+--   ['<leader>w'] = { name = '[W]orkspace', _ = 'which_key_ignore' },
+-- }
+
+local wk = require('which-key')
+wk.add({
+  { '<leader>c', group = '[C]ode' },
+  { '<leader>d', group = '[D]ocument' },
+  { '<leader>g', group = '[G]it' },
+  { '<leader>h', group = 'Git [H]unk' },
+  { '<leader>n', group = '[N]ew' },
+  { '<leader>r', group = '[R]ename' },
+  { '<leader>s', group = '[S]earch' },
+  { '<leader>t', group = '[T]oggle' },
+  { '<leader>w', group = '[W]orkspace' },
+})
+
 -- register which-key VISUAL mode
 -- required for visual <leader>hs (hunk stage) to work
-require('which-key').register({
-  ['<leader>'] = { name = 'VISUAL <leader>' },
-  ['<leader>h'] = { 'Git [H]unk' },
-}, { mode = 'v' })
+wk.add({
+  {
+    mode = { 'v' },
+    { '<leader>', group = 'VISUAL <leader>' },
+    { '<leader>h', group = 'Git [H]unk' },
+  }
+})
 
 -- mason-lspconfig requires that these setup functions are called in this order
 -- before setting up the servers.
@@ -823,9 +810,10 @@ local servers = {
 -- Setup neovim lua configuration
 require('neodev').setup()
 
+-- COMMENTED OUT FOR COC-nvim
 -- nvim-cmp supports additional completion capabilities, so broadcast that to servers
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+-- local capabilities = vim.lsp.protocol.make_client_capabilities()
+-- capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
 -- Ensure the servers above are installed
 local mason_lspconfig = require 'mason-lspconfig'
@@ -845,57 +833,91 @@ mason_lspconfig.setup_handlers {
   end,
 }
 
+vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
+
+-- Use <Tab> and <S-Tab> to navigate through popup menu
+function _G.check_back_space()
+    local col = vim.fn.col('.') - 1
+    return col == 0 or vim.fn.getline('.'):sub(col, col):match('%s') ~= nil
+end
+
+-- Use Tab for trigger completion with characters ahead and navigate
+-- NOTE: There's always a completion item selected by default, you may want to enable
+-- no select by setting `"suggest.noselect": true` in your configuration file
+-- NOTE: Use command ':verbose imap <tab>' to make sure Tab is not mapped by
+-- other plugins before putting this into your config
+local opts = {silent = true, noremap = true, expr = true, replace_keycodes = false}
+vim.keymap.set("i", "<TAB>", 'coc#pum#visible() ? coc#pum#next(1) : v:lua.check_back_space() ? "<TAB>" : coc#refresh()', opts)
+vim.keymap.set("i", "<S-TAB>", [[coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"]], opts)
+
+-- Make <CR> to accept selected completion item or notify coc.nvim to format
+-- <C-g>u breaks current undo, please make your own choice
+vim.keymap.set("i", "<cr>", [[coc#pum#visible() ? coc#pum#confirm() : "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"]], opts)
+
+-- Use <c-j> to trigger snippets
+vim.keymap.set("i", "<c-j>", "<Plug>(coc-snippets-expand-jump)")
+-- Use <c-space> to trigger completion
+vim.keymap.set("i", "<c-space>", "coc#refresh()", {silent = true, expr = true})
+
+-- Lets fix file/definition jumping
+vim.keymap.set("n", "gd", "<Plug>(coc-definition)")
+vim.keymap.set("n", "gy", "<Plug>(coc-type-definition)")
+vim.keymap.set("n", "gi", "<Plug>(coc-implementation)")
+vim.keymap.set("n", "gr", "<Plug>(coc-references)")
+
+
+-- COMMENTED OUT FOR COC-nvim
 -- [[ Configure nvim-cmp ]]
 -- See `:help cmp`
-local cmp = require 'cmp'
-local luasnip = require 'luasnip'
-require('luasnip.loaders.from_vscode').lazy_load()
-luasnip.config.setup {}
+-- local cmp = require 'cmp'
+-- local luasnip = require 'luasnip'
+-- require('luasnip.loaders.from_vscode').lazy_load()
+-- luasnip.config.setup {}
 
-cmp.setup {
-  snippet = {
-    expand = function(args)
-      luasnip.lsp_expand(args.body)
-    end,
-  },
-  completion = {
-    completeopt = 'menu,menuone,noinsert',
-  },
-  mapping = cmp.mapping.preset.insert {
-    ['<C-n>'] = cmp.mapping.select_next_item(),
-    ['<C-p>'] = cmp.mapping.select_prev_item(),
-    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-Space>'] = cmp.mapping.complete {},
-    ['<CR>'] = cmp.mapping.confirm {
-      behavior = cmp.ConfirmBehavior.Replace,
-      select = true,
-    },
-    ['<Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_next_item()
-      elseif luasnip.expand_or_locally_jumpable() then
-        luasnip.expand_or_jump()
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
-    ['<S-Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_prev_item()
-      elseif luasnip.locally_jumpable(-1) then
-        luasnip.jump(-1)
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
-  },
-  sources = {
-    { name = 'nvim_lsp' },
-    { name = 'luasnip' },
-    { name = 'path' },
-  },
-}
+-- cmp.setup {
+--   snippet = {
+--     expand = function(args)
+--       luasnip.lsp_expand(args.body)
+--     end,
+--   },
+--   completion = {
+--     completeopt = 'menu,menuone,noinsert',
+--   },
+--   mapping = cmp.mapping.preset.insert {
+--     ['<C-n>'] = cmp.mapping.select_next_item(),
+--     ['<C-p>'] = cmp.mapping.select_prev_item(),
+--     ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+--     ['<C-f>'] = cmp.mapping.scroll_docs(4),
+--     ['<C-Space>'] = cmp.mapping.complete {},
+--     ['<CR>'] = cmp.mapping.confirm {
+--       behavior = cmp.ConfirmBehavior.Replace,
+--       select = true,
+--     },
+--     ['<Tab>'] = cmp.mapping(function(fallback)
+--       if cmp.visible() then
+--         cmp.select_next_item()
+--       elseif luasnip.expand_or_locally_jumpable() then
+--         luasnip.expand_or_jump()
+--       else
+--         fallback()
+--       end
+--     end, { 'i', 's' }),
+--     ['<S-Tab>'] = cmp.mapping(function(fallback)
+--       if cmp.visible() then
+--         cmp.select_prev_item()
+--       elseif luasnip.locally_jumpable(-1) then
+--         luasnip.jump(-1)
+--       else
+--         fallback()
+--       end
+--     end, { 'i', 's' }),
+--   },
+--   sources = {
+--     { name = 'nvim_lsp' },
+--     { name = 'luasnip' },
+--     { name = 'path' },
+--   },
+-- }
 
 vim.api.nvim_command('silent! delcommand CopilotAuth')
 

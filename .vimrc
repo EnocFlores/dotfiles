@@ -3,7 +3,7 @@
 " Maintainer: The Vim Project <https://github.com/vim/vim>
 " Former Maintainer: Bram Moolenaar <Bram@vim.org> - RIP 2023 Aug 3
 " Editor: EnocFlores <https://github.com/EnocFlores>
-" Last Change: 2024 Mar 06
+" Last Change: 2025 Feb 16
 " 
 " This is loaded if no vimrc file was found.
 " Except when Vim is run with "-u NONE" or "-C".
@@ -43,9 +43,9 @@ colorscheme ron
 " ====================================== "
 " === There is some differences that === "
 " === occur when using tmux within   === "
-" === your choosen terminal, the     === "
+" === your chosen terminal, the      === "
 " === background and foreground can  === "
-" === be particulurly tricky and so  === "
+" === be particularly tricky and so  === "
 " === this checks for a screen       === "
 " === terminal and adds this fix so  === "
 " === that everything looks as       === "
@@ -70,7 +70,7 @@ endif
 
 " ====================================== "
 " === This is still being tested on  === "
-" === compatability with neovim      === "
+" === compatibility with neovim      === "
 " ====================================== "
 " if has('nvim') || has('vim')
 "   if has('unix') && has('termguicolors')
@@ -130,6 +130,9 @@ set ruler
 " === command you write will show    === "
 " ====================================== "
 set showcmd
+
+" === set leader key to spacebar     === "
+let mapleader = " "
 
 " ====================================== "
 " === Use the OS clipboard by        === "
@@ -216,11 +219,34 @@ set history=200
 " ====================================== "
 " === This helps a lot when writing  === "
 " === commands with autocomplete     === "
-" === beacuase is displays all the   === "
+" === because is displays all the    === "
 " === available options right above  === "
 " === which you can tab through      === "
 " ====================================== "
 set wildmenu
+
+" ====================================== "
+" === Toggles                       ==== "
+" ====================================== "
+nnoremap <leader>tc :set cursorcolumn!<CR>
+nnoremap <leader>tr :set relativenumber!<CR>
+nnoremap <leader>tw :set wrap!<CR>
+
+" ====================================== "
+" === Spelling enabled by default on === "
+" === markdown files and toggle to   === "
+" === enable spelling anywhere. Sets === "
+" === where the spellfile is as well === "
+" ===                                === "
+" === For file navigation:           === "
+" === ~/.vim/spell/en.utf-8.add      === "
+" ====================================== "
+autocmd FileType markdown setlocal spell
+autocmd BufRead,BufNewFile *.zsh setlocal spell
+autocmd BufRead,BufNewFile *.zsh set syntax=OFF
+" autocmd BufRead,BufNewFile *.zsh set filetype=bash
+set spellfile+=~/.vim/spell/en.utf-8.add
+nnoremap <leader>ts :set spell!<CR>
 
 " ====================================== "
 " === This is a useful feature when  === "
@@ -246,7 +272,7 @@ endif
 
 " ====================================== "
 " === This checks if relative time   === "
-" === measurement is avilable and    === "
+" === measurement is available and   === "
 " === therefore the system can       === "
 " === handle the incremental search  === "
 " === feature                        === "
@@ -307,7 +333,7 @@ let g:netrw_preview=1
 let g:netrw_winsize=300
 
 " === search through my git repo ======= "
-set gp=git\ grep\ -ni
+" set gp=git\ grep\ -ni
 
 " ====================================== "
 " === File navigation ================== "
@@ -516,9 +542,6 @@ if filereadable(expand('~/.vim/autoload/plug.vim'))
 
     " colorscheme purpura
     
-    " sets mapleader because nerdcommenter uses it for its bindings
-    let mapleader = " "
-
     " Add spaces after comment delimiters by default
     let g:NERDSpaceDelims = 1
 
