@@ -24,7 +24,7 @@ programs_list='curl git jq zsh chafa neofetch vim btop tmux neovim lf cava alacr
 # ! TESTING ! A method to use dirname and basename to install programs that have a different package name than their command name, so far it is just one so not investing the time to get this working yet, just an idea, but this might also later be used to specify how the application can be installed
 special_snowflake_list='curl/curl git/git jq/jq zsh/zsh chafa/chafa neofetch/neofetch vim/vim btop/btop tmux/tmux neovim/nvim lf/lf alacritty/alacritty zellij/zellij wezterm/wezterm'
 
-dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .config/btop/themes/perox-enurple.theme .tmux.conf .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh .config/cava/config .config/alacritty/alacritty.toml .config/zellij/config.kdl .config/wezterm/wezterm.lua'
+dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .config/btop/themes/perox-enurple.theme .tmux.conf .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh .config/cava/config .config/alacritty/alacritty.toml .config/wezterm/wezterm.lua .config/yazi/theme.toml .config/zellij/config.kdl .config/kmonad.kdb'
 nerd_font='RobotoMono'
 nerd_font_package='roboto-mono'
 
@@ -40,6 +40,27 @@ start_install_script() {
     fi
     echo "Aborting script."
     exit 1
+}
+
+# Function to update the username in the script
+update_username() {
+    local new_username="$1"
+    local script_path="$0"
+    
+    # Create backup of original script
+    cp "$script_path" "${script_path}.backup"
+    
+    # Replace username in the script
+    sed -i".temp" "s/username=\"[^\"]*\"/username=\"$new_username\"/" "$script_path"
+    
+    if [ $? -eq 0 ]; then
+        echo "Username updated to $new_username"
+        rm "${script_path}.temp"
+    else
+        echo -e "\033[41m\033[1m\033[37mError: Failed to update username. Restoring backup... \033[0m"
+        mv "${script_path}.backup" "$script_path"
+        exit 1
+    fi
 }
 
 # Function to choose what sort of setup to run for installer
@@ -119,7 +140,7 @@ change_gitconfig() {
         echo -e "\033[43m\033[30mNOTE: You probably already ran the install script and changed the .gitconfig file! \033[0m"
         return
     fi
-    local email="$(curl --silent 'https://api.github.com/users/EnocFlores' | jq -r .id)+$email"
+    local email="$(curl --silent "https://api.github.com/users/$username" | jq -r .id)+$email"
     sed -i".backup" -e "s/GIT_NAME/$username/g" .gitconfig
     if [ $? -eq 0 ];then
         echo " -  successfully changed .gitconfig name to $username"
@@ -163,6 +184,19 @@ check_directory() {
         echo -e "\033[41m\033[1m\033[37mError: Run this from the dotfiles repo \033[0m"
         exit 1
     fi
+}
+
+# Function to get dotfiles
+get_dotfiles() {
+    # Start with the predefined list
+    local result=".gitconfig .gitignore_global .zshrc .vimrc"
+    
+    # Add files from .config using find
+    while IFS= read -r -d '' file; do
+        result="$result $file"
+    done < <(find .config -type f -print0)
+    
+    echo $result
 }
 
 # Function to compare files
@@ -516,6 +550,21 @@ nerd_font_installer() {
 # Run functions in order
 install_script() {
     start_install_script
+
+    echo -e "\033[7m\033[1m### Would you like to change the default username ($username) for this script? [y/N] \033[0m"
+    read yn
+    case $yn in
+        [Yy]* )
+            read -p "Enter your GitHub username: " new_username
+            update_username "$new_username"
+            echo -e "\033[43mNOTE: Username updated. Please rerun the script for changes to take effect: ./install.sh \033[0m"
+            exit 0
+            ;;
+        [Nn]* | * )
+            echo "Continuing with username: $username"
+            ;;
+    esac
+
     setup_type
     assign_package_manager
 
