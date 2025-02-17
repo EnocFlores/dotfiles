@@ -30,6 +30,18 @@ nerd_font_package='roboto-mono'
 
 setup="desktop"
 
+# Give the user a warning that the script is about to run in current directory
+start_install_script() {
+    echo -e "\033[43m\033[30mNOTE: Your are about to run this script in $PWD and the build files will also be downloaded here \033[0m"
+    echo -e "\033[7m\033[1m - Do you wish to continue? [y/N] \033[0m"
+    read response
+    if [[ $response == "y" || $response == "Y" ]]; then
+        return
+    fi
+    echo "Aborting script."
+    exit 1
+}
+
 # Function to update the username in the script
 update_username() {
     local new_username="$1"
@@ -59,7 +71,7 @@ setup_type() {
         setup=$SETUP_SCRIPT_ENV
         echo -e "\n\033[7m\033[1m##### Running $setup version of the script! #####\033[0m"
     else
-        echo "Do you want to run a full desktop setup or a server setup? [desktop/server]"
+        echo -e "\n\033[7m\033[1m##### Do you want to run a full desktop setup or a server setup? [desktop/server] #####\033[0m"
         read setup
     fi
     if [[ $setup == "desktop" ]]; then
@@ -125,7 +137,7 @@ clone_or_update_repo() {
 # Function to change .gitconfig file after cloning or updating the repo
 change_gitconfig() {
     if [ -f .gitconfig.backup ]; then
-        echo -e "\033[43mNOTE: You probably already ran the install script and changed the .gitconfig file! \033[0m"
+        echo -e "\033[43m\033[30mNOTE: You probably already ran the install script and changed the .gitconfig file! \033[0m"
         return
     fi
     local email="$(curl --silent "https://api.github.com/users/$username" | jq -r .id)+$email"
@@ -297,7 +309,7 @@ brew_on_mac() {
             /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
             PM="brew"
         else
-            echo -e "\033[43mNote: Not using a package manager with this script might cause problems, skipping to dotfile replacement... \033[0m"
+            echo -e "\033[43m\033[30mNote: Not using a package manager with this script might cause problems, skipping to dotfile replacement... \033[0m"
             replace_dotfiles
             exit 0
         fi
@@ -351,7 +363,7 @@ alacritty_installer() {
             cp extra/completions/_alacritty ${ZDOTDIR:-~}/.zsh_functions/_alacritty
             cd $current_path
             ;;
-        *) echo -e "\033[43mNOTE: Package manager not yet supported \033[0m";;
+        *) echo -e "\033[43m\033[30mNOTE: Package manager not yet supported \033[0m";;
     esac
 }
 
@@ -375,7 +387,7 @@ neovim_installer() {
                 cd $current_path
             fi
             ;;
-        *) echo -e "\033[43mNOTE: Package manager not yet supported \033[0m";;
+        *) echo -e "\033[43m\033[30mNOTE: Package manager not yet supported \033[0m";;
     esac
 }
 
@@ -386,7 +398,7 @@ lf_installer() {
     elif [[ $arch = "aarch64" ]];then
         lf_os="arm64"
     else
-        echo -e "\033[43mNOTE: Architecture not supported by this script at this time, skipping... \033[0m"
+        echo -e "\033[43m\033[30mNOTE: Architecture not supported by this script at this time, skipping... \033[0m"
         return
     fi
     curl -fLo "lf-linux-$lf_os.tar.gz" "https://github.com/gokcehan/lf/releases/latest/download/lf-linux-$lf_os.tar.gz"
@@ -435,7 +447,7 @@ chafa_installer(){
     ./autogen.sh
     ./autogen.sh
     make
-    sudo rm /usr/loca/bin/chafa
+    sudo rm /usr/local/bin/chafa
     sudo ln -s $PWD/tools/chafa/chafa /usr/local/bin/chafa
     cd $current_path
 }
@@ -537,6 +549,8 @@ nerd_font_installer() {
 
 # Run functions in order
 install_script() {
+    start_install_script
+
     echo -e "\033[7m\033[1m### Would you like to change the default username ($username) for this script? [y/N] \033[0m"
     read yn
     case $yn in
