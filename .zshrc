@@ -1,5 +1,5 @@
 # EnocFlores <https://github.com/EnocFlores>
-# Last Change: 2024.03.06
+# Last Change: 2025.02.17
 
 
 
@@ -27,7 +27,7 @@ fi
 if [ "$os" = "Darwin" ] && $(command -v brew &> /dev/null);then
     PROGRAM_CHECKS="$PROGRAM_CHECKS\nbrew is installed"
 # === Add Homebrew commands to PATH  === #
-    export PATH=/opt/homebrew/bin:$PATH
+    # export PATH=/opt/homebrew/bin:$PATH
 # ====================================== #
 # === Use Homebrew version of        === #
 # === openssh to fix issue of Xcode  === #
@@ -240,6 +240,9 @@ bindkey '^v' edit-command-line
 # === Fix backspace vim bug ============ #
 bindkey '^?' backward-delete-char
 
+# === Search history better ============ #
+bindkey '^R' history-incremental-search-backward
+
 # ====================================== #
 # === Show vim mode on right side of === #
 # === prompt                         === #
@@ -354,17 +357,71 @@ alias top="btop -p 3"
 alias btop="btop -p 2"
 alias tlock="tmux setw prefix None"
 alias tunlock="tmux setw prefix C-t"
+alias nowork="figlet -f doh -w 210 COMPLETED | lolcat -F 0.5"
+alias shistory="cat ~/.zsh_history | fzf | copy"
 
-alias vMount='f() { cryfs $1 ~/Vaults/$(basename $1) };f'
-alias vUnmount='f() { cryfs-unmount ~/Vaults/$1 };f'
+mount_container() {
+    container_path=$1
+    # mount_point=$2
+    filename=$(basename "$container_path" .${container_path##*.})
+    mount_dir=~/Vaults/$filename
+
+    # Create the directory if it doesn't exist
+    if [ ! -d "$mount_dir" ]; then
+        mkdir -p "$mount_dir"
+    fi
+
+    # Check if it's a CryFS container
+    if [ -f "$container_path/cryfs.config" ]; then
+        # cryfs "$container_path" "$mount_point"
+        LC_ALL=C cryfs "$container_path" "$mount_dir"
+    elif [ -f "$container_path/gocryptfs.conf" ]; then
+        # gocryptfs "$container_path" "$mount_point"
+        gocryptfs "$container_path" "$mount_dir"
+    else
+        echo "Not a encrypted container"
+    fi
+
+    if [ $? -ne 0 ]; then
+        echo "Failed to mount container"
+    fi
+}
+
+unmount_container() {
+    container_name=$1
+    container_type=$2
+
+    # Unmount the container
+    if [ "$container_type" = "cryfs" ]; then
+        LC_ALL=C cryfs-unmount ~/Vaults/$container_name
+    else
+        if [ "$os" = "Darwin" ]; then
+            umount ~/Vaults/$container_name
+        else
+            fusermount -u ~/Vaults/$container_name
+        fi
+    fi
+
+    if [ $? -ne 0 ]; then
+        echo "Failed to unmount container"
+    fi
+}
+
+alias cMount=mount_container
+alias cUnmount=unmount_container
+alias cList="find ~/Vaults -maxdepth 1 -type d -not -empty | tail -n +2 | xargs -I {} basename {} | sort"
+alias cBusy='f() { lsof +f -- ~/Vaults/"$1" };f'
+
 # alias vList="ls -l@ ~/Vaults | grep '@' | awk '{print $NF}'"
-alias vList="find ~/Vaults -type d -links 1 -maxdepth 1 | xargs -I {} basename {} | sort"
+# alias vList="find ~/Vaults -type d -links 1 -maxdepth 1 | xargs -I {} basename {} | sort"
 
 
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
 # !!!!!!!! System Specific Start !!!!!!! #
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
+
+export PATH=$HOME/.local/bin:$PATH
 
 if [ "$os" = "Linux" ]; then
     PROGRAM_CHECKS="Your OS is Linux$PROGRAM_CHECKS"
@@ -373,7 +430,6 @@ if [ "$os" = "Linux" ]; then
     if [ "$arch" = "x86_64" ]; then
         export PATH=/opt/nvim:$PATH
     fi
-    export PATH=$HOME/.local/bin:$PATH
 elif [ "$os" = "Darwin" ]; then
     PROGRAM_CHECKS="Your OS is macOS$PROGRAM_CHECKS"
     alias copy="pbcopy"
@@ -390,12 +446,12 @@ fi
 # === EnocFlores (git base repo) ======= #
 alias cdEF="cd ~/Development/EnocFlores"
 alias cdTEST="cd ~/Development/Test"
-alias cd.="cd ~/dotfiles"
+alias cd\.="cd ~/dotfiles"
 
 # === Git (shortened git commands) ===== #
 alias gs="git status"
 alias gb="git branch"
-alias ga="git add ."
+alias ga="git add -p"
 alias gc='f() { git commit -m $1 };f'
 alias gpull='f() { git pull origin $1 || git pull portable $1 || git pull backup $1 }; f'
 alias gpush='f() { git push origin $1 || git push portable $1 || git push backup $1 }; f'
@@ -506,3 +562,5 @@ if ! ( pgrep "tmux" > /dev/null || pgrep "zellij" > /dev/null ); then
     fi
     echo "$PROGRAM_CHECKS"
 fi
+
+export MANPAGER="vim +MANPAGER --not-a-term -"
