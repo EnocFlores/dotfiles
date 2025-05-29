@@ -1,5 +1,5 @@
 -- EnocFlores <https://github.com/EnocFlores>
--- Last Change: 2025.02.16             
+-- Last Change: 2025.05.28             
 -- Special thanks to TJ from nvim-lua on github for their Kickstart.nvim project
 -- https://github.com/nvim-lua/kickstart.nvim
 
@@ -127,6 +127,7 @@ require('lazy').setup({
           -- cvs = false,
         },
         copilot_node_command = 'node', -- Node.js version must be > 18.x
+        copilot_model = "gpt-4o-copilot",
         server_opts_overrides = {},
       })
       -- require("copilot.suggestion").toggle_auto_trigger()
@@ -145,10 +146,12 @@ require('lazy').setup({
       { "nvim-lua/plenary.nvim" }, -- for curl, log wrapper
     },
     opts = {
-      model = 'claude-3.5-sonnet', -- Default model to use, see ':CopilotChatModels' for available models (can be specified manually in prompt via $)
+      model = 'claude-3.7-sonnet', -- Default model to use, see ':CopilotChatModels' for available models (can be specified manually in prompt via $)
 
       window = {
         layout = 'float',
+        width = 0.7,
+        height = 0.8,
       },
 
       show_help = true, -- Shows help message as virtual lines when waiting for user input
@@ -174,7 +177,7 @@ require('lazy').setup({
         },
         submit_prompt = {
           normal = '<CR>',
-          insert = '<C-m>'
+          insert = '<M-CR>'
         },
         accept_diff = {
           normal = '<C-y>',
@@ -195,6 +198,14 @@ require('lazy').setup({
       },
     },
     -- See Commands section for default commands if you want to lazy load on them
+  },
+
+  {
+    'tssujt/openinvscode.nvim',
+    cmd = 'OpenInVSCode',
+    opts = {
+      editor = 'code',
+    },
   },
 
   -- VScode Language server
