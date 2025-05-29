@@ -1,5 +1,5 @@
 # EnocFlores <https://github.com/EnocFlores>
-# Last Change: 2025.02.17
+# Last Change: 2025.05.28
 
 # You can use it to add commands that run after login to macOS user session.
 # 'start-at-login' needs to be 'true' for 'after-login-command' to work
@@ -284,4 +284,8 @@ shift-down = ['volume set 0', 'mode main']
 
 [[on-window-detected]]
     if.app-name-regex-substring = 'com.apple'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-name-regex-substring = 'finder'
     run = 'layout floating'

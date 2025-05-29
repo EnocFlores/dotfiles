@@ -1,8 +1,6 @@
 #!/bin/bash
 # EnocFlores <https://github.com/EnocFlores>
-# Last Change: 2024.04.26
-
-
+# Last Change: 2025.05.28
 
 # This script will install/check necessary programs to setup and use these dotfiles
 
@@ -19,20 +17,28 @@ device=$(uname -o)
 current_path=$(pwd)
 
 # programs and dotfiles variables for easy access
+# The programs_list contains all software packages that will be offered for installation
 programs_list='curl git jq zsh chafa neofetch vim btop tmux neovim lf cava alacritty zellij wezterm'
 
 # ! TESTING ! A method to use dirname and basename to install programs that have a different package name than their command name, so far it is just one so not investing the time to get this working yet, just an idea, but this might also later be used to specify how the application can be installed
+# This list maps command names to package names for programs where they differ
 special_snowflake_list='curl/curl git/git jq/jq zsh/zsh chafa/chafa neofetch/neofetch vim/vim btop/btop tmux/tmux neovim/nvim lf/lf alacritty/alacritty zellij/zellij wezterm/wezterm'
 
+# List of dotfiles to be managed by this script
 dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .config/btop/themes/perox-enurple.theme .tmux.conf .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh .config/cava/config .config/alacritty/alacritty.toml .config/wezterm/wezterm.lua .config/yazi/theme.toml .config/zellij/config.kdl .config/kmonad.kdb'
+
+# Nerd font to be installed
 nerd_font='RobotoMono'
 nerd_font_package='roboto-mono'
 
+# Default installation type (desktop includes GUI apps, server is minimal)
 setup="desktop"
 
 # Give the user a warning that the script is about to run in current directory
 start_install_script() {
     echo -e "\033[43m\033[30mNOTE: Your are about to run this script in $PWD and the build files will also be downloaded here \033[0m"
+    echo -e "\033[43m\033[30m      any build files will also be downloaded here \033[0m"
+    echo -e "\033[43m\033[30mRecommended location: ~/Downloads/Builds \033[0m"
     echo -e "\033[7m\033[1m - Do you wish to continue? [y/N] \033[0m"
     read response
     if [[ $response == "y" || $response == "Y" ]]; then
@@ -63,24 +69,122 @@ update_username() {
     fi
 }
 
+# Platform detection
+detect_platform() {
+    if [[ $os == "Darwin" ]]; then
+        echo "macos"
+    elif [[ "$device" = "Android" ]]; then
+        echo "android"
+    else
+        echo "linux"
+    fi
+}
+
+# Function to get programs list based on platform and setup
+get_programs_list() {
+    local platform="$1"
+    local setup_type="$2"
+    
+    # Common programs for all platforms
+    local common="curl git jq zsh vim tmux neofetch"
+    
+    # Platform-specific programs
+    case $platform in
+        "macos")
+            local platform_specific="neovim alacritty wezterm chafa btop lf cava zellij"
+            ;;
+        "linux")
+            local platform_specific="neovim alacritty wezterm chafa btop lf cava zellij"
+            ;;
+        "android")
+            local platform_specific="neovim chafa lf cava zellij"
+            ;;
+        *)
+            local platform_specific="neovim"
+            ;;
+    esac
+    
+    # Filter for server setup (remove GUI applications)
+    if [[ $setup_type == "server" ]]; then
+        platform_specific=$(echo $platform_specific | sed 's/ alacritty//g' | sed 's/ wezterm//g' | sed 's/ cava//g')
+    fi
+    
+    echo "$common $platform_specific"
+}
+
+# Function to get dotfiles list based on setup type
+get_dotfiles_list() {
+    local setup_type="$1"
+    
+    local common_dotfiles=".gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .config/btop/themes/perox-enurple.theme .tmux.conf .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh"
+    
+    if [[ $setup_type == "desktop" ]]; then
+        local desktop_dotfiles=".config/cava/config .config/alacritty/alacritty.toml .config/wezterm/wezterm.lua .config/yazi/theme.toml .config/zellij/config.kdl .config/kmonad.kdb"
+        echo "$common_dotfiles $desktop_dotfiles"
+    else
+        echo "$common_dotfiles"
+    fi
+}
+
+# Function to check what command to use for a program
+get_program_command() {
+    local program="$1"
+    case $program in
+        "neovim") echo "nvim" ;;
+        *) echo "$program" ;;
+    esac
+}
+
+# Function to check if program needs custom installer
+needs_custom_installer() {
+    local program="$1"
+    local platform="$2"
+    
+    case $program in
+        "neovim"|"alacritty"|"lf"|"zellij"|"wezterm"|"chafa")
+            if [[ $platform != "macos" && $PM != "pkg" ]]; then
+                return 0  # true - needs custom installer
+            fi
+            ;;
+    esac
+    return 1  # false - use package manager
+}
+
 # Function to choose what sort of setup to run for installer
 # Note: For headless server no terminal emulator should be installed (alacritty and wezterm), and installing the font is not necessary
 setup_type() {
     if [ -f .env ]; then
         source .env
         setup=$SETUP_SCRIPT_ENV
-        echo -e "\n\033[7m\033[1m##### Running $setup version of the script! #####\033[0m"
+        echo -e "\n\033[7m\033[1m##### Found $setup env in your setup! #####\033[0m"
     else
-        echo -e "\n\033[7m\033[1m##### Do you want to run a full desktop setup or a server setup? [desktop/server] #####\033[0m"
-        read setup
+        echo -e "\n\033[7m\033[1m##### Please select the installation type: #####\033[0m"
+        options=("Desktop" "Server")
+        select opt in "${options[@]}"; do
+            case $opt in
+                "Desktop")
+                    setup="desktop"
+                    break
+                    ;;
+                "Server")
+                    setup="server"
+                    break
+                    ;;
+                *) 
+                    echo -e "\033[41m\033[1m\033[37mInvalid option. Please try again.\033[0m"
+                    ;;
+            esac
+        done
     fi
+
+    # Set platform and update program/dotfile lists
+    platform=$(detect_platform)
+    programs_list=$(get_programs_list "$platform" "$setup")
+    dotfiles_list=$(get_dotfiles_list "$setup")
+
     if [[ $setup == "desktop" ]]; then
-        setup="desktop"
         echo -e "\n\033[7m\033[1m##### Running $setup version of the script! #####\033[0m"
     elif [[ $setup == "server" ]]; then
-        setup="server"
-        programs_list='curl git jq zsh chafa neofetch vim btop tmux neovim lf'
-        dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .config/btop/themes/perox-enurple.theme .tmux.conf .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh'
         echo -e "\n\033[7m\033[1m##### Running $setup version of the script! #####\033[0m"
     else
         echo -e "\033[41m\033[1m\033[37mError: Invalid option. Please run the script again and choose either 'desktop' or 'server'. Exiting... \033[0m"
@@ -164,7 +268,7 @@ setup_development_repo() {
                 if [ ! -d "$HOME/Development/$username" ]; then
                     create_directory "$HOME/Development/$username"
                 fi
-                change_directory $HOME;;
+                change_directory $HOME/Development/$username;;
             [Nn]* ) 
                 read -p "Please enter the full path of the existing directory where you'd like to clone the dotfiles: " dir
                 change_directory "$dir";;
@@ -186,7 +290,9 @@ check_directory() {
     fi
 }
 
-# Function to get dotfiles
+# Function to get dotfiles - currently not used in the script (for update script)
+# This function can dynamically discover dotfiles in the .config directory
+# instead of using the hardcoded list
 get_dotfiles() {
     # Start with the predefined list
     local result=".gitconfig .gitignore_global .zshrc .vimrc"
@@ -264,7 +370,7 @@ replace_files() {
     local file=$1
     local cmpResult=$2
     local goal=$3
-    read -p " -  Do you want to $goal your local ~/$file with the remote one? [y/N] " replace_choice
+    read -p " -  Do you want to $goal your local ~/$file $([ "$goal" = "replace" ] && echo "with" || echo "from") the remote one? [y/N] " replace_choice
     if [[ $replace_choice == "y" || $replace_choice == "Y" ]]; then
         backup_files "$file" "$cmpResult"
         copy_files "$file" "$goal"
@@ -298,7 +404,8 @@ replace_dotfiles() {
     done
 }
 
-# Function to install Homebrew on Mac if it is not already installed
+# Function to install Homebrew on Mac if not already installed
+# This is necessary for Mac users since Homebrew is the primary package manager
 brew_on_mac() {
     if command -v brew &> /dev/null; then
         PM="brew"
@@ -331,8 +438,12 @@ assign_package_manager() {
     echo -e "\033[7m\033[1m#### Your package manager is set to $PM #### \033[0m"
 }
 
+# Program installation functions
+# Each of these functions handles the installation of a specific program
+# They take into account different package managers and system architectures
 # NOTE: The installers for the programs below are because for some of these programs we need the latest version of this is the only way to install them, it can vary from using your package manager, using an appimage, or compiling the program from source
-# Build alacritty from source
+
+# Build alacritty from source when not available through package manager
 alacritty_installer() {
     case $PM in
         "brew") $PM install alacritty;;
@@ -367,7 +478,9 @@ alacritty_installer() {
     esac
 }
 
-# Install neovim app image or if arm then build from source
+# Install neovim using appropriate method for the current architecture
+# For x86_64: Uses AppImage
+# For other architectures: Builds from source
 neovim_installer() {
     case $PM in
         "brew") $PM install neovim;;
@@ -391,7 +504,7 @@ neovim_installer() {
     esac
 }
 
-# Install lf binary
+# Install lf file manager by downloading the appropriate binary for the system architecture
 lf_installer() {
     if [[ $arch = "x86_64" ]];then
         lf_os="amd64"
@@ -452,27 +565,17 @@ chafa_installer(){
     cd $current_path
 }
 
-# Ask user to install programs
+# Main program installation function
+# This function iterates through the programs list and offers to install each one
+# It uses specialized installers for certain programs and falls back to package manager for others
 programs_installer() {
     for program in $programs_list
     do
-        if command -v $program &> /dev/null; then
+        local command_name=$(get_program_command "$program")
+        local platform=$(detect_platform)
+
+        if command -v $command_name &> /dev/null; then
             echo -e "\033[7m\033[1m### You already have $program installed \033[0m"
-        elif [[ $program == "neovim" ]]; then
-            # neovim has a different program name, so we want to catch this before the other programs that command is the same name as their package
-            if command -v nvim &> /dev/null; then
-                echo -e "\033[7m\033[1m### You already have $program installed \033[0m"
-            else
-                echo -e "\033[7m\033[1m### Would you like to install $program? [y/N] \033[0m"
-                read yn
-                case $yn in
-                    [Yy]* ) 
-                        neovim_installer
-                        ;;
-                    [Nn]* ) echo "Skipping $program.";;
-                    * ) echo "Please answer yes or no.";;
-                esac
-            fi
         elif [[ $device == "Android" && ( $program == "alacritty" || $program == "wezterm"  || $program == "btop" ) ]]; then
             echo "Skip!" &> /dev/null
         else
@@ -480,24 +583,22 @@ programs_installer() {
             read yn
             case $yn in
                 [Yy]* ) 
-                    if [[ $PM == "brew" || $PM == "pkg" ]]; then
-                        $PM install $program
-                        if [ $? -ne 0 ]; then
-                            echo -e "\033[41m\033[1m\033[37mError: Failed to install $program with $PM \033[0m"
-                            exit 1
-                        fi
-                    elif [[ $program == "alacritty" ]]; then
-                        alacritty_installer
-                    elif [[ $program == "lf" ]]; then
-                        lf_installer
-                    elif [[ $program == "zellij" ]]; then
-                        zellij_installer
-                    elif [[ $program == "wezterm" ]]; then
-                        wezterm_installer
-                    elif [[ $program == "chafa" ]]; then
-                        chafa_installer
+                    if needs_custom_installer "$program" "$platform"; then
+                        case $program in
+                            "neovim") neovim_installer ;;
+                            "alacritty") alacritty_installer ;;
+                            "lf") lf_installer ;;
+                            "zellij") zellij_installer ;;
+                            "wezterm") wezterm_installer ;;
+                            "chafa") chafa_installer ;;
+                        esac
                     else
-                        sudo $PM install $program
+                        if [[ $PM == "brew" || $PM == "pkg" ]]; then
+                            $PM install $program
+                        else
+                            sudo $PM install $program
+                        fi
+                        
                         if [ $? -ne 0 ]; then
                             echo -e "\033[41m\033[1m\033[37mError: Failed to install $program with $PM \033[0m"
                             exit 1
@@ -511,6 +612,8 @@ programs_installer() {
     done
 }
 
+# Function to change the user's default shell to zsh
+# This is important since many of the dotfiles assume zsh is being used
 change_shell() {
     if [[ "$(basename $SHELL)" != "zsh" ]]; then
         echo -e "\033[7m\033[1m### Do you want to change your shell to zsh? (most things in this script won't work if you don't) [Y/n] \033[0m"
@@ -547,7 +650,12 @@ nerd_font_installer() {
     fi
 }
 
-# Run functions in order
+# Main installation function that orchestrates the entire setup process
+# 1. Starts with confirmation prompt
+# 2. Offers username change
+# 3. Determines setup type (desktop/server)
+# 4. Assigns package manager
+# 5. Installs programs, changes shell, installs fonts, and sets up dotfiles
 install_script() {
     start_install_script
 
