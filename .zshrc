@@ -1,5 +1,5 @@
 # EnocFlores <https://github.com/EnocFlores>
-# Last Change: 2025.02.17
+# Last Change: 2025.05.29
 
 
 
@@ -78,7 +78,7 @@ setopt histignorealldups
 # === within the scrollable shell    === #
 # === history                        === #
 # ====================================== #
-HISTSIZE=1000
+HISTSIZE=5000
 
 # ====================================== #
 # === Save 10000 lines of history    === #
@@ -351,6 +351,7 @@ alias ls="ls --color=auto"
 alias cls="clear"
 alias python="python3"
 alias diff="diff --color"
+alias nvim="mise exec node@22.11.0 -- nvim"
 alias vims="nvim -S Session.vim"
 alias icat="wezterm imgcat"
 alias top="btop -p 3"
@@ -446,7 +447,7 @@ fi
 # === EnocFlores (git base repo) ======= #
 alias cdEF="cd ~/Development/EnocFlores"
 alias cdTEST="cd ~/Development/Test"
-alias cd\.="cd ~/dotfiles"
+alias cd\.="cd ~/.files/dotfiles"
 
 # === Git (shortened git commands) ===== #
 alias gs="git status"
