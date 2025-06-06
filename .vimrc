@@ -3,7 +3,7 @@
 " Maintainer: The Vim Project <https://github.com/vim/vim>
 " Former Maintainer: Bram Moolenaar <Bram@vim.org> - RIP 2023 Aug 3
 " Editor: EnocFlores <https://github.com/EnocFlores>
-" Last Change: 2025 Feb 16
+" Last Change: 2025 Jun 6
 " 
 " This is loaded if no vimrc file was found.
 " Except when Vim is run with "-u NONE" or "-C".
@@ -339,11 +339,50 @@ let g:netrw_winsize=300
 " === File navigation ================== "
 " ====================================== "
 set isfname+=@-@
+" set includeexpr=substitute(substitute(v:fname,'^~\/','',''),'^@\/','','')
+" set includeexpr=substitute(v:fname,'^(@\/\|~\/)','','')
 set includeexpr=substitute(v:fname,'^@\/','','')
 
 " === Just some JavaScript configs ===== "
 set path+=components,src
 set suffixesadd+=,/index.js,index.js
+
+
+" Testing...
+
+" function! JsGotoFile()
+"   let l:fname = matchstr(getline('.'), &include)
+"   let l:base  = simplify(expand('%:h') . '/' . l:fname)
+
+"   for l:ext in split(&suffixesadd, ',')
+"     let l:file = l:base . l:ext
+
+"     if filereadable(l:file)
+"       execute 'edit' l:file
+"       return
+"     endif
+"   endfor
+
+"   " https://damien.pobel.fr/post/configure-neovim-vim-gf-javascript-import/
+"   let l:nodeModules = './node_modules/' . l:fname . '/'
+"   let l:packagePath = l:nodeModules . 'package.json'
+
+"   if filereadable(l:packagePath)
+"     let l:file = join(readfile(l:packagePath))
+"     let l:json = json_decode(l:file)
+
+"     execute 'edit' l:nodeModules . l:json.main
+"     return
+"   endif
+
+"   execute 'edit' l:fname
+" endfunction
+
+" autocmd FileType javascript,javascriptreact
+"       \ setlocal include=\\(\\<require\\s*(\\s*\\\|\\<import\\>\\)[^;\"']*[\"']\\zs[^\"']* |
+"       \ nnoremap <buffer> gf :call JsGotoFile()<CR>
+
+
 
 " ====================================== "
 " === Have a status line that is     === "

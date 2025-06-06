@@ -1,5 +1,5 @@
 # EnocFlores <https://github.com/EnocFlores>
-# Last Change: 2025.05.29
+# Last Change: 2025.06.05
 
 
 
@@ -273,32 +273,33 @@ else
     PROGRAM_CHECKS="$PROGRAM_CHECKS\ntpm is installed"
 fi
 
+# ====================================== #
+# === NVM installation TO BE REPLACED=== #
+# === with mise                      === #
+# ====================================== #
+
 if [ "$device" != "Android" ]; then
-    # === Point NVM to config directory ==== #
-    export NVM_DIR="$HOME/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+    eval "$(/Users/enfloreshernandez/.local/bin/mise activate zsh)"
 
     # ====================================== #
-    # === node version manager checker   === #
-    # === and installer                  === #
+    # === mise checker and installer     === #
     # ====================================== #
-    if ! command -v nvm &> /dev/null; then
-        # If nvm is not installed then prompt user to install
-        echo "nvm is not installed, would you like to install it? [y/N]"
+    if ! command -v mise &> /dev/null; then
+        # If mise is not installed then prompt user to install
+        echo "mise is not installed, would you like to install it? [y/N]"
         read answer
 
         if [ "$answer" = "y" ]; then
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+            curl https://mise.run | sh
         else
-            PROGRAM_CHECKS="$PROGRAM_CHECKS\nnvm is not installed"
+            PROGRAM_CHECKS="$PROGRAM_CHECKS\nmise is not installed"
         fi
     else
-        PROGRAM_CHECKS="$PROGRAM_CHECKS\nnvm is installed"
+        PROGRAM_CHECKS="$PROGRAM_CHECKS\nmise is installed"
     fi
 
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
-    # !!! place this after nvm           !!! #
+    # !!! place this after mise          !!! #
     # !!! initialization                 !!! #
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
     # ====================================== #
@@ -308,28 +309,44 @@ if [ "$device" != "Android" ]; then
     # ====================================== #
 
     # === FOR LATER USE ONCE TESTED ======== #
-    if command -v nvm &> /dev/null; then
+    if command -v mise &> /dev/null; then
         autoload -U add-zsh-hook
         load-nvmrc() {
-            local node_version="$(nvm version)"
-            local nvmrc_path="$(nvm_find_nvmrc)"
-
-             if [ -n "$nvmrc_path" ]; then
-                 local nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
-
-                 if [ "$nvmrc_node_version" = "N/A" ]; then
-                     nvm install
-                 elif [ "$nvmrc_node_version" != "$node_version" ]; then
-                    nvm use
-                fi
-            elif [ "$node_version" != "$(nvm version default)" ]; then
-                echo "Reverting to nvm default version"
-                nvm use default
+            # local node_version="$(nvm version)"
+            # local nvmrc_path="$(nvm_find_nvmrc)"
+            if [ -n ".nvmrc" ]; then
+                mise install
+            else
+                echo "Reverting to mise default version"
             fi
         }
         add-zsh-hook chpwd load-nvmrc
         load-nvmrc
     fi
+
+    # === OLD NVM SCRIPT FOR REFERENCE   === #
+    # if command -v nvm &> /dev/null; then
+    #     autoload -U add-zsh-hook
+    #     load-nvmrc() {
+    #         local node_version="$(nvm version)"
+    #         local nvmrc_path="$(nvm_find_nvmrc)"
+
+    #          if [ -n "$nvmrc_path" ]; then
+    #              local nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
+
+    #              if [ "$nvmrc_node_version" = "N/A" ]; then
+    #                  nvm install
+    #              elif [ "$nvmrc_node_version" != "$node_version" ]; then
+    #                 nvm use
+    #             fi
+    #         elif [ "$node_version" != "$(nvm version default)" ]; then
+    #             echo "Reverting to nvm default version"
+    #             nvm use default
+    #         fi
+    #     }
+    #     add-zsh-hook chpwd load-nvmrc
+    #     load-nvmrc
+    # fi
 fi
 
 # ====================================== #
@@ -433,6 +450,7 @@ if [ "$os" = "Linux" ]; then
     fi
 elif [ "$os" = "Darwin" ]; then
     PROGRAM_CHECKS="Your OS is macOS$PROGRAM_CHECKS"
+    export DOCKER_HOST="unix://${HOME}/.colima/docker.sock"
     alias copy="pbcopy"
 else
     PROGRAM_CHECKS="The operating system is not recognized$PROGRAM_CHECKS"
