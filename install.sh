@@ -1,6 +1,6 @@
 #!/bin/bash
 # EnocFlores <https://github.com/EnocFlores>
-# Last Change: 2025.05.28
+# Last Change: 2025.06.05
 
 # This script will install/check necessary programs to setup and use these dotfiles
 
@@ -46,6 +46,13 @@ start_install_script() {
     fi
     echo "Aborting script."
     exit 1
+}
+
+check_network() {
+    if ! curl -s --head --request GET https://github.com > /dev/null; then
+        echo -e "\033[41m\033[1m\033[37mError: No internet connection. Please check your network and try again. \033[0m"
+        exit 1
+    fi
 }
 
 # Function to update the username in the script
@@ -506,6 +513,7 @@ neovim_installer() {
 
 # Install lf file manager by downloading the appropriate binary for the system architecture
 lf_installer() {
+    local lf_os="null"
     if [[ $arch = "x86_64" ]];then
         lf_os="amd64"
     elif [[ $arch = "aarch64" ]];then
@@ -534,10 +542,10 @@ wezterm_installer() {
         curl https://sh.rustup.rs -sSf | sh -s
         . $HOME/.cargo/env
     fi
-    github_version=$(curl --silent "https://api.github.com/repos/wez/wezterm/releases/latest" | jq -r .tag_name)
-    curl -LO https://github.com/wez/wezterm/releases/download/20240203-110809-5046fc22/wezterm-20240203-110809-5046fc22-src.tar.gz
-    tar -xzf wezterm-20240203-110809-5046fc22-src.tar.gz
-    cd wezterm-20240203-110809-5046fc22
+    local github_version=$(curl --silent "https://api.github.com/repos/wezterm/wezterm/releases/latest" | jq -r .tag_name)
+    curl -LO "https://github.com/wez/wezterm/releases/download/$github_version/wezterm-$github_version-src.tar.gz"
+    tar -xzf wezterm-$github_version-src.tar.gz
+    cd wezterm-$github_version
     ./get-deps
     cargo build --release
     cargo run --release --bin wezterm -- start
@@ -657,6 +665,7 @@ nerd_font_installer() {
 # 4. Assigns package manager
 # 5. Installs programs, changes shell, installs fonts, and sets up dotfiles
 install_script() {
+    check_network
     start_install_script
 
     echo -e "\033[7m\033[1m### Would you like to change the default username ($username) for this script? [y/N] \033[0m"
@@ -673,9 +682,11 @@ install_script() {
             ;;
     esac
 
+    check_network
     setup_type
     assign_package_manager
 
+    check_network
     if [[ $setup == "desktop" ]]; then
         programs_installer
         change_shell

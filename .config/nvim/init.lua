@@ -1,5 +1,5 @@
 -- EnocFlores <https://github.com/EnocFlores>
--- Last Change: 2025.05.28             
+-- Last Change: 2025.06.05
 -- Special thanks to TJ from nvim-lua on github for their Kickstart.nvim project
 -- https://github.com/nvim-lua/kickstart.nvim
 
@@ -146,7 +146,9 @@ require('lazy').setup({
       { "nvim-lua/plenary.nvim" }, -- for curl, log wrapper
     },
     opts = {
-      model = 'claude-3.7-sonnet', -- Default model to use, see ':CopilotChatModels' for available models (can be specified manually in prompt via $)
+      system_prompt = 'COPILOT_INSTRUCTIONS', -- System prompt to use (can be specified manually in prompt via /).
+
+      model = 'claude-sonnet-4', -- Default model to use, see ':CopilotChatModels' for available models (can be specified manually in prompt via $)
 
       window = {
         layout = 'float',
@@ -160,6 +162,38 @@ require('lazy').setup({
 
       question_header = '## THE USER ',
       answer_header = '## CATILA ',
+
+      -- default prompts
+      -- see config/prompts.lua for implementation
+      prompts = {
+        Explain = {
+          prompt = 'Write an explanation for the selected code as paragraphs of text.',
+          system_prompt = 'COPILOT_EXPLAIN',
+        },
+        Review = {
+          prompt = 'Review the selected code.',
+          system_prompt = 'COPILOT_REVIEW',
+        },
+        Fix = {
+          prompt = 'There is a problem in this code. Identify the issues and rewrite the code with fixes. Explain what was wrong and how your changes address the problems.',
+        },
+        Optimize = {
+          prompt = 'Optimize the selected code to improve performance and readability. Explain your optimization strategy and the benefits of your changes.',
+        },
+        Docs = {
+          prompt = 'Please add documentation comments to the selected code.',
+        },
+        Tests = {
+          prompt = 'Please generate tests for my code.',
+        },
+        Commit = {
+          prompt = 'Write commit message for the change with commitizen convention. Keep the title under 50 characters and wrap message at 72 characters. Format as a gitcommit code block.',
+          context = 'git:staged',
+        },
+        Yarrr = {
+          system_prompt = 'You are fascinated by pirates, so please respond in pirate speak.',
+        },
+      },
 
       -- See Configuration section for rest
       mappings = {
