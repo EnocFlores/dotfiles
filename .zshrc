@@ -474,6 +474,71 @@ alias ga="git add -p"
 alias gc='f() { git commit -m $1 };f'
 alias gpull='f() { git pull origin $1 || git pull portable $1 || git pull backup $1 }; f'
 alias gpush='f() { git push origin $1 || git push portable $1 || git push backup $1 }; f'
+
+# === Git Worktrees ==================== #
+alias gw='f() { cd $(git worktree list | grep $1 | awk "{print \$1}") };f'
+alias gwl="git worktree list"
+# f( <worktree-name> <branch-name> )
+create_worktree() {
+  local repo_root
+  if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    # We are in a git repository
+    repo_root=$(git rev-parse --show-toplevel)
+
+    if [[ "$repo_root" == *".worktrees"* ]]; then
+      # We are in a worktree, go to parent directory
+      repo_root="${repo_root%/.worktrees*}"
+    fi
+
+    # echo $repo_root $@
+    # echo $repo_root$1 $2 hello$3
+    
+    if [[ "$3" == "new" ]]; then
+        git worktree add -b "$2" "$repo_root/.worktrees/$1"
+    else
+        git worktree add "$repo_root/.worktrees/$1" "$2"
+    fi
+
+    if [ $? -ne 0 ]; then
+        echo "Failed to create worktree"
+        echo "Usage: gwa <worktree-name> <branch-name> <new>(optional)"
+        return 1
+    fi
+
+    cd "$repo_root/.worktrees/$1"
+  else
+    echo "Error: Not in a git repository or worktree"
+    return 1
+  fi
+}
+alias gwa='f() { create_worktree $1 $2 $3 };f'
+alias gwd='f() { git worktree remove $1 };f'
+gws() {
+    local files=(".env.local" ".git/config" ".vim/coc-settings.json")
+    
+    for file in "${files[@]}"; do
+        if [[ -e "../../$file" || -L "../../$file" ]]; then
+            # Create parent directory if it doesn't exist
+            local parent_dir=$(dirname "$file")
+            if [[ "$parent_dir" != "." && ! -d "$parent_dir" ]]; then
+                echo "Creating directory $parent_dir"
+                mkdir -p "$parent_dir"
+            fi
+            
+            if [[ -e "$file" || -L "$file" ]]; then
+                echo "Removing existing $file"
+                rm -rf "$file"
+            fi
+            echo "Linking $file -> ../../$file"
+            ln -sfn "../../$file" "$file"
+        else
+            echo "Warning: ../../$file does not exist, skipping"
+        fi
+    done
+    
+    echo "Worktree sync complete!"
+}
+
 # === SOMETHING USEFUL TO WORK ON ====== #
 # alias gdelete="git branch -d `git branch --list 'FRONT-*'`"
 alias glist='f() { git branch --list $1 };f'
@@ -574,7 +639,13 @@ show_color() {
 # ====================================== #
 if ! ( pgrep "tmux" > /dev/null || pgrep "zellij" > /dev/null ); then
     if (( $(tput cols) > 80 )); then
-        neofetch
+        if [ "$GUI_TERM" = "WEZTERM" ]; then
+            echo "$(neofetch --off | pr -t -o 30)"; echo -e "\033[18A"; icat --width 30 "$HOME/.config/penguinpower.gif"
+        else
+            neofetch
+        fi
+        # penguinpower.gif obtained from Elizabeth Grimm's website "Tux (the Linux mascot)", no credit was given to this image but it is the oldest reference I could find, claimed to be public domain
+        # ref: https://www3.nd.edu/~ljordan/linux/tuxgallery.html
     else
         neofetch -L
         neofetch --off
