@@ -2,5 +2,6 @@
 Session.vim
 *vim/
 *.swp
+.worktrees/
 *.ampule
 *-ampule
