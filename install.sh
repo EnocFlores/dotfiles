@@ -646,7 +646,6 @@ nerd_font_installer() {
         echo -e "\033[7m\033[1m### You already have $nerd_font Nerd Font installed \033[0m"
     elif [[ $PM == 'brew' ]]; then
         echo -e "\033[7m\033[1m### Installing $nerd_font Nerd Font \033[0m"
-        brew tap homebrew/cask-fonts &&
         brew install --cask font-$nerd_font_package-nerd-font
     else
         echo -e "\033[7m\033[1m### Downloading and installing $nerd_font Nerd Font \033[0m"
