@@ -421,6 +421,9 @@ brew_on_mac() {
         read yn
         if [[ $yn == "y" || $yn == "Y" ]]; then
             /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            echo >> $HOME/.zprofile
+            echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> $HOME/.zprofile
+            eval "$(/opt/homebrew/bin/brew shellenv)"
             PM="brew"
         else
             echo -e "\033[43m\033[30mNote: Not using a package manager with this script might cause problems, skipping to dotfile replacement... \033[0m"
@@ -494,16 +497,17 @@ neovim_installer() {
         "pkg") $PM install neovim;;
         "apt")
             if [[ $arch = "x86_64" ]]; then
-                curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+                curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-$arch.appimage
                 chmod u+x nvim.appimage
-                sudo mkdir -p /opt/nvim
-                sudo mv nvim.appimage /opt/nvim/nvim
+                mkdir -p $HOME/.local/share/applications
+                mv nvim.appimage $HOME/.local/share/applications/nvim
             else
                 sudo apt-get install ninja-build gettext cmake unzip curl
                 git clone https://github.com/neovim/neovim
                 cd neovim && make CMAKE_BUILD_TYPE=Release
                 sudo make install
-                sudo mv build/bin/nvim /usr/local/bin/
+                mkdir -p $HOME/.local/bin
+                mv build/bin/nvim $HOME/.local/bin/
                 cd $current_path
             fi
             ;;
@@ -539,11 +543,11 @@ zellij_installer() {
 wezterm_installer() {
     command -v cargo &> /dev/null
     if [ $? -ne 0 ]; then
-        curl https://sh.rustup.rs -sSf | sh -s
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
         . $HOME/.cargo/env
     fi
     local github_version=$(curl --silent "https://api.github.com/repos/wezterm/wezterm/releases/latest" | jq -r .tag_name)
-    curl -LO "https://github.com/wez/wezterm/releases/download/$github_version/wezterm-$github_version-src.tar.gz"
+    curl -LO "https://github.com/wezterm/wezterm/releases/download/$github_version/wezterm-$github_version-src.tar.gz"
     tar -xzf wezterm-$github_version-src.tar.gz
     cd wezterm-$github_version
     ./get-deps
