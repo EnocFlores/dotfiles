@@ -1,0 +1,55 @@
+{
+    // FastFetch configuration – mirrors:
+    // fastfetch -s title:separator:os:host:kernal:uptime:packages:shell:display:de:wm:wmtheme:theme:icons:font:terminal:terminalfont:cpu:gpu:memory:battery:break:colors
+
+    // --------------------------------------------------------------
+    //  FastFetch configuration – JSONC (JSON with comments)
+    //  This follows the official FastFetch wiki layout:
+    //  https://github.com/fastfetch-cli/fastfetch/wiki/Configuration
+    // --------------------------------------------------------------
+
+    // Optional: lets editors (VS Code, Helix, etc.) provide schema‑based
+    // autocomplete and validation.
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+
+    // -----------------------------------------------------------------
+    //  Display options – you can tweak spacing, colors, etc. here.
+    //  The defaults are fine for the requested layout, so we keep it
+    //  simple.
+    // -----------------------------------------------------------------
+    "display": {
+        // Example: you could change the separator character, but the
+        // default works for the “separator” module.
+    },
+
+    // -----------------------------------------------------------------
+    //  MODULE LIST – this is the heart of the config.  Each object’s
+    //  “type” matches a FastFetch module name.  The order of the array
+    //  determines the order of output, exactly like the `-s` flag 
+    // -----------------------------------------------------------------
+    "modules": [
+        { "type": "title" },          // Banner / title
+        { "type": "separator" },     // Visual separator line
+        { "type": "os" },
+        { "type": "host" },
+        { "type": "kernel" },
+        { "type": "uptime" },
+        { "type": "packages" },
+        { "type": "shell" },
+        { "type": "display" },
+        { "type": "de" },
+        { "type": "wm" },
+        { "type": "wmTheme" },
+        { "type": "theme" },
+        { "type": "icons" },
+        { "type": "font" },
+        { "type": "terminal" },
+        { "type": "terminalFont" },
+        { "type": "cpu" },
+        { "type": "gpu" },
+        { "type": "memory" },
+        { "type": "battery" },
+        { "type": "break" },         // Empty line before the color block
+        { "type": "colors" }         // Terminal colour palette
+    ]
+}
