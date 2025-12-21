@@ -5,7 +5,9 @@
 # This script will install/check necessary programs to setup and use these dotfiles
 
 {
+# Flag, set to 0 when testing so you don't fetch from origin
 testing=1
+
 # If you fork the repo, then these variables make it easy to change this script for your own Github, make sure to replace this with your actual Github username
 username="EnocFlores"
 email="${username}@users.noreply.github.com"
@@ -16,16 +18,15 @@ os=$(uname -s)
 device=$(uname -o)
 current_path=$(pwd)
 
-# programs and dotfiles variables for easy access
 # The programs_list contains all software packages that will be offered for installation
-programs_list='curl git jq zsh chafa neofetch vim btop tmux neovim lf cava alacritty zellij wezterm'
+programs_list='curl git jq file tput zsh chafa fastfetch vim btop tmux neovim lf cava alacritty zellij wezterm'
 
 # ! TESTING ! A method to use dirname and basename to install programs that have a different package name than their command name, so far it is just one so not investing the time to get this working yet, just an idea, but this might also later be used to specify how the application can be installed
 # This list maps command names to package names for programs where they differ
-special_snowflake_list='curl/curl git/git jq/jq zsh/zsh chafa/chafa neofetch/neofetch vim/vim btop/btop tmux/tmux neovim/nvim lf/lf alacritty/alacritty zellij/zellij wezterm/wezterm'
+special_snowflake_list='curl/curl git/git jq/jq file/file ncurses-utils/tput zsh/zsh chafa/chafa fastfetch/fastfetch vim/vim btop/btop tmux/tmux neovim/nvim lf/lf alacritty/alacritty zellij/zellij wezterm/wezterm'
 
 # List of dotfiles to be managed by this script
-dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .config/btop/themes/perox-enurple.theme .tmux.conf .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh .config/cava/config .config/alacritty/alacritty.toml .config/wezterm/wezterm.lua .config/yazi/theme.toml .config/zellij/config.kdl .config/kmonad.kdb'
+dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .tmux.conf .config/alacritty/alacritty.toml .config/btop/btop.conf .config/btop/themes/perox-enurple.theme .config/cava/config .config/fastfetch/config.jsonc .config/kmonad.kdb .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh .config/wezterm/wezterm.lua .config/yazi/theme.toml .config/zellij/config.kdl'
 
 # Nerd font to be installed
 nerd_font='RobotoMono'
@@ -93,7 +94,7 @@ get_programs_list() {
     local setup_type="$2"
     
     # Common programs for all platforms
-    local common="curl git jq zsh vim tmux neofetch"
+    local common="curl git jq zsh vim tmux fastfetch"
     
     # Platform-specific programs
     case $platform in
@@ -499,8 +500,8 @@ neovim_installer() {
             if [[ $arch = "x86_64" ]]; then
                 curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-$arch.appimage
                 chmod u+x nvim.appimage
-                mkdir -p $HOME/.local/share/applications
-                mv nvim.appimage $HOME/.local/share/applications/nvim
+                mkdir -p $HOME/.local/bin/
+                mv nvim.appimage $HOME/.local/bin/nvim
             else
                 sudo apt-get install ninja-build gettext cmake unzip curl
                 git clone https://github.com/neovim/neovim
