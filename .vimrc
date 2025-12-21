@@ -3,7 +3,7 @@
 " Maintainer: The Vim Project <https://github.com/vim/vim>
 " Former Maintainer: Bram Moolenaar <Bram@vim.org> - RIP 2023 Aug 3
 " Editor: EnocFlores <https://github.com/EnocFlores>
-" Last Change: 2025 Jun 6
+" Last Change: 2025 Dec 20
 " 
 " This is loaded if no vimrc file was found.
 " Except when Vim is run with "-u NONE" or "-C".
@@ -232,6 +232,8 @@ nnoremap <leader>tc :set cursorcolumn!<CR>
 nnoremap <leader>tr :set relativenumber!<CR>
 nnoremap <leader>tw :set wrap!<CR>
 
+nnoremap <leader>yp :let @*=@%<CR>
+
 " ====================================== "
 " === Spelling enabled by default on === "
 " === markdown files and toggle to   === "
@@ -256,6 +258,12 @@ nnoremap <leader>ts :set spell!<CR>
 " === into view better               === "
 " ====================================== "
 set scrolloff=5
+
+" ====================================== "
+" === Custom scroll mappings         === "
+" ====================================== "
+nnoremap <C-d> :execute "normal! " . (winheight(0) / 4) . "j"<CR>
+nnoremap <C-u> :execute "normal! " . (winheight(0) / 4) . "k"<CR>
 
 " ====================================== "
 " === This will check if you have a  === "

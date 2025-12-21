@@ -1,5 +1,5 @@
 # EnocFlores <https://github.com/EnocFlores>
-# Last Change: 2025.06.05
+# Last Change: 2025.12.20
 
 
 
@@ -368,7 +368,7 @@ alias ls="ls --color=auto"
 alias cls="clear"
 alias python="python3"
 alias diff="diff --color"
-alias nvim="mise exec node@22.11.0 -- nvim"
+alias nvim="mise exec node@22.19.0 -- nvim"
 alias vims="nvim -S Session.vim"
 alias icat="wezterm imgcat"
 alias top="btop -p 3"
@@ -434,6 +434,13 @@ alias cBusy='f() { lsof +f -- ~/Vaults/"$1" };f'
 # alias vList="find ~/Vaults -type d -links 1 -maxdepth 1 | xargs -I {} basename {} | sort"
 
 
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	IFS= read -r -d '' cwd < "$tmp"
+	[ -n "$cwd" ] && [ "$cwd" != "$PWD" ] && builtin cd -- "$cwd"
+	rm -f -- "$tmp"
+}
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
 # !!!!!!!! System Specific Start !!!!!!! #
@@ -465,56 +472,83 @@ fi
 # === EnocFlores (git base repo) ======= #
 alias cdEF="cd ~/Development/EnocFlores"
 alias cdTEST="cd ~/Development/Test"
-alias cd\.="cd ~/.files/dotfiles"
+alias cd\.="cd ~/Development/EnocFlores/dotfiles"
 
 # === Git (shortened git commands) ===== #
 alias gs="git status"
 alias gb="git branch"
+alias gd="git diff"
 alias ga="git add -p"
 alias gc='f() { git commit -m $1 };f'
 alias gpull='f() { git pull origin $1 || git pull portable $1 || git pull backup $1 }; f'
 alias gpush='f() { git push origin $1 || git push portable $1 || git push backup $1 }; f'
 
 # === Git Worktrees ==================== #
-alias gw='f() { cd $(git worktree list | grep $1 | awk "{print \$1}") };f'
-alias gwl="git worktree list"
+gw() { 
+  if [[ "$1" == "bare" ]]; then
+    cd $(git worktree list | head -1 | awk '{print $1}')
+  else
+    cd $(git worktree list | grep "/$1 " | awk '{print $1}')
+  fi
+}
+
+## Completion function for gw
+_gw_completion() {
+  local -a worktrees
+  worktrees=($(git worktree list | awk '{if(NR==1) print "bare"; else {gsub(".*/", "", $1); print $1}}'))
+  _values 'worktree' ${worktrees[@]}
+}
+
+## Register the completion
+compdef _gw_completion gw
+
+alias gwl='git worktree list | sed "s|^$(pwd) |* & |"'
+
 # f( <worktree-name> <branch-name> )
 create_worktree() {
   local repo_root
-  if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    # We are in a git repository
+  
+  # Check if we're in any kind of git repository
+  if ! git rev-parse --git-dir >/dev/null 2>&1; then
+    echo "Error: Not in a git repository or worktree"
+    return 1
+  fi
+  
+  # Determine repo root based on repository type
+  if git rev-parse --is-bare-repository >/dev/null 2>&1 && [[ "$(git rev-parse --is-bare-repository)" == "true" ]]; then
+    # We are in a bare repository
+    repo_root=$(git rev-parse --git-dir)
+  else
+    # We are in a regular repository or worktree
     repo_root=$(git rev-parse --show-toplevel)
-
+    
     if [[ "$repo_root" == *".worktrees"* ]]; then
       # We are in a worktree, go to parent directory
       repo_root="${repo_root%/.worktrees*}"
     fi
+  fi
 
-    # echo $repo_root $@
-    # echo $repo_root$1 $2 hello$3
-    
-    if [[ "$3" == "new" ]]; then
-        git worktree add -b "$2" "$repo_root/.worktrees/$1"
-    else
-        git worktree add "$repo_root/.worktrees/$1" "$2"
-    fi
-
-    if [ $? -ne 0 ]; then
-        echo "Failed to create worktree"
-        echo "Usage: gwa <worktree-name> <branch-name> <new>(optional)"
-        return 1
-    fi
-
-    cd "$repo_root/.worktrees/$1"
+  # Create the worktree
+  if [[ "$3" == "new" ]]; then
+    git worktree add -b "$2" "$repo_root/.worktrees/$1"
   else
-    echo "Error: Not in a git repository or worktree"
+    git fetch origin $2:$2 && git worktree add "$repo_root/.worktrees/$1" "$2"
+  fi
+
+  if [ $? -ne 0 ]; then
+    echo "Failed to create worktree"
+    echo "Usage: gwa <worktree-name> <branch-name> <new>(optional)"
     return 1
   fi
+
+  cd "$repo_root/.worktrees/$1"
 }
 alias gwa='f() { create_worktree $1 $2 $3 };f'
+
 alias gwd='f() { git worktree remove $1 };f'
+
 gws() {
-    local files=(".env.local" ".git/config" ".vim/coc-settings.json")
+    local files=(".env.local" ".vim/coc-settings.json" "AGENTS.md" ".ignore" "agent-resources")
     
     for file in "${files[@]}"; do
         if [[ -e "../../$file" || -L "../../$file" ]]; then

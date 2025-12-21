@@ -1,5 +1,5 @@
 -- EnocFlores <https://github.com/EnocFlores>
--- Last Change: 2025.05.29
+-- Last Change: 2025.12.20
 
 
 
@@ -20,7 +20,7 @@ config.set_environment_variables = {
 
 -- This is where you actually apply your config choices
 config.font = wezterm.font('RobotoMono Nerd Font Mono', { weight = 'Regular' })
-config.font_size = 11.5
+config.font_size = 12
 
 -- Window
 config.initial_cols = 100
