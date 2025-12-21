@@ -2,6 +2,19 @@
 Session.vim
 *vim/
 *.swp
+
+# Ignore my git worktree files
 .worktrees/
+
+# Ignore my temporary files
 *.ampule
 *-ampule
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore my agent documentation file
+AGENTS.md
+.ignore
+agent-resources
+agent-resources/
