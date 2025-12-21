@@ -1,5 +1,5 @@
 -- EnocFlores <https://github.com/EnocFlores>
--- Last Change: 2025.06.05
+-- Last Change: 2025.12.20
 -- Special thanks to TJ from nvim-lua on github for their Kickstart.nvim project
 -- https://github.com/nvim-lua/kickstart.nvim
 
@@ -42,6 +42,15 @@ vim.cmd('source ~/.vimrc')
 ------------------------------------------
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
+
+
+------------------------------------------
+-- Disabling some unused languages so   --
+-- that vim provider doesn't have any   --
+-- warnings on these                    --
+------------------------------------------
+vim.g.loaded_perl_provider = 0    -- Disable Perl
+vim.g.loaded_ruby_provider = 0    -- Disable Ruby (if you don't use it)
 
 ------------------------------------------
 --[[Install `lazy.nvim` plugin manager]]--
@@ -861,22 +870,22 @@ require('neodev').setup()
 -- capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
 -- Ensure the servers above are installed
-local mason_lspconfig = require 'mason-lspconfig'
+-- local mason_lspconfig = require 'mason-lspconfig'
 
-mason_lspconfig.setup {
-  ensure_installed = vim.tbl_keys(servers),
-}
+-- mason_lspconfig.setup {
+--   ensure_installed = vim.tbl_keys(servers),
+-- }
 
-mason_lspconfig.setup_handlers {
-  function(server_name)
-    require('lspconfig')[server_name].setup {
-      capabilities = capabilities,
-      on_attach = on_attach,
-      settings = servers[server_name],
-      filetypes = (servers[server_name] or {}).filetypes,
-    }
-  end,
-}
+-- mason_lspconfig.setup_handlers {
+--   function(server_name)
+--     require('lspconfig')[server_name].setup {
+--       capabilities = capabilities,
+--       on_attach = on_attach,
+--       settings = servers[server_name],
+--       filetypes = (servers[server_name] or {}).filetypes,
+--     }
+--   end,
+-- }
 
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 
