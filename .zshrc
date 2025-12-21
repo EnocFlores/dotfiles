@@ -12,6 +12,8 @@ PROGRAM_CHECKS=""
 
 fpath+=${ZDOTDIR:-~}/.zsh_functions
 
+export PATH=$HOME/.local/bin:$PATH
+
 # === Rust ============================= #
 if [[ ! -d "$HOME/.cargo/bin" ]]; then
     PROGRAM_CHECKS="$PROGRAM_CHECKS\ncargo is not installed"
@@ -27,7 +29,7 @@ fi
 if [ "$os" = "Darwin" ] && $(command -v brew &> /dev/null);then
     PROGRAM_CHECKS="$PROGRAM_CHECKS\nbrew is installed"
 # === Add Homebrew commands to PATH  === #
-    # export PATH=/opt/homebrew/bin:$PATH
+    export PATH=/opt/homebrew/bin:$PATH
 # ====================================== #
 # === Use Homebrew version of        === #
 # === openssh to fix issue of Xcode  === #
@@ -273,14 +275,19 @@ else
     PROGRAM_CHECKS="$PROGRAM_CHECKS\ntpm is installed"
 fi
 
+if [ "$device" != "Android" ]; then
+# === Point NVM to config directory ==== #
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+fi
+
 # ====================================== #
 # === NVM installation TO BE REPLACED=== #
 # === with mise                      === #
 # ====================================== #
 
 if [ "$device" != "Android" ]; then
-    eval "$(/Users/enfloreshernandez/.local/bin/mise activate zsh)"
-
     # ====================================== #
     # === mise checker and installer     === #
     # ====================================== #
@@ -295,7 +302,8 @@ if [ "$device" != "Android" ]; then
             PROGRAM_CHECKS="$PROGRAM_CHECKS\nmise is not installed"
         fi
     else
-        PROGRAM_CHECKS="$PROGRAM_CHECKS\nmise is installed"
+        eval "$(/home/eknock/.local/bin/mise activate zsh)"
+        PROGRAM_CHECKS="$PROGRAM_CHECKS\nmise is installed and activated"
     fi
 
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
@@ -430,10 +438,6 @@ alias cUnmount=unmount_container
 alias cList="find ~/Vaults -maxdepth 1 -type d -not -empty | tail -n +2 | xargs -I {} basename {} | sort"
 alias cBusy='f() { lsof +f -- ~/Vaults/"$1" };f'
 
-# alias vList="ls -l@ ~/Vaults | grep '@' | awk '{print $NF}'"
-# alias vList="find ~/Vaults -type d -links 1 -maxdepth 1 | xargs -I {} basename {} | sort"
-
-
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
 	yazi "$@" --cwd-file="$tmp"
@@ -446,12 +450,12 @@ function y() {
 # !!!!!!!! System Specific Start !!!!!!! #
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
 
-export PATH=$HOME/.local/bin:$PATH
-
 if [ "$os" = "Linux" ]; then
     PROGRAM_CHECKS="Your OS is Linux$PROGRAM_CHECKS"
-    alias copy="xclip -selection c"
     alias bat="batcat"
+    if [ "$XDG_SESSION_TYPE" = "x11" ]; then
+        alias copy="xclip -selection c"
+    fi
     if [ "$arch" = "x86_64" ]; then
         export PATH=/opt/nvim:$PATH
     fi
@@ -674,15 +678,15 @@ show_color() {
 if ! ( pgrep "tmux" > /dev/null || pgrep "zellij" > /dev/null ); then
     if (( $(tput cols) > 80 )); then
         if [ "$GUI_TERM" = "WEZTERM" ]; then
-            echo "$(neofetch --off | pr -t -o 30)"; echo -e "\033[18A"; icat --width 30 "$HOME/.config/penguinpower.gif"
+            echo "$(fastfetch -l none | pr -t -o 30)"; echo -e "\033[18A"; icat --width 30 "$HOME/.config/penguinpower.gif"
         else
-            neofetch
+            fastfetch
         fi
         # penguinpower.gif obtained from Elizabeth Grimm's website "Tux (the Linux mascot)", no credit was given to this image but it is the oldest reference I could find, claimed to be public domain
         # ref: https://www3.nd.edu/~ljordan/linux/tuxgallery.html
     else
-        neofetch -L
-        neofetch --off
+        fastfetch -s none
+        fastfetch -l none
     fi
     echo "$PROGRAM_CHECKS"
 fi

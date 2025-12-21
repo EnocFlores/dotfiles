@@ -116,3 +116,8 @@ cmd zip ${{
     zip -r $1.zip $1
     rm -rf $1
 }}
+
+cmd copy-path ${{
+    echo -n $PWD | xclip -selection clipboard
+}}
+# map cp :copy-path

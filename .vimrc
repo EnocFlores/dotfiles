@@ -102,6 +102,9 @@ syntax on
 " vnoremap gh <ESC>
 " set timeoutlen=150
 
+nnoremap gb :bnext<CR>
+nnoremap gB :bprevious<CR>
+
 " ====================================== "
 " === Sets a timeout for key codes   === "
 " === Currently set to 100ms until   === "
