@@ -12,8 +12,6 @@ PROGRAM_CHECKS=""
 
 fpath+=${ZDOTDIR:-~}/.zsh_functions
 
-export PATH=$HOME/.local/bin:$PATH
-
 # === Rust ============================= #
 if [[ ! -d "$HOME/.cargo/bin" ]]; then
     PROGRAM_CHECKS="$PROGRAM_CHECKS\ncargo is not installed"
@@ -288,6 +286,8 @@ fi
 # ====================================== #
 
 if [ "$device" != "Android" ]; then
+    eval "$(/Users/enfloreshernandez/.local/bin/mise activate zsh)"
+
     # ====================================== #
     # === mise checker and installer     === #
     # ====================================== #
@@ -302,7 +302,6 @@ if [ "$device" != "Android" ]; then
             PROGRAM_CHECKS="$PROGRAM_CHECKS\nmise is not installed"
         fi
     else
-        eval "$(/home/eknock/.local/bin/mise activate zsh)"
         PROGRAM_CHECKS="$PROGRAM_CHECKS\nmise is installed and activated"
     fi
 
@@ -385,6 +384,8 @@ alias tlock="tmux setw prefix None"
 alias tunlock="tmux setw prefix C-t"
 alias nowork="figlet -f doh -w 210 COMPLETED | lolcat -F 0.5"
 alias shistory="cat ~/.zsh_history | fzf | copy"
+# choose between yazi and lf as I transition
+alias lf='echo "Choose: [l]f or [y]azi (yazi)?" && read -k1 choice && echo && case $choice in l) command lf;; y) yazi;; *) echo "Invalid choice";; esac'
 
 mount_container() {
     container_path=$1
@@ -486,8 +487,15 @@ alias ga="git add -p"
 alias gc='f() { git commit -m $1 };f'
 alias gpull='f() { git pull origin $1 || git pull portable $1 || git pull backup $1 }; f'
 alias gpush='f() { git push origin $1 || git push portable $1 || git push backup $1 }; f'
+alias gedit='nvim $(git diff --name-only)'
 
-# === Git Worktrees ==================== #
+# ====================================== #
+# =========== GIT WORKTREES ============ #
+# ====================================== #
+
+# The following is used by the gws (git worktree sync) alias to sync files
+syncedWorktreeFiles=(".env.local" ".vim/coc-settings.json" "AGENTS.md" ".ignore" "agent-resources" "opencode.jsonc")
+
 gw() { 
   if [[ "$1" == "bare" ]]; then
     cd $(git worktree list | head -1 | awk '{print $1}')
@@ -551,10 +559,14 @@ alias gwa='f() { create_worktree $1 $2 $3 };f'
 
 alias gwd='f() { git worktree remove $1 };f'
 
+# ====================================== #
+# === This creates symbolic links to === #
+# === the files/directories you want === #
+# === to share across all your other === #
+# === worktrees                      === #
+# ====================================== #
 gws() {
-    local files=(".env.local" ".vim/coc-settings.json" "AGENTS.md" ".ignore" "agent-resources")
-    
-    for file in "${files[@]}"; do
+    for file in "${syncedWorktreeFiles[@]}"; do
         if [[ -e "../../$file" || -L "../../$file" ]]; then
             # Create parent directory if it doesn't exist
             local parent_dir=$(dirname "$file")
@@ -690,5 +702,7 @@ if ! ( pgrep "tmux" > /dev/null || pgrep "zellij" > /dev/null ); then
     fi
     echo "$PROGRAM_CHECKS"
 fi
+
+export PATH=$HOME/.local/bin:$PATH
 
 export MANPAGER="vim +MANPAGER --not-a-term -"

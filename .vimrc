@@ -102,9 +102,6 @@ syntax on
 " vnoremap gh <ESC>
 " set timeoutlen=150
 
-nnoremap gb :bnext<CR>
-nnoremap gB :bprevious<CR>
-
 " ====================================== "
 " === Sets a timeout for key codes   === "
 " === Currently set to 100ms until   === "
@@ -326,6 +323,16 @@ endif
 set nrformats-=octal
 
 " ====================================== "
+" === Modelines allow vim to read   === "
+" === configuration settings from   === "
+" === comments at the top or bottom === "
+" === of files. This sets how many  === "
+" === lines to scan for these       === "
+" === directives (0 disables them)  === "
+" ====================================== "
+set modelines=1
+
+" ====================================== "
 " === By default vim usually unloads === "
 " === a buffer from memory when      === "
 " === opening another file, this     === "
@@ -333,6 +340,8 @@ set nrformats-=octal
 " === it, you can :bNext or Ctrl+o   === "
 " ====================================== "
 set hidden
+nnoremap gb :bnext<CR>
+nnoremap gB :bprevious<CR>
 
 " === netrw configs ==================== "
 " nnoremap <C-n> <Esc>:35Lexplore<cr> "Fails in nvim, so:
@@ -393,7 +402,56 @@ set suffixesadd+=,/index.js,index.js
 "       \ setlocal include=\\(\\<require\\s*(\\s*\\\|\\<import\\>\\)[^;\"']*[\"']\\zs[^\"']* |
 "       \ nnoremap <buffer> gf :call JsGotoFile()<CR>
 
+" ====================================== "
+" === Modeline Security Warning      === "
+" === Scans files for vim modelines  === "
+" === and prompts before processing  === "
+" === to prevent malicious commands  === "
+" ====================================== "
+function! CheckModelines()
+  let l:modelines_setting = &modelines
+  if l:modelines_setting == 0
+    return
+  endif
+  
+  let l:total_lines = line('$')
+  let l:scan_lines = []
+  
+  " Scan first N lines
+  for i in range(1, min([l:modelines_setting, l:total_lines]))
+    call add(l:scan_lines, getline(i))
+  endfor
+  
+  " Scan last N lines (avoid duplicates if file is short)
+  if l:total_lines > l:modelines_setting
+    for i in range(max([1, l:total_lines - l:modelines_setting + 1]), l:total_lines)
+      call add(l:scan_lines, getline(i))
+    endfor
+  endif
+  
+  " Check for modeline patterns
+  let l:found_modelines = []
+  for line in l:scan_lines
+    if line =~ '\(vi\|vim\|ex\):\s*set\?\s'
+      call add(l:found_modelines, line)
+    endif
+  endfor
+  
+  if len(l:found_modelines) > 0
+    echo "⚠️  MODELINE DETECTED in " . expand('%:t') . ":"
+    for modeline in l:found_modelines
+      echo "   " . trim(modeline)
+    endfor
+    echo ""
+    let choice = input("Process modeline? [y/N]: ")
+    if choice !~? '^y\(es\)\?$'
+      setlocal nomodeline
+      echo "Modelines disabled for this buffer"
+    endif
+  endif
+endfunction
 
+autocmd BufReadPost * call CheckModelines()
 
 " ====================================== "
 " === Have a status line that is     === "
