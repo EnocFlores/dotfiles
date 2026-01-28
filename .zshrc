@@ -494,7 +494,7 @@ alias gedit='nvim $(git diff --name-only)'
 # ====================================== #
 
 # The following is used by the gws (git worktree sync) alias to sync files
-syncedWorktreeFiles=(".env.local" ".vim/coc-settings.json" "AGENTS.md" ".ignore" "agent-resources" "opencode.jsonc")
+worktreesSyncedFiles=(".env.local" ".vim/coc-settings.json" "AGENTS.md" ".ignore" "agent-resources" "opencode.jsonc")
 
 gw() { 
   if [[ "$1" == "bare" ]]; then
@@ -566,7 +566,7 @@ alias gwd='f() { git worktree remove $1 };f'
 # === worktrees                      === #
 # ====================================== #
 gws() {
-    for file in "${syncedWorktreeFiles[@]}"; do
+    for file in "${worktreesSyncedFiles[@]}"; do
         if [[ -e "../../$file" || -L "../../$file" ]]; then
             # Create parent directory if it doesn't exist
             local parent_dir=$(dirname "$file")
