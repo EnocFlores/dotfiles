@@ -2,6 +2,7 @@
 description: Expert teacher that guides you through understanding any codebase, concept, or technology with adaptive teaching
 mode: primary
 temperature: 0.3
+color: '#0700FF'
 tools:
   edit: false
   bash: false

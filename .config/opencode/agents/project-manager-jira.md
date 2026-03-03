@@ -71,6 +71,8 @@ If MCP is unavailable OR developer provides ticket info directly, use that:
 
 ## Proactive Behavior (ALWAYS ASK FIRST)
 
+If the developer has already confirmed creation in this session, proceed without asking again.
+
 ### When Creating Docs
 
 Before creating any documentation, **ASK** for confirmation:
@@ -106,7 +108,42 @@ When invoked, look for these patterns:
 
 ## Template Usage
 
-Always use `agent-resources/TEMPLATES/IMP_DOC_TEMPLATE.md` as the base. Customize the "Related Items" section:
+Always use `agent-resources/TEMPLATES/IMP_DOC_TEMPLATE.md` as the base. Customize the "Related Items" section. If the developer explicitly says no Jira link is needed, omit it from Related Items.
+
+## Testing Requirements (MANDATORY)
+
+Testing is a critical part of implementation planning. Follow these rules:
+
+### 1. If Template Has a Testing Phase
+
+The testing phase is **MANDATORY** - never skip, remove, or rename it. Populate it with specific testing tasks relevant to the work type.
+
+### 2. If Template Does NOT Have a Testing Phase
+
+**ALWAYS suggest adding one** to the user before finalizing the doc:
+
+> "The template doesn't include a Testing phase. Based on this work type, I recommend adding:
+>
+> ### Phase N: Testing & Validation
+>
+> - [ ] [Specific testing tasks based on work type]
+> - [ ] Run lint and type checks
+>
+> Should I include this section?"
+
+### 3. Work-Type Testing Guidance
+
+When populating testing tasks, use these guidelines:
+
+- **Bug Fix**: First task should be "Write test to reproduce the bug" (test-first approach)
+- **New Component/Module**: Include "Write unit tests for [component/module name]"
+- **Enhancement**: Include "Update existing tests if behavior changes"
+- **Refactor**: Include "Verify existing tests still pass"
+
+### 4. Always Be Specific
+
+- Bad: `- [ ] Write tests`
+- Good: `- [ ] Write unit tests for PricePoint component (tests/unit/components/PricePoint.test.ts)`
 
 ```markdown
 ## Related Items
@@ -122,7 +159,7 @@ When creating links, use standard Jira URL format:
 
 - `https://jira.company.com/browse/TICKET-ID`
 
-If the developer's Jira has a different base URL, ask once and remember for the session.
+If the developer's Jira has a different base URL, ask once and remember for the session. Only ask for the base URL when a Jira link will be included.
 
 ## Constraints
 

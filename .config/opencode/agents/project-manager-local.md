@@ -104,6 +104,41 @@ Always use `agent-resources/TEMPLATES/IMP_DOC_TEMPLATE.md` as the base when crea
 - **Enhancement**: Focus on current behavior vs. improved behavior
 - **Refactor**: Focus on files affected, before/after patterns
 
+## Testing Requirements (MANDATORY)
+
+Testing is a critical part of implementation planning. Follow these rules:
+
+### 1. If Template Has a Testing Phase
+
+The testing phase is **MANDATORY** - never skip, remove, or rename it. Populate it with specific testing tasks relevant to the work type.
+
+### 2. If Template Does NOT Have a Testing Phase
+
+**ALWAYS suggest adding one** to the user before finalizing the doc:
+
+> "The template doesn't include a Testing phase. Based on this work type, I recommend adding:
+>
+> ### Phase N: Testing & Validation
+>
+> - [ ] [Specific testing tasks based on work type]
+> - [ ] Run lint and type checks
+>
+> Should I include this section?"
+
+### 3. Work-Type Testing Guidance
+
+When populating testing tasks, use these guidelines:
+
+- **Bug Fix**: First task should be "Write test to reproduce the bug" (test-first approach)
+- **New Component/Module**: Include "Write unit tests for [component/module name]"
+- **Enhancement**: Include "Update existing tests if behavior changes"
+- **Refactor**: Include "Verify existing tests still pass"
+
+### 4. Always Be Specific
+
+- Bad: `- [ ] Write tests`
+- Good: `- [ ] Write unit tests for PricePoint component (tests/unit/components/PricePoint.test.ts)`
+
 ## Constraints
 
 - **NEVER auto-update** - Always ask permission before making changes
