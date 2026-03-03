@@ -1,32 +1,16 @@
 #!/bin/bash
 # EnocFlores <https://github.com/EnocFlores>
-# Last Change: 2025.06.05
+# Last Change: 2026.02.23
 
 # This script will install/check necessary programs to setup and use these dotfiles
 
 {
 # Flag, set to 0 when testing so you don't fetch from origin
-testing=1
+testing=0
 
 # If you fork the repo, then these variables make it easy to change this script for your own Github, make sure to replace this with your actual Github username
 username="EnocFlores"
 email="${username}@users.noreply.github.com"
-
-# Note the architecture, OS, device, and current path of the user
-arch=$(uname -m)
-os=$(uname -s)
-device=$(uname -o)
-current_path=$(pwd)
-
-# The programs_list contains all software packages that will be offered for installation
-programs_list='curl git jq file tput zsh chafa fastfetch vim btop tmux neovim lf cava alacritty zellij wezterm'
-
-# ! TESTING ! A method to use dirname and basename to install programs that have a different package name than their command name, so far it is just one so not investing the time to get this working yet, just an idea, but this might also later be used to specify how the application can be installed
-# This list maps command names to package names for programs where they differ
-special_snowflake_list='curl/curl git/git jq/jq file/file ncurses-utils/tput zsh/zsh chafa/chafa fastfetch/fastfetch vim/vim btop/btop tmux/tmux neovim/nvim lf/lf alacritty/alacritty zellij/zellij wezterm/wezterm'
-
-# List of dotfiles to be managed by this script
-dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .tmux.conf .config/alacritty/alacritty.toml .config/btop/btop.conf .config/btop/themes/perox-enurple.theme .config/cava/config .config/fastfetch/config.jsonc .config/kmonad.kdb .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh .config/wezterm/wezterm.lua .config/yazi/theme.toml .config/zellij/config.kdl'
 
 # Nerd font to be installed
 nerd_font='RobotoMono'
@@ -35,12 +19,101 @@ nerd_font_package='roboto-mono'
 # Default installation type (desktop includes GUI apps, server is minimal)
 setup="desktop"
 
+# Note the architecture, OS, device, and current path of the user
+arch=$(uname -m)
+os=$(uname -s)
+device=$(uname -o)
+current_path=$(pwd)
+
+# Color codes for faster modification and better readability of the script
+WARNING="\033[43m\033[30m"
+ERROR="\033[41m\033[1m\033[37m"
+INVERTED="\033[7m\033[1m"
+RESET_COLOR="\033[0m"
+
+# The programs_list contains all software packages that will be offered for installation
+programs_list='curl git jq file tput zsh chafa fastfetch vim btop tmux nvim yazi cava alacritty zellij wezterm'
+
+# Core programs (essential for all environments)
+programs_core='curl git jq file tput zsh vim btop tmux yazi'
+
+# Development tools for desktop environments
+programs_desktop='nvim alacritty chafa zellij'
+
+# Full/Heavy programs that are not necessary for devs, just personal preference
+programs_full='fastfetch cava wezterm'
+
+# Mac specific programs
+programs_macos='aerospace raycast'
+
+# List of dotfiles to be managed by this script
+dotfiles_list='.gitconfig .gitignore_global .zshrc .vimrc .tmux.conf .config/alacritty/alacritty.toml .config/btop/btop.conf .config/btop/themes/perox-enurple.theme .config/cava/config .config/fastfetch/config.jsonc .config/kmonad.kdb .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh .config/wezterm/wezterm.lua .config/yazi/theme.toml .config/zellij/config.kdl'
+
+get_package_name() {
+    local program="$1"
+    local pm="$2"
+    
+    case "$program:$pm" in
+        "file:brew") echo "file-formula" ;;
+
+        "tput:apt") echo "ncurses-bin" ;;
+        "tput:apk") echo "ncurses" ;;
+        "tput:brew") echo "ncurses" ;;
+        "tput:dnf") echo "ncurses" ;;
+        "tput:pkg") echo "ncurses-utils" ;;
+
+        "chafa:apt") echo "MANUAL" ;;
+        "chafa:apk") echo "chafa" ;;
+        "chafa:brew") echo "chafa" ;;
+        "chafa:dnf") echo "chafa" ;;
+        "chafa:pkg") echo "chafa" ;;
+
+        "fastfetch:apt") echo "fastfetch" ;;
+        "fastfetch:apk") echo "fastfetch" ;;
+        "fastfetch:brew") echo "fastfetch" ;;
+        "fastfetch:dnf") echo "fastfetch" ;;
+        "fastfetch:pkg") echo "fastfetch" ;;
+
+        "nvim:apt") echo "MANUAL" ;;
+        "nvim:apk") echo "neovim" ;;
+        "nvim:brew") echo "neovim" ;;
+        "nvim:dnf") echo "neovim" ;;
+        "nvim:pkg") echo "neovim" ;;
+
+        "yazi:apt") echo "MANUAL" ;;
+        "yazi:apk") echo "yazi" ;;
+        "yazi:brew") echo "yazi" ;;
+        "yazi:dnf") echo "MANUAL" ;;
+        "yazi:pkg") echo "yazi" ;;
+
+        "zellij:apt") echo "MANUAL" ;;
+        "zellij:apk") echo "zellij" ;;
+        "zellij:brew") echo "zellij" ;;
+        "zellij:dnf") echo "zellij" ;;
+        "zellij:pkg") echo "zellij" ;;
+
+        "alacritty:apt") echo "MANUAL" ;;
+        "alacritty:apk") echo "alacritty" ;;
+        "alacritty:brew") echo "alacritty" ;;
+        "alacritty:dnf") echo "alacritty" ;;
+        "alacritty:pkg") echo "alacritty" ;;
+
+        "wezterm:apt") echo "MANUAL" ;;
+        "wezterm:apk") echo "wezterm" ;;
+        "wezterm:brew") echo "wezterm" ;;
+        "wezterm:dnf") echo "wezterm" ;;
+        "wezterm:pkg") echo "wezterm" ;;
+
+        *) echo "$program" ;;
+    esac
+}
+
 # Give the user a warning that the script is about to run in current directory
 start_install_script() {
-    echo -e "\033[43m\033[30mNOTE: Your are about to run this script in $PWD and the build files will also be downloaded here \033[0m"
-    echo -e "\033[43m\033[30m      any build files will also be downloaded here \033[0m"
-    echo -e "\033[43m\033[30mRecommended location: ~/Downloads/Builds \033[0m"
-    echo -e "\033[7m\033[1m - Do you wish to continue? [y/N] \033[0m"
+    echo -e "${WARNING}NOTE: Your are about to run this script in $PWD and the build files will also be downloaded here ${RESET_COLOR}"
+    echo -e "${WARNING}      any build files will also be downloaded here ${RESET_COLOR}"
+    echo -e "${WARNING}Recommended location: ~/Downloads/Builds ${RESET_COLOR}"
+    echo -e "${INVERTED} - Do you wish to continue? [y/N] ${RESET_COLOR}"
     read response
     if [[ $response == "y" || $response == "Y" ]]; then
         return
@@ -51,7 +124,7 @@ start_install_script() {
 
 check_network() {
     if ! curl -s --head --request GET https://github.com > /dev/null; then
-        echo -e "\033[41m\033[1m\033[37mError: No internet connection. Please check your network and try again. \033[0m"
+        echo -e "${ERROR}Error: No internet connection. Please check your network and try again. ${RESET_COLOR}"
         exit 1
     fi
 }
@@ -71,7 +144,7 @@ update_username() {
         echo "Username updated to $new_username"
         rm "${script_path}.temp"
     else
-        echo -e "\033[41m\033[1m\033[37mError: Failed to update username. Restoring backup... \033[0m"
+        echo -e "${ERROR}Error: Failed to update username. Restoring backup... ${RESET_COLOR}"
         mv "${script_path}.backup" "$script_path"
         exit 1
     fi
@@ -93,31 +166,25 @@ get_programs_list() {
     local platform="$1"
     local setup_type="$2"
     
-    # Common programs for all platforms
-    local common="curl git jq zsh vim tmux fastfetch"
+    # Start with core programs that work on all platforms
+    local computed_program_list="$programs_core"
     
-    # Platform-specific programs
-    case $platform in
-        "macos")
-            local platform_specific="neovim alacritty wezterm chafa btop lf cava zellij"
-            ;;
-        "linux")
-            local platform_specific="neovim alacritty wezterm chafa btop lf cava zellij"
-            ;;
-        "android")
-            local platform_specific="neovim chafa lf cava zellij"
-            ;;
-        *)
-            local platform_specific="neovim"
-            ;;
-    esac
-    
-    # Filter for server setup (remove GUI applications)
-    if [[ $setup_type == "server" ]]; then
-        platform_specific=$(echo $platform_specific | sed 's/ alacritty//g' | sed 's/ wezterm//g' | sed 's/ cava//g')
+    # Add desktop programs for desktop setup
+    if [[ $setup_type == "desktop" ]]; then
+        computed_program_list="$computed_program_list $programs_desktop"
+        
+        # Add full programs if requested (could be optional)
+        if [[ ${INSTALL_FULL:-0} == "1" ]]; then
+            computed_program_list="$computed_program_list $programs_full"
+        fi
     fi
     
-    echo "$common $platform_specific"
+    # Add platform-specific programs
+    if [[ $platform == "macos" ]]; then
+        computed_program_list="$computed_program_list $programs_macos"
+    fi
+    
+    echo "$computed_program_list"
 }
 
 # Function to get dotfiles list based on setup type
@@ -146,15 +213,14 @@ get_program_command() {
 # Function to check if program needs custom installer
 needs_custom_installer() {
     local program="$1"
-    local platform="$2"
+    local pm="$2"
     
-    case $program in
-        "neovim"|"alacritty"|"lf"|"zellij"|"wezterm"|"chafa")
-            if [[ $platform != "macos" && $PM != "pkg" ]]; then
-                return 0  # true - needs custom installer
-            fi
-            ;;
-    esac
+    local package_name=$(get_package_name "$program" "$pm")
+    
+    if [[ "$package_name" == "MANUAL" ]]; then
+        return 0  # true - needs custom installer
+    fi
+    
     return 1  # false - use package manager
 }
 
@@ -164,9 +230,9 @@ setup_type() {
     if [ -f .env ]; then
         source .env
         setup=$SETUP_SCRIPT_ENV
-        echo -e "\n\033[7m\033[1m##### Found $setup env in your setup! #####\033[0m"
+        echo -e "\n${INVERTED}##### Found $setup env in your setup! #####${RESET_COLOR}"
     else
-        echo -e "\n\033[7m\033[1m##### Please select the installation type: #####\033[0m"
+        echo -e "\n${INVERTED}##### Please select the installation type: #####${RESET_COLOR}"
         options=("Desktop" "Server")
         select opt in "${options[@]}"; do
             case $opt in
@@ -179,7 +245,7 @@ setup_type() {
                     break
                     ;;
                 *) 
-                    echo -e "\033[41m\033[1m\033[37mInvalid option. Please try again.\033[0m"
+                    echo -e "${ERROR}Invalid option. Please try again.${RESET_COLOR}"
                     ;;
             esac
         done
@@ -191,11 +257,11 @@ setup_type() {
     dotfiles_list=$(get_dotfiles_list "$setup")
 
     if [[ $setup == "desktop" ]]; then
-        echo -e "\n\033[7m\033[1m##### Running $setup version of the script! #####\033[0m"
+        echo -e "\n${INVERTED}##### Running $setup version of the script! #####${RESET_COLOR}"
     elif [[ $setup == "server" ]]; then
-        echo -e "\n\033[7m\033[1m##### Running $setup version of the script! #####\033[0m"
+        echo -e "\n${INVERTED}##### Running $setup version of the script! #####${RESET_COLOR}"
     else
-        echo -e "\033[41m\033[1m\033[37mError: Invalid option. Please run the script again and choose either 'desktop' or 'server'. Exiting... \033[0m"
+        echo -e "${ERROR}Error: Invalid option. Please run the script again and choose either 'desktop' or 'server'. Exiting... ${RESET_COLOR}"
         exit 1
     fi
 }
@@ -206,7 +272,7 @@ create_directory() {
     if [ ! -d "$dir" ]; then
         mkdir -p "$dir"
         if [ ! -d "$dir" ]; then
-            echo -e "\033[41m\033[1m\033[37mError: Failed to create directory. Exiting... \033[0m"
+            echo -e "${ERROR}Error: Failed to create directory. Exiting... ${RESET_COLOR}"
             exit 1
         fi
     fi
@@ -220,7 +286,7 @@ change_directory() {
     elif [ -d "$HOME/$dir" ]; then
         cd "$HOME/$dir"
     else
-        echo -e "\033[41m\033[1m\033[37mError: Directory does not exist. Exiting... \033[0m"
+        echo -e "${ERROR}Error: Directory does not exist. Exiting... ${RESET_COLOR}"
         exit 1
     fi
 }
@@ -230,7 +296,7 @@ clone_or_update_repo() {
     if [ ! -d "dotfiles" ]; then
         git clone https://github.com/$username/dotfiles.git
         if [ $? -ne 0 ]; then
-            echo -e "\033[41m\033[1m\033[37mError: Failed to clone repository, check internet connection, make sure you have git installed, that the repo exists or that you have the right permissions set then try again. Exiting... \033[0m"
+            echo -e "${ERROR}Error: Failed to clone repository, check internet connection, make sure you have git installed, that the repo exists or that you have the right permissions set then try again. Exiting... ${RESET_COLOR}"
             exit 1
         fi
         cd dotfiles
@@ -239,7 +305,7 @@ clone_or_update_repo() {
         cd dotfiles
         git pull
         if [ $? -ne 0 ] && [ $testing -ne 0 ]; then
-            echo -e "\033[41m\033[1m\033[37mError: Failed to update repository, check internet connection, make sure you have git installed, that the repo exists or that you have the right permissions set then try again. Exiting... \033[0m"
+            echo -e "${ERROR}Error: Failed to update repository, check internet connection, make sure you have git installed, that the repo exists or that you have the right permissions set then try again. Exiting... ${RESET_COLOR}"
             exit 1
         fi
         echo "SETUP_SCRIPT_ENV=$setup" > .env
@@ -249,7 +315,7 @@ clone_or_update_repo() {
 # Function to change .gitconfig file after cloning or updating the repo
 change_gitconfig() {
     if [ -f .gitconfig.backup ]; then
-        echo -e "\033[43m\033[30mNOTE: You probably already ran the install script and changed the .gitconfig file! \033[0m"
+        echo -e "${WARNING}NOTE: You probably already ran the install script and changed the .gitconfig file! ${RESET_COLOR}"
         return
     fi
     local email="$(curl --silent "https://api.github.com/users/$username" | jq -r .id)+$email"
@@ -266,10 +332,10 @@ change_gitconfig() {
 # Function to create Development repo or move into desired repo branch, clone or update the repository
 setup_development_repo() {
     if [ -d "$HOME/Development/$username" ]; then
-        echo -e "\n\033[7m\033[1m### You already have ~/Development/$username dir, going \$HOME(~/) \033[0m"
+        echo -e "\n${INVERTED}### You already have ~/Development/$username dir, going \$HOME(~/) ${RESET_COLOR}"
         cd "$HOME"
     else
-        echo -e "\033[7m\033[1m### Would you like to create a new Development directory ~/Development/$username? [y/n] \033[0m"
+        echo -e "${INVERTED}### Would you like to create a new Development directory ~/Development/$username? [y/n] ${RESET_COLOR}"
         read yn
         case $yn in
             [Yy]* ) 
@@ -280,7 +346,7 @@ setup_development_repo() {
             [Nn]* ) 
                 read -p "Please enter the full path of the existing directory where you'd like to clone the dotfiles: " dir
                 change_directory "$dir";;
-            * ) echo -e "\033[41m\033[1m\033[37mError: Please answer yes or no, retry the script. Exiting... \033[0m"
+            * ) echo -e "${ERROR}Error: Please answer yes or no, retry the script. Exiting... ${RESET_COLOR}"
                 exit 1;;
         esac
     fi
@@ -293,7 +359,7 @@ setup_development_repo() {
 check_directory() {
     local current_dir=$(basename "$(pwd)")
     if [ "$current_dir" != "dotfiles" ]; then
-        echo -e "\033[41m\033[1m\033[37mError: Run this from the dotfiles repo \033[0m"
+        echo -e "${ERROR}Error: Run this from the dotfiles repo ${RESET_COLOR}"
         exit 1
     fi
 }
@@ -361,14 +427,14 @@ copy_files() {
     if [ ! -d "$HOME/$(dirname $file)" ]; then
         mkdir -p "$HOME/$(dirname $file)"
         if [ $? -ne 0 ]; then
-            echo -e "\033[41mError: Failed to make directory for $file! \033[0m"
+            echo -e "\033[41mError: Failed to make directory for $file! ${RESET_COLOR}"
         else
             echo "Made directory: $HOME/$(dirname $file)"
         fi
     fi
     cp "$file" "$HOME/$file"
     if [ $? -ne 0 ]; then
-        echo -e "\033[41m\033[1m\033[37mError: Failed to copy file locally! \033[0m"
+        echo -e "${ERROR}Error: Failed to copy file locally! ${RESET_COLOR}"
     fi
     echo " -  Local ~/$file has been ${goal}d with the remote one."
 }
@@ -390,13 +456,13 @@ handle_differences() {
     local file=$1
     local cmpResult=$2
     if [ $cmpResult -eq 0 ]; then
-        echo -e "\033[7m\033[1m### $file files are identical \033[0m"
+        echo -e "${INVERTED}### $file files are identical ${RESET_COLOR}"
     elif [ $cmpResult -eq 1 ];then
-        echo -e "\033[7m\033[1m### $file files are different \033[0m"
+        echo -e "${INVERTED}### $file files are different ${RESET_COLOR}"
         view_differences "$file"
         replace_files "$file" "$cmpResult" "replace"
     else
-        echo -e "\033[7m\033[1m### The local file ~/$file does not exist! \033[0m"
+        echo -e "${INVERTED}### The local file ~/$file does not exist! ${RESET_COLOR}"
         replace_files "$file" "$cmpResult" "create"
     fi
 }
@@ -418,7 +484,7 @@ brew_on_mac() {
     if command -v brew &> /dev/null; then
         PM="brew"
     else
-        echo -e "\033[7m\033[1m### Your Mac doesn't have brew, would you like to install it? [y/N] \033[0m"
+        echo -e "${INVERTED}### Your Mac doesn't have brew, would you like to install it? [y/N] ${RESET_COLOR}"
         read yn
         if [[ $yn == "y" || $yn == "Y" ]]; then
             /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -427,7 +493,7 @@ brew_on_mac() {
             eval "$(/opt/homebrew/bin/brew shellenv)"
             PM="brew"
         else
-            echo -e "\033[43m\033[30mNote: Not using a package manager with this script might cause problems, skipping to dotfile replacement... \033[0m"
+            echo -e "${WARNING}Note: Not using a package manager with this script might cause problems, skipping to dotfile replacement... ${RESET_COLOR}"
             replace_dotfiles
             exit 0
         fi
@@ -440,13 +506,17 @@ assign_package_manager() {
         brew_on_mac
     elif [[ "$device" = "Android" ]]; then
         PM="pkg"
+    elif command -v dnf &> /dev/null; then
+        PM="dnf"
+    elif command -v apk &> /dev/null; then
+        PM="apk"
     elif command -v apt &> /dev/null; then
         PM="apt"
     else
-        echo -e "\033[41m\033[1m\033[37mError: No supported package manager found. Exiting... \033[0m"
+        echo -e "${ERROR}Error: No supported package manager found. Exiting... ${RESET_COLOR}"
         exit 1
     fi
-    echo -e "\033[7m\033[1m#### Your package manager is set to $PM #### \033[0m"
+    echo -e "${INVERTED}#### Your package manager is set to $PM #### ${RESET_COLOR}"
 }
 
 # Program installation functions
@@ -485,7 +555,7 @@ alacritty_installer() {
             cp extra/completions/_alacritty ${ZDOTDIR:-~}/.zsh_functions/_alacritty
             cd $current_path
             ;;
-        *) echo -e "\033[43m\033[30mNOTE: Package manager not yet supported \033[0m";;
+        *) echo -e "${WARNING}NOTE: Package manager not yet supported ${RESET_COLOR}";;
     esac
 }
 
@@ -512,24 +582,18 @@ neovim_installer() {
                 cd $current_path
             fi
             ;;
-        *) echo -e "\033[43m\033[30mNOTE: Package manager not yet supported \033[0m";;
+        *) echo -e "${WARNING}NOTE: Package manager not yet supported ${RESET_COLOR}";;
     esac
 }
 
-# Install lf file manager by downloading the appropriate binary for the system architecture
-lf_installer() {
-    local lf_os="null"
-    if [[ $arch = "x86_64" ]];then
-        lf_os="amd64"
-    elif [[ $arch = "aarch64" ]];then
-        lf_os="arm64"
-    else
-        echo -e "\033[43m\033[30mNOTE: Architecture not supported by this script at this time, skipping... \033[0m"
-        return
-    fi
-    curl -fLo "lf-linux-$lf_os.tar.gz" "https://github.com/gokcehan/lf/releases/latest/download/lf-linux-$lf_os.tar.gz"
-    tar -xzf lf-linux-$lf_os.tar.gz
-    sudo mv lf /usr/local/bin
+# Install yazi file manager by downloading the appropriate binary for the system architecture
+yazi_installer() {
+    curl -fLo "yazi-$arch-unknown-linux-gnu.zip" "https://github.com/sxyazi/yazi/releases/latest/download/yazi-$arch-unknown-linux-gnu.zip"
+    unzip "yazi-$arch-unknown-linux-gnu.zip"
+    cd yazi-$arch-unknown-linux-gnu
+    mkdir -p $HOME/.local/bin/
+    cp yazi $HOME/.local/bin
+    cd $current_path
 }
 
 # Install zellij binary for linux
@@ -582,38 +646,40 @@ chafa_installer(){
 # This function iterates through the programs list and offers to install each one
 # It uses specialized installers for certain programs and falls back to package manager for others
 programs_installer() {
+    local platform=$(detect_platform)
+    
     for program in $programs_list
     do
         local command_name=$(get_program_command "$program")
-        local platform=$(detect_platform)
+        local package_name=$(get_package_name "$program" "$PM")
 
         if command -v $command_name &> /dev/null; then
-            echo -e "\033[7m\033[1m### You already have $program installed \033[0m"
-        elif [[ $device == "Android" && ( $program == "alacritty" || $program == "wezterm"  || $program == "btop" ) ]]; then
-            echo "Skip!" &> /dev/null
+            echo -e "${INVERTED}### You already have $program installed ${RESET_COLOR}"
+        elif [[ $device == "Android" && ( $program == "alacritty" || $program == "wezterm"  || $program == "cava" ) ]]; then
+            echo "Skipping $program on Android" &> /dev/null
         else
-            echo -e "\033[7m\033[1m### Would you like to install $program? [y/N] \033[0m"
+            echo -e "${INVERTED}### Would you like to install $program? [y/N] ${RESET_COLOR}"
             read yn
             case $yn in
                 [Yy]* ) 
-                    if needs_custom_installer "$program" "$platform"; then
+                    if needs_custom_installer "$program" "$PM"; then
                         case $program in
-                            "neovim") neovim_installer ;;
+                            "nvim") neovim_installer ;;
                             "alacritty") alacritty_installer ;;
-                            "lf") lf_installer ;;
+                            "yazi") yazi_installer ;;
                             "zellij") zellij_installer ;;
                             "wezterm") wezterm_installer ;;
                             "chafa") chafa_installer ;;
                         esac
                     else
                         if [[ $PM == "brew" || $PM == "pkg" ]]; then
-                            $PM install $program
+                            $PM install $package_name
                         else
-                            sudo $PM install $program
+                            sudo $PM install $package_name
                         fi
                         
                         if [ $? -ne 0 ]; then
-                            echo -e "\033[41m\033[1m\033[37mError: Failed to install $program with $PM \033[0m"
+                            echo -e "${ERROR}Error: Failed to install $program with $PM ${RESET_COLOR}"
                             exit 1
                         fi
                     fi
@@ -629,7 +695,7 @@ programs_installer() {
 # This is important since many of the dotfiles assume zsh is being used
 change_shell() {
     if [[ "$(basename $SHELL)" != "zsh" ]]; then
-        echo -e "\033[7m\033[1m### Do you want to change your shell to zsh? (most things in this script won't work if you don't) [Y/n] \033[0m"
+        echo -e "${INVERTED}### Do you want to change your shell to zsh? (most things in this script won't work if you don't) [Y/n] ${RESET_COLOR}"
         read yn
         case $yn in
             [Nn]* )
@@ -644,12 +710,12 @@ change_shell() {
 nerd_font_installer() {
     fc-list | grep "$nerd_font Nerd Font Mono" > /dev/null
     if [ $? -eq 0 ]; then
-        echo -e "\033[7m\033[1m### You already have $nerd_font Nerd Font installed \033[0m"
+        echo -e "${INVERTED}### You already have $nerd_font Nerd Font installed ${RESET_COLOR}"
     elif [[ $PM == 'brew' ]]; then
-        echo -e "\033[7m\033[1m### Installing $nerd_font Nerd Font \033[0m"
+        echo -e "${INVERTED}### Installing $nerd_font Nerd Font ${RESET_COLOR}"
         brew install --cask font-$nerd_font_package-nerd-font
     else
-        echo -e "\033[7m\033[1m### Downloading and installing $nerd_font Nerd Font \033[0m"
+        echo -e "${INVERTED}### Downloading and installing $nerd_font Nerd Font ${RESET_COLOR}"
         mkdir nerd-font && cd nerd-font
         curl -fLo "$nerd_font.tar.xz" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/$nerd_font.tar.xz"
         tar -xf $nerd_font.tar.xz
@@ -672,13 +738,13 @@ install_script() {
     check_network
     start_install_script
 
-    echo -e "\033[7m\033[1m### Would you like to change the default username ($username) for this script? [y/N] \033[0m"
+    echo -e "${INVERTED}### Would you like to change the default username ($username) for this script? [y/N] ${RESET_COLOR}"
     read yn
     case $yn in
         [Yy]* )
             read -p "Enter your GitHub username: " new_username
             update_username "$new_username"
-            echo -e "\033[43mNOTE: Username updated. Please rerun the script for changes to take effect: ./install.sh \033[0m"
+            echo -e "\033[43mNOTE: Username updated. Please rerun the script for changes to take effect: ./install.sh ${RESET_COLOR}"
             exit 0
             ;;
         [Nn]* | * )

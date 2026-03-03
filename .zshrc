@@ -286,7 +286,7 @@ fi
 # ====================================== #
 
 if [ "$device" != "Android" ]; then
-    eval "$(/Users/enfloreshernandez/.local/bin/mise activate zsh)"
+    eval "$(~/.local/bin/mise activate zsh)"
 
     # ====================================== #
     # === mise checker and installer     === #
@@ -385,7 +385,17 @@ alias tunlock="tmux setw prefix C-t"
 alias nowork="figlet -f doh -w 210 COMPLETED | lolcat -F 0.5"
 alias shistory="cat ~/.zsh_history | fzf | copy"
 # choose between yazi and lf as I transition
-alias lf='echo "Choose: [l]f or [y]azi (yazi)?" && read -k1 choice && echo && case $choice in l) command lf;; y) yazi;; *) echo "Invalid choice";; esac'
+lf() {
+    echo "Choose: [l]f or [y]azi (yazi)?" 
+    read -k1 choice 
+    echo 
+    case $choice in 
+        l) command lf "$@";; 
+        y) yazi "$@";; 
+        *) echo "Invalid choice";; 
+    esac
+}
+alias lf=lf
 
 mount_container() {
     container_path=$1
@@ -484,7 +494,13 @@ alias gs="git status"
 alias gb="git branch"
 alias gd="git diff"
 alias ga="git add -p"
-alias gc='f() { git commit -m $1 };f'
+# alias gc='f() { git commit -m $1 };f' #This alias has served me well but inline env vars do not work
+gc() {
+    git commit -m "$*"
+}
+gf() {
+    git fetch origin "$1":refs/remotes/origin/"$1"
+}
 alias gpull='f() { git pull origin $1 || git pull portable $1 || git pull backup $1 }; f'
 alias gpush='f() { git push origin $1 || git push portable $1 || git push backup $1 }; f'
 alias gedit='nvim $(git diff --name-only)'
