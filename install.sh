@@ -39,13 +39,13 @@ GREEN="\033[32m"
 programs_list='curl git jq file tput zsh chafa fastfetch vim btop tmux nvim yazi cava alacritty zellij wezterm'
 
 # Core programs (essential for all environments)
-programs_core='curl git jq file tput zsh vim btop tmux yazi'
+programs_core='curl git jq file tput zsh chafa vim btop tmux yazi'
 
 # Development tools for desktop environments
-programs_desktop='nvim alacritty chafa zellij'
+programs_desktop='nvim alacritty zellij'
 
 # Full/Heavy programs that are not necessary for devs, just personal preference
-programs_full='fastfetch cava wezterm'
+programs_full='fastfetch cava wezterm kmonad'
 
 # Mac specific programs
 programs_macos='aerospace raycast'
@@ -98,7 +98,8 @@ get_package_name() {
 
         "alacritty:apt") echo "MANUAL" ;;
         "alacritty:apk") echo "alacritty" ;;
-        "alacritty:brew") echo "alacritty" ;;
+        # Alacritty is no longer supported
+        "alacritty:brew") echo "-n alacritty" ;;
         "alacritty:dnf") echo "alacritty" ;;
         "alacritty:pkg") echo "alacritty" ;;
 
@@ -107,6 +108,12 @@ get_package_name() {
         "wezterm:brew") echo "wezterm" ;;
         "wezterm:dnf") echo "wezterm" ;;
         "wezterm:pkg") echo "wezterm" ;;
+
+        "kmonad:apt") echo "MANUAL" ;;
+        "kmonad:apk") echo "MANUAL" ;;
+        "kmonad:brew") echo "MANUAL" ;;
+        "kmonad:dnf") echo "MANUAL" ;;
+        "kmonad:pkg") echo "MANUAL" ;;
 
         "aerospace:brew") echo "--cask nikitabobko/tap/aerospace" ;;
 
@@ -638,6 +645,40 @@ wezterm_installer() {
     cd $current_path
 }
 
+# Use provided binary for x86_64 systems and build for macOS
+kmonad_installer() {
+    if [[ $os == "Linux" ]]; then
+        curl -fLO "https://github.com/kmonad/kmonad/releases/download/latest/kmonad"
+        chmod +x kmonad
+        mkdir -p ~/.local/bin
+        cp kmonad $HOME/.local/bin
+        echo "KMonad installed to ~/.local/bin/kmonad"
+    elif [[ $os == "Darwin" ]]; then
+        brew install --cask karabiner-elements
+        command -v stack &> /dev/null
+        if [ $? -ne 0 ]; then
+            echo "Installing Haskell Stack..."
+            brew install haskell-stack
+        fi
+        git clone --recursive https://github.com/kmonad/kmonad.git
+        cd kmonad/
+        # SKIP THIS FOR NOW
+        if [[ $arch == "x86_64" ]]; then
+            open c_src/mac/Karabiner-DriverKit-VirtualHIDDevice/dist/Karabiner-DriverKit-VirtualHIDDevice-3.1.0.pkg
+            /Applications/.Karabiner-VirtualHIDDevice-Manager.app/Contents/MacOS/Karabiner-VirtualHIDDevice-Manager activate
+        fi
+
+        stack install --flag kmonad:dext
+        stack build --flag kmonad:dext --extra-include-dirs=c_src/mac/Karabiner-DriverKit-VirtualHIDDevice/include/pqrs/karabiner/driverkit:c_src/mac/Karabiner-DriverKit-VirtualHIDDevice/src/Client/vendor/include
+        ## working after installing ghc:
+        stack install --systme-ghc --flag kmonad:dext
+
+        # ln -s "$PWD/.stack-work/install/$arch-osx/*/9.4.8/bin/kmonad /usr/local/bin/kmonad"
+
+        cd "$current_path"
+    fi
+}
+
 # WIP
 chafa_installer(){
     sudo $PM install build-essential make autoconf automake libtool pkg-config libglib2.0-dev libfreetype6-dev libjpeg-dev librsvg2-dev libtiff5-dev libwebp-dev gtk-doc-tools
@@ -680,8 +721,9 @@ programs_installer() {
                             "alacritty") alacritty_installer ;;
                             "yazi") yazi_installer ;;
                             "zellij") zellij_installer ;;
-                            "wezterm") wezterm_installer ;;
                             "chafa") chafa_installer ;;
+                            "wezterm") wezterm_installer ;;
+                            "kmonad") kmonad_installer ;;
                         esac
                     else
                         if [[ $PM == "brew" || $PM == "pkg" ]]; then
