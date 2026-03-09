@@ -1,5 +1,5 @@
 # EnocFlores <https://github.com/EnocFlores>
-# Last Change: 2025.12.20
+# Last Change: 2026.03.09
 
 
 
@@ -303,6 +303,7 @@ if [ "$device" != "Android" ]; then
         fi
     else
         PROGRAM_CHECKS="$PROGRAM_CHECKS\nmise is installed and activated"
+        eval "$(mise activate zsh --shims)" # this sets up non-interactive sessions
     fi
 
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
@@ -473,6 +474,7 @@ if [ "$os" = "Linux" ]; then
 elif [ "$os" = "Darwin" ]; then
     PROGRAM_CHECKS="Your OS is macOS$PROGRAM_CHECKS"
     export DOCKER_HOST="unix://${HOME}/.colima/docker.sock"
+    export PATH="/opt/homebrew/opt/imagemagick-full/bin:$PATH"
     alias copy="pbcopy"
 else
     PROGRAM_CHECKS="The operating system is not recognized$PROGRAM_CHECKS"
