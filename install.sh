@@ -199,7 +199,7 @@ get_dotfiles_list() {
     
     local common_dotfiles=".gitconfig .gitignore_global .zshrc .vimrc .config/btop/btop.conf .config/btop/themes/perox-enurple.theme .tmux.conf .config/nvim/init.lua .config/lf/lfrc .config/lf/previewer.sh"
     
-    if [[ $setup_type == "desktop" ]]; then
+    if [[ $setup_type == "desktop" || $setup_type == "desktop-full" ]]; then
         local desktop_dotfiles=".config/cava/config .config/alacritty/alacritty.toml .config/wezterm/wezterm.lua .config/yazi/theme.toml .config/zellij/config.kdl .config/kmonad.kdb"
         echo "$common_dotfiles $desktop_dotfiles"
     else
@@ -769,7 +769,7 @@ install_script() {
     assign_package_manager
 
     check_network
-    if [[ $setup_type == "desktop" || $setup_type == "desktop-full" ]]; then
+    if [[ $setup == "desktop" || $setup == "desktop-full" ]]; then
         programs_installer
         change_shell
         nerd_font_installer
