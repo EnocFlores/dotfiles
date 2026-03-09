@@ -769,7 +769,7 @@ install_script() {
     assign_package_manager
 
     check_network
-    if [[ $setup == "desktop" ]]; then
+    if [[ $setup_type == "desktop" || $setup_type == "desktop-full" ]]; then
         programs_installer
         change_shell
         nerd_font_installer
