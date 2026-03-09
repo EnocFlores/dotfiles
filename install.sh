@@ -652,29 +652,21 @@ kmonad_installer() {
         chmod +x kmonad
         mkdir -p ~/.local/bin
         cp kmonad $HOME/.local/bin
-        echo "KMonad installed to ~/.local/bin/kmonad"
+        echo -e "${WARNING}KMonad installed to ~/.local/bin/kmonad${RESET_COLOR}"
     elif [[ $os == "Darwin" ]]; then
         brew install --cask karabiner-elements
         command -v stack &> /dev/null
         if [ $? -ne 0 ]; then
-            echo "Installing Haskell Stack..."
+            echo "${WARNING}Installing Haskell Stack...${RESET_COLOR}"
             brew install haskell-stack
         fi
         git clone --recursive https://github.com/kmonad/kmonad.git
         cd kmonad/
-        # SKIP THIS FOR NOW
-        if [[ $arch == "x86_64" ]]; then
-            open c_src/mac/Karabiner-DriverKit-VirtualHIDDevice/dist/Karabiner-DriverKit-VirtualHIDDevice-3.1.0.pkg
-            /Applications/.Karabiner-VirtualHIDDevice-Manager.app/Contents/MacOS/Karabiner-VirtualHIDDevice-Manager activate
-        fi
-
+        echo -e "${WARNING}This will take a while, please be patient...${RESET_COLOR}"
         stack install --flag kmonad:dext
-        stack build --flag kmonad:dext --extra-include-dirs=c_src/mac/Karabiner-DriverKit-VirtualHIDDevice/include/pqrs/karabiner/driverkit:c_src/mac/Karabiner-DriverKit-VirtualHIDDevice/src/Client/vendor/include
-        ## working after installing ghc:
-        stack install --systme-ghc --flag kmonad:dext
-
-        # ln -s "$PWD/.stack-work/install/$arch-osx/*/9.4.8/bin/kmonad /usr/local/bin/kmonad"
-
+        echo -e "${WARNING}Opening Karabiner-Elements to finish daemon permissions setup, please follow the instructions there to allow kmonad to control your keyboard, then come back to the terminal and press enter to continue the installation${RESET_COLOR}"
+        open -a Karabiner-Elements
+        read -p "Press enter to continue the installation after giving the necessary permissions to kmonad in Karabiner-Elements"
         cd "$current_path"
     fi
 }
