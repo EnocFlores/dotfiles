@@ -1,6 +1,6 @@
 #!/bin/bash
 # EnocFlores <https://github.com/EnocFlores>
-# Last Change: 2026.02.23
+# Last Change: 2026.03.09
 
 # This script will install/check necessary programs to setup and use these dotfiles
 
@@ -104,6 +104,8 @@ get_package_name() {
         "wezterm:dnf") echo "wezterm" ;;
         "wezterm:pkg") echo "wezterm" ;;
 
+        "aerospace:brew") echo "--cask nikitabobko/tap/aerospace" ;;
+
         *) echo "$program" ;;
     esac
 }
@@ -170,11 +172,11 @@ get_programs_list() {
     local computed_program_list="$programs_core"
     
     # Add desktop programs for desktop setup
-    if [[ $setup_type == "desktop" ]]; then
+    if [[ $setup == "desktop" || $setup == "desktop-full" ]]; then
         computed_program_list="$computed_program_list $programs_desktop"
         
-        # Add full programs if requested (could be optional)
-        if [[ ${INSTALL_FULL:-0} == "1" ]]; then
+        # Add full programs if requested choice was desktop-full
+        if [[ $setup == "desktop-full" ]]; then
             computed_program_list="$computed_program_list $programs_full"
         fi
     fi
@@ -232,23 +234,29 @@ setup_type() {
         setup=$SETUP_SCRIPT_ENV
         echo -e "\n${INVERTED}##### Found $setup env in your setup! #####${RESET_COLOR}"
     else
-        echo -e "\n${INVERTED}##### Please select the installation type: #####${RESET_COLOR}"
-        options=("Desktop" "Server")
-        select opt in "${options[@]}"; do
-            case $opt in
-                "Desktop")
-                    setup="desktop"
-                    break
-                    ;;
-                "Server")
-                    setup="server"
-                    break
-                    ;;
-                *) 
-                    echo -e "${ERROR}Invalid option. Please try again.${RESET_COLOR}"
-                    ;;
-            esac
-        done
+        echo -e "${INVERTED}### Choose your setup type: ${RESET_COLOR}"
+        echo -e "  ${GREEN}1${RESET_COLOR}) Desktop + Full programs (includes heavy programs like fastfetch, cava, wezterm)"
+        echo -e "  ${GREEN}2${RESET_COLOR}) Desktop (full setup with GUI programs)"
+        echo -e "  ${GREEN}3${RESET_COLOR}) Server (minimal setup without GUI)"
+        echo ""
+        echo -e "${YELLOW}Enter choice [1-3]: ${RESET_COLOR}"
+        
+        read choice
+        case $choice in
+            1)
+                echo "desktop-full"
+                ;;
+            2)
+                echo "desktop"
+                ;;
+            3)
+                echo "server"
+                ;;
+            *)
+                echo -e "${RED}Invalid choice. Defaulting to server.${RESET_COLOR}"
+                echo "server"
+                ;;
+        esac
     fi
 
     # Set platform and update program/dotfile lists
@@ -489,8 +497,8 @@ brew_on_mac() {
         if [[ $yn == "y" || $yn == "Y" ]]; then
             /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
             echo >> $HOME/.zprofile
-            echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> $HOME/.zprofile
-            eval "$(/opt/homebrew/bin/brew shellenv)"
+            echo 'eval "$(/opt/homebrew/bin/brew shellenv zsh)"' >> $HOME/.zprofile
+            eval "$(/opt/homebrew/bin/brew shellenv zsh)"
             PM="brew"
         else
             echo -e "${WARNING}Note: Not using a package manager with this script might cause problems, skipping to dotfile replacement... ${RESET_COLOR}"
