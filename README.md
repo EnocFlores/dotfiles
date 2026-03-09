@@ -245,12 +245,23 @@ The programs will be needed to use these dotfiles and their plugins
 
 > [!WARNING]  
 > It is dangerous to download random scripts from the internet without understanding them, proceed with caution
+Install script from latest release:
+```sh
+curl -O https://raw.githubusercontent.com/EnocFlores/dotfiles/latest/install.sh || wget https://raw.githubusercontent.com/EnocFlores/dotfiles/latest/install.sh
+chmod +x install.sh
+./install.sh
+rm install.sh
+```
+
+<details>
+<summary>Install script from main</summary>
 ```sh
 curl -O https://raw.githubusercontent.com/EnocFlores/dotfiles/main/install.sh || wget https://raw.githubusercontent.com/EnocFlores/dotfiles/main/install.sh
 chmod +x install.sh
 ./install.sh
 rm install.sh
 ```
+</details>
 
 ### `update.sh` script
 Once this repository is downloaded, cd into it and you can run this script to update your dotfiles if there have been new updates to the remote dotfiles repository
