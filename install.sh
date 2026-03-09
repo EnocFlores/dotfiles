@@ -31,6 +31,10 @@ ERROR="\033[41m\033[1m\033[37m"
 INVERTED="\033[7m\033[1m"
 RESET_COLOR="\033[0m"
 
+RED="\033[31m"
+YELLOW="\033[33m"
+GREEN="\033[32m"
+
 # The programs_list contains all software packages that will be offered for installation
 programs_list='curl git jq file tput zsh chafa fastfetch vim btop tmux nvim yazi cava alacritty zellij wezterm'
 
@@ -172,11 +176,11 @@ get_programs_list() {
     local computed_program_list="$programs_core"
     
     # Add desktop programs for desktop setup
-    if [[ $setup == "desktop" || $setup == "desktop-full" ]]; then
+    if [[ $setup_type == "desktop" || $setup_type == "desktop-full" ]]; then
         computed_program_list="$computed_program_list $programs_desktop"
         
         # Add full programs if requested choice was desktop-full
-        if [[ $setup == "desktop-full" ]]; then
+        if [[ $setup_type == "desktop-full" ]]; then
             computed_program_list="$computed_program_list $programs_full"
         fi
     fi
@@ -244,17 +248,17 @@ setup_type() {
         read choice
         case $choice in
             1)
-                echo "desktop-full"
+                setup="desktop-full"
                 ;;
             2)
-                echo "desktop"
+                setup="desktop"
                 ;;
             3)
-                echo "server"
+                setup="server"
                 ;;
             *)
                 echo -e "${RED}Invalid choice. Defaulting to server.${RESET_COLOR}"
-                echo "server"
+                setup="server"
                 ;;
         esac
     fi
@@ -264,7 +268,7 @@ setup_type() {
     programs_list=$(get_programs_list "$platform" "$setup")
     dotfiles_list=$(get_dotfiles_list "$setup")
 
-    if [[ $setup == "desktop" ]]; then
+    if [[ $setup == "desktop" || $setup == "desktop-full" ]]; then
         echo -e "\n${INVERTED}##### Running $setup version of the script! #####${RESET_COLOR}"
     elif [[ $setup == "server" ]]; then
         echo -e "\n${INVERTED}##### Running $setup version of the script! #####${RESET_COLOR}"
