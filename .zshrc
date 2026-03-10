@@ -376,7 +376,7 @@ alias ls="ls --color=auto"
 alias cls="clear"
 alias python="python3"
 alias diff="diff --color"
-alias nvim="mise exec node@22.19.0 -- nvim"
+alias nvim="mise exec node@22.14 -- nvim"
 alias vims="nvim -S Session.vim"
 alias icat="wezterm imgcat"
 alias top="btop -p 3"
@@ -396,7 +396,6 @@ lf() {
         *) echo "Invalid choice";; 
     esac
 }
-alias lf=lf
 
 mount_container() {
     container_path=$1
