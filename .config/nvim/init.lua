@@ -136,7 +136,7 @@ require('lazy').setup({
           -- cvs = false,
         },
         copilot_node_command = 'node', -- Node.js version must be > 18.x
-        copilot_model = "gpt-4o-copilot",
+        copilot_model = "gpt-41-copilot",
         server_opts_overrides = {},
       })
       -- require("copilot.suggestion").toggle_auto_trigger()
@@ -208,7 +208,7 @@ require('lazy').setup({
       mappings = {
         complete = {
           detail = 'Use @<Tab> or /<Tab> for options.',
-          insert ='<Tab>',
+          insert ='<M-Tab>'
         },
         close = {
           normal = 'q',
@@ -261,6 +261,9 @@ require('lazy').setup({
 
   -- VScode Language server
   {'neoclide/coc.nvim', branch = 'release'},
+
+  -- Add icon support for which-key and other plugins
+  {'nvim-tree/nvim-web-devicons', lazy = true },
 
   -- Git related plugins
   'tpope/vim-fugitive',
@@ -692,7 +695,11 @@ vim.keymap.set('n', '<leader>tw', ':set wrap!<CR>', { desc = '[T]oggle [W]rap', 
 -- See `:help nvim-treesitter`
 -- Defer Treesitter setup after first render to improve startup time of 'nvim {filename}'
 vim.defer_fn(function()
-  require('nvim-treesitter.configs').setup {
+  local status_ok, treesitter_configs = pcall(require, 'nvim-treesitter.configs')
+  if not status_ok then
+    return
+  end
+  treesitter_configs.setup {
     -- Add languages to be installed here that you want installed for treesitter
     ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash', 'diff', 'terraform' },
 
@@ -759,48 +766,48 @@ end, 0)
 
 -- [[ Configure LSP ]]
 --  This function gets run when an LSP connects to a particular buffer.
-local on_attach = function(_, bufnr)
+-- local on_attach = function(_, bufnr)
   -- NOTE: Remember that lua is a real programming language, and as such it is possible
   -- to define small helper and utility functions so you don't have to repeat yourself
   -- many times.
   --
   -- In this case, we create a function that lets us more easily define mappings specific
   -- for LSP related items. It sets the mode, buffer and description for us each time.
-  local nmap = function(keys, func, desc)
-    if desc then
-      desc = 'LSP: ' .. desc
-    end
-
-    vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
-  end
-
-  nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
-  nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
-
-  nmap('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
-  nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
-  nmap('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
-  nmap('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
-  nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
-  nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
-
-  -- See `:help K` for why this keymap
-  nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
-  nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
-
-  -- Lesser used LSP functionality
-  nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
-  nmap('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
-  nmap('<leader>wr', vim.lsp.buf.remove_workspace_folder, '[W]orkspace [R]emove Folder')
-  nmap('<leader>wl', function()
-    print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-  end, '[W]orkspace [L]ist Folders')
-
-  -- Create a command `:Format` local to the LSP buffer
-  vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
-    vim.lsp.buf.format()
-  end, { desc = 'Format current buffer with LSP' })
-end
+--   local nmap = function(keys, func, desc)
+--     if desc then
+--       desc = 'LSP: ' .. desc
+--     end
+--
+--     vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
+--   end
+--
+--   nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
+--   nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
+--
+--   nmap('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
+--   nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
+--   nmap('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
+--   nmap('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
+--   nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
+--   nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+--
+--   -- See `:help K` for why this keymap
+--   nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
+--   nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
+--
+--   -- Lesser used LSP functionality
+--   nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
+--   nmap('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
+--   nmap('<leader>wr', vim.lsp.buf.remove_workspace_folder, '[W]orkspace [R]emove Folder')
+--   nmap('<leader>wl', function()
+--     print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+--   end, '[W]orkspace [L]ist Folders')
+--
+--   -- Create a command `:Format` local to the LSP buffer
+--   vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
+--     vim.lsp.buf.format()
+--   end, { desc = 'Format current buffer with LSP' })
+-- end
 
 -- document existing key chains
 local wk = require('which-key')
@@ -821,7 +828,6 @@ wk.add({
 wk.add({
   {
     mode = { 'v' },
-    { '<leader>', group = 'VISUAL <leader>' },
     { '<leader>h', group = 'Git [H]unk' },
   }
 })
@@ -839,23 +845,23 @@ require('mason-lspconfig').setup()
 --
 --  If you want to override the default filetypes that your language server will attach to you can
 --  define the property 'filetypes' to the map in question.
-local servers = {
-  -- clangd = {},
-  -- gopls = {},
-  -- pyright = {},
-  -- rust_analyzer = {},
-  -- tsserver = {},
-  -- html = { filetypes = { 'html', 'twig', 'hbs'} },
-
-  lua_ls = {
-    Lua = {
-      workspace = { checkThirdParty = false },
-      telemetry = { enable = false },
-      -- NOTE: toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-      -- diagnostics = { disable = { 'missing-fields' } },
-    },
-  },
-}
+-- local servers = {
+--   -- clangd = {},
+--   -- gopls = {},
+--   -- pyright = {},
+--   -- rust_analyzer = {},
+--   -- tsserver = {},
+--   -- html = { filetypes = { 'html', 'twig', 'hbs'} },
+--
+--   lua_ls = {
+--     Lua = {
+--       workspace = { checkThirdParty = false },
+--       telemetry = { enable = false },
+--       -- NOTE: toggle below to ignore Lua_LS's noisy `missing-fields` warnings
+--       -- diagnostics = { disable = { 'missing-fields' } },
+--     },
+--   },
+-- }
 
 -- Setup neovim lua configuration
 require('neodev').setup()
@@ -882,8 +888,6 @@ require('neodev').setup()
 --     }
 --   end,
 -- }
-
-vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 
 -- Use <Tab> and <S-Tab> to navigate through popup menu
 function _G.check_back_space()
@@ -914,6 +918,13 @@ vim.keymap.set("n", "gd", "<Plug>(coc-definition)")
 vim.keymap.set("n", "gy", "<Plug>(coc-type-definition)")
 vim.keymap.set("n", "gi", "<Plug>(coc-implementation)")
 vim.keymap.set("n", "gr", "<Plug>(coc-references)")
+
+-- Disable conflicting LSP keymaps that overlap with gr
+vim.keymap.del("n", "gra", { silent = true })
+vim.keymap.del("n", "grn", { silent = true }) 
+vim.keymap.del("n", "grr", { silent = true })
+vim.keymap.del("n", "gri", { silent = true })
+vim.keymap.del("n", "grt", { silent = true })
 
 -- COMMENTED OUT FOR COC-nvim
 -- [[ Configure nvim-cmp ]]
@@ -968,7 +979,27 @@ vim.keymap.set("n", "gr", "<Plug>(coc-references)")
 --   },
 -- }
 
+-- COC Extensions Configuration
+vim.g.coc_global_extensions = {
+  'coc-prettier',
+  'coc-marketplace', 
+  '@yaegassy/coc-tailwindcss3',
+  'coc-tsserver',
+  'coc-json',
+  'coc-css'
+}
+
 vim.api.nvim_command('silent! delcommand CopilotAuth')
+
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "copilot-chat",
+    callback = function()
+          local opts = { buffer = true, silent = true }
+          vim.keymap.set('i', '<Tab>', '<Down>', opts)
+          vim.keymap.set('i', '<S-Tab>', '<Up>', opts)
+    end,
+})
+
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

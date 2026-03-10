@@ -1,0 +1,5 @@
+{
+  "[css][javascript][javascriptreact][typescript][typescriptreact][json][html][yaml]": {
+    "coc.preferences.formatOnSave": true
+  }
+}
