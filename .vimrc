@@ -141,7 +141,52 @@ let mapleader = " "
 " ====================================== "
 let device = system('uname -o')
 
-if exists("+clipboard")
+if !has('nvim')
+    function! IsRemoteSession() abort
+        if !empty($SSH_CLIENT) || !empty($SSH_CONNECTION) || !empty($SSH_TTY)
+            return v:true
+        endif
+
+        let l:user = !empty($USER) ? $USER : $LOGNAME
+        if empty(l:user)
+            return v:false
+        endif
+
+        let l:check = 'pgrep -f ' . shellescape('sshd.*' . l:user) . ' >/dev/null'
+        call system('sh -c ' . shellescape(l:check))
+
+        return v:shell_error == 0
+    endfunction
+
+    function! OSC52Copy(lines) abort
+        let l:text = type(a:lines) == type('') ? a:lines : join(a:lines, "\n")
+        let l:b64 = system('base64 | tr -d ''\n''', l:text)
+
+        if v:shell_error != 0
+            echohl WarningMsg
+            echom 'OSC52 copy failed'
+            echohl None
+            return
+        endif
+
+        let l:osc52 = "\<Esc>]52;c;" . substitute(l:b64, '\n\+$', '', '') . "\x07"
+        let l:write = 'printf %s ' . shellescape(l:osc52) . ' > /dev/tty'
+        call system('sh -c ' . shellescape(l:write))
+
+        if v:shell_error != 0
+            echohl WarningMsg
+            echom 'OSC52 terminal write failed'
+            echohl None
+        endif
+    endfunction
+endif
+
+if !has('nvim') && IsRemoteSession()
+    augroup remote_clipboard
+        autocmd!
+        autocmd TextYankPost * if v:event.operator is# 'y' | call OSC52Copy(getreg(empty(v:event.regname) ? '"' : v:event.regname, 1, 1)) | endif
+    augroup END
+elseif exists("+clipboard")
     if device =~ 'Darwin'
         set clipboard=unnamed
     elseif device =~ 'Android'
@@ -745,4 +790,3 @@ if has('langmap') && exists('+langremap')
   " compatible).
   set nolangremap
 endif
-

@@ -1,5 +1,5 @@
 -- EnocFlores <https://github.com/EnocFlores>
--- Last Change: 2025.12.20
+-- Last Change: 2026.03.11
 -- Special thanks to TJ from nvim-lua on github for their Kickstart.nvim project
 -- https://github.com/nvim-lua/kickstart.nvim
 
@@ -491,7 +491,7 @@ require('lazy').setup({
   -- Fuzzy Finder (files, lsp, etc)
   {
     'nvim-telescope/telescope.nvim',
-    branch = '0.1.x',
+    branch = 'master',
     dependencies = {
       'nvim-lua/plenary.nvim',
       -- Fuzzy Finder Algorithm which requires local dependencies to be built.
@@ -549,7 +549,59 @@ vim.o.mouse = 'a'
 -- Sync clipboard between OS and Neovim.
 --  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
+local function is_remote_session()
+  if vim.env.SSH_CLIENT or vim.env.SSH_CONNECTION or vim.env.SSH_TTY then
+    return true
+  end
+
+  local user = vim.env.USER or vim.env.LOGNAME
+  if not user or user == '' then
+    return false
+  end
+
+  local check = 'pgrep -f ' .. vim.fn.shellescape('sshd.*' .. user) .. ' >/dev/null && printf yes || printf no'
+  local result = vim.fn.system({ 'sh', '-c', check })
+
+  return vim.v.shell_error == 0 and vim.trim(result) == 'yes'
+end
+
 vim.o.clipboard = 'unnamedplus'
+
+if is_remote_session() then
+  local osc52 = require 'vim.ui.clipboard.osc52'
+  local clipboard_cache = {
+    ['+'] = nil,
+    ['*'] = nil,
+  }
+
+  local function copy_with_cache(register)
+    local osc52_copy = osc52.copy(register)
+
+    return function(lines, regtype)
+      clipboard_cache[register] = { vim.deepcopy(lines), regtype }
+      osc52_copy(lines, regtype)
+    end
+  end
+
+  local function paste_from_cache(register)
+    return function()
+      return clipboard_cache[register] or { {}, 'v' }
+    end
+  end
+
+  vim.g.clipboard = {
+    name = 'OSC 52 copy only',
+    copy = {
+      ['+'] = copy_with_cache '+',
+      ['*'] = copy_with_cache '*',
+    },
+    paste = {
+      ['+'] = paste_from_cache '+',
+      ['*'] = paste_from_cache '*',
+    },
+    cache_enabled = 1,
+  }
+end
 
 -- Enable break indent
 vim.o.breakindent = true
