@@ -1,7 +1,7 @@
 # NOTES
 
 Q: What is this?
-A: This is a temporary or permanant place for documenting things outside of the README, at least for now until I figure out git wiki
+A: This is a temporary or permanent place for documenting things outside of the README, at least for now until I figure out git wiki
 
 ## Extensions
 
@@ -27,8 +27,30 @@ map <c-f> scrollFullPageDown
 
 # Use dd for deleting a tab
 map dd removeTab
+
+# Reverse uppercase JK function
+unmap J
+unmap K
+map K previousTab
+map J nextTab
+
+# Use p to create private window
+map p createTab incognito
 ```
 
+### Video Speed Contoller
+
+| Setting     | K | Val |
+| ---         | - | --- |
+| Dec. speed  | S | 0.1 |
+| Inc. speed  | D | 0.1 |
+| Rewind      | Z | 10  |
+| Advance     | X | 10  |
+| Reset speed | R | 1   |
+| Pre. speed  | E | 2   |
+| Pre. speed  | W | 3   |
+| Pre. speed  | Q | 4   |
+| Pause       | A | 0   |
 
 ## firefox
 
