@@ -303,7 +303,7 @@ if [ "$device" != "Android" ]; then
         fi
     else
         PROGRAM_CHECKS="$PROGRAM_CHECKS\nmise is installed and activated"
-        eval "$(mise activate zsh --shims)" # this sets up non-interactive sessions
+        eval "$(mise activate zsh)" # this sets up non-interactive sessions
     fi
 
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
@@ -376,7 +376,7 @@ alias ls="ls --color=auto"
 alias cls="clear"
 alias python="python3"
 alias diff="diff --color"
-alias nvim="mise exec node@22.14 -- nvim"
+alias nvim="mise exec node@24.14 -- nvim"
 alias vims="nvim -S Session.vim"
 alias icat="wezterm imgcat"
 alias top="btop -p 3"
@@ -504,7 +504,7 @@ gf() {
 }
 alias gpull='f() { git pull origin $1 || git pull portable $1 || git pull backup $1 }; f'
 alias gpush='f() { git push origin $1 || git push portable $1 || git push backup $1 }; f'
-alias gedit='nvim $(git diff --name-only)'
+alias gedit='git diff --name-only -z | xargs -0 nvim -p'
 
 # ====================================== #
 # =========== GIT WORKTREES ============ #
@@ -584,23 +584,52 @@ alias gwd='f() { git worktree remove $1 };f'
 # ====================================== #
 gws() {
     for file in "${worktreesSyncedFiles[@]}"; do
-        if [[ -e "../../$file" || -L "../../$file" ]]; then
-            # Create parent directory if it doesn't exist
-            local parent_dir=$(dirname "$file")
-            if [[ "$parent_dir" != "." && ! -d "$parent_dir" ]]; then
-                echo "Creating directory $parent_dir"
-                mkdir -p "$parent_dir"
-            fi
-            
-            if [[ -e "$file" || -L "$file" ]]; then
-                echo "Removing existing $file"
-                rm -rf "$file"
-            fi
-            echo "Linking $file -> ../../$file"
-            ln -sfn "../../$file" "$file"
-        else
-            echo "Warning: ../../$file does not exist, skipping"
+        local source_path="../../$file"
+        local parent_dir=$(dirname "$file")
+
+        if [[ ! -e "$source_path" && ! -L "$source_path" ]]; then
+            echo "Warning: $source_path does not exist, skipping"
+            continue
         fi
+
+        if [[ "$parent_dir" != "." && ! -d "$parent_dir" ]]; then
+            echo "Creating directory $parent_dir"
+            mkdir -p "$parent_dir"
+        fi
+
+        if [[ -L "$file" ]]; then
+            if [[ "$(readlink "$file")" == "$source_path" ]]; then
+                continue
+            fi
+
+            echo "Removing existing $file"
+            rm -f "$file"
+            echo "Linking $file -> $source_path"
+            ln -s "$source_path" "$file"
+            continue
+        fi
+
+        if [[ -f "$file" ]]; then
+            echo "Warning: $file exists, want to open in vimdiff (y/N)?"
+            read answer
+
+            if [[ "$answer" == "y" || "$answer" == "Y" ]]; then
+                vimdiff "$source_path" "$file"
+            fi
+
+            rm -f "$file"
+            cp "$source_path" "$file"
+            echo "Copied file from $source_path"
+            continue
+        fi
+
+        if [[ -e "$file" ]]; then
+            echo "Warning: $file exists and is not a regular file or symlink, skipping"
+            continue
+        fi
+
+        echo "Linking $file -> $source_path"
+        ln -s "$source_path" "$file"
     done
     
     echo "Worktree sync complete!"
