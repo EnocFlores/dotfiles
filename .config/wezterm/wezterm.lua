@@ -29,6 +29,7 @@ config.window_decorations = "RESIZE"
 config.use_resize_increments = true
 config.hide_tab_bar_if_only_one_tab = true
 config.enable_scroll_bar = false
+config.enable_kitty_keyboard = true
 config.window_frame = {
   border_left_width = '0.5cell',
   border_right_width = '0.5cell',
