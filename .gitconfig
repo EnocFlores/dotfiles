@@ -7,7 +7,5 @@
 	defaultBranch = main
 [core]
     excludesfile = ~/.gitignore_global
-[includeIf "hasconfig:remote.*.url:http://forgejo.home.arpa/**"]
-    path = ~/.gitconfig-forgejo
-[includeIf "hasconfig:remote.*.url:ssh://git@local.forgejo/**"]
-    path = ~/.gitconfig-forgejo
+[include]
+    path = ~/.gitconfig-private

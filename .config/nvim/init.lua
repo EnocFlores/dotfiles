@@ -70,6 +70,8 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+local disable_online_ai = vim.env.NVIM_DISABLE_ONLINE_AI == 'true'
+
 ------------------------------------------
 -- [[ Configure plugins ]]
 -- NOTE: Here is where you install your plugins.
@@ -92,6 +94,9 @@ require('lazy').setup({
     "zbirenbaum/copilot.lua",
     cmd = "Copilot",
     event = "InsertEnter",
+    cond = function()
+      return not disable_online_ai
+    end,
     config = function()
       require('copilot').setup({
         panel = {
@@ -150,6 +155,9 @@ require('lazy').setup({
   {
     "CopilotC-Nvim/CopilotChat.nvim",
     branch = "main",
+    cond = function()
+      return not disable_online_ai
+    end,
     dependencies = {
       { "zbirenbaum/copilot.lua" }, -- or github/copilot.vim
       { "nvim-lua/plenary.nvim" }, -- for curl, log wrapper
@@ -157,7 +165,7 @@ require('lazy').setup({
     opts = {
       system_prompt = 'COPILOT_INSTRUCTIONS', -- System prompt to use (can be specified manually in prompt via /).
 
-      model = 'claude-sonnet-4', -- Default model to use, see ':CopilotChatModels' for available models (can be specified manually in prompt via $)
+      model = 'claude-opus-4.7', -- Default model to use, see ':CopilotChatModels' for available models (can be specified manually in prompt via $)
 
       window = {
         layout = 'float',
@@ -494,6 +502,10 @@ require('lazy').setup({
     branch = 'master',
     dependencies = {
       'nvim-lua/plenary.nvim',
+      {
+        'nvim-telescope/telescope-live-grep-args.nvim',
+        dependencies = { 'nvim-telescope/telescope.nvim' },
+      },
       -- Fuzzy Finder Algorithm which requires local dependencies to be built.
       -- Only load if `make` is available. Make sure you have the system
       -- requirements installed.
@@ -664,10 +676,16 @@ require('telescope').setup {
       },
     },
   },
+  extensions = {
+    live_grep_args = {
+      auto_quoting = true,
+    },
+  },
 }
 
--- Enable telescope fzf native, if installed
+-- Enable telescope extensions, if installed
 pcall(require('telescope').load_extension, 'fzf')
+pcall(require('telescope').load_extension, 'live_grep_args')
 
 -- Telescope live_grep in git root
 -- Function to find the git root directory based on the current buffer's path
@@ -728,7 +746,7 @@ vim.keymap.set('n', '<leader>gf', require('telescope.builtin').git_files, { desc
 vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
 vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
 vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
-vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
+vim.keymap.set('n', '<leader>sg', require('telescope').extensions.live_grep_args.live_grep_args, { desc = '[S]earch by [G]rep with args' })
 vim.keymap.set('n', '<leader>sG', ':LiveGrepGitRoot<cr>', { desc = '[S]earch by [G]rep on Git Root' })
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
@@ -736,7 +754,9 @@ vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = 
 vim.keymap.set('n', '<leader>nt', ':tabnew<CR>', { desc = '[N]ew [T]ab', noremap = true, silent = true })
 
 -- Toggles
-vim.keymap.set('n', '<leader>ta', ':CopilotChatToggle<CR>', { desc = '[T]oggle [A]i Chat (Copilot)', noremap = true })
+if not disable_online_ai then
+  vim.keymap.set('n', '<leader>ta', ':CopilotChatToggle<CR>', { desc = '[T]oggle [A]i Chat (Copilot)', noremap = true })
+end
 vim.keymap.set('n', '<leader>tc', ':set cursorcolumn!<CR>', { desc = '[T]oggle [C]ursor column', noremap = true })
 vim.keymap.set('n', '<leader>tr', ':set relativenumber!<CR>', { desc = '[T]oggle [R]elativenumber', noremap = true })
 vim.keymap.set('n', '<leader>ts', ':set spell!<CR>', { desc = '[T]oggle [S]pelling', noremap = true })
@@ -1043,14 +1063,16 @@ vim.g.coc_global_extensions = {
 
 vim.api.nvim_command('silent! delcommand CopilotAuth')
 
-vim.api.nvim_create_autocmd("FileType", {
-    pattern = "copilot-chat",
+if not disable_online_ai then
+  vim.api.nvim_create_autocmd('FileType', {
+    pattern = 'copilot-chat',
     callback = function()
-          local opts = { buffer = true, silent = true }
-          vim.keymap.set('i', '<Tab>', '<Down>', opts)
-          vim.keymap.set('i', '<S-Tab>', '<Up>', opts)
+      local opts = { buffer = true, silent = true }
+      vim.keymap.set('i', '<Tab>', '<Down>', opts)
+      vim.keymap.set('i', '<S-Tab>', '<Up>', opts)
     end,
-})
+  })
+end
 
 
 -- The line beneath this is called `modeline`. See `:help modeline`

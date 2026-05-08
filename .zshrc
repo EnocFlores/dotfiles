@@ -286,8 +286,6 @@ fi
 # ====================================== #
 
 if [ "$device" != "Android" ]; then
-    eval "$(~/.local/bin/mise activate zsh)"
-
     # ====================================== #
     # === mise checker and installer     === #
     # ====================================== #
@@ -311,8 +309,8 @@ if [ "$device" != "Android" ]; then
     # !!! initialization                 !!! #
     # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
     # ====================================== #
-    # === Changes npm version depending  === #
-    # === on .nvm file (if it exists in  === #
+    # === Auto installs npm version via  === #
+    # === .nvm file (if it exists in     === #
     # === current directory/repo)        === #
     # ====================================== #
 
@@ -320,8 +318,6 @@ if [ "$device" != "Android" ]; then
     if command -v mise &> /dev/null; then
         autoload -U add-zsh-hook
         load-nvmrc() {
-            # local node_version="$(nvm version)"
-            # local nvmrc_path="$(nvm_find_nvmrc)"
             if [ -n ".nvmrc" ]; then
                 mise install
             else
@@ -331,30 +327,6 @@ if [ "$device" != "Android" ]; then
         add-zsh-hook chpwd load-nvmrc
         load-nvmrc
     fi
-
-    # === OLD NVM SCRIPT FOR REFERENCE   === #
-    # if command -v nvm &> /dev/null; then
-    #     autoload -U add-zsh-hook
-    #     load-nvmrc() {
-    #         local node_version="$(nvm version)"
-    #         local nvmrc_path="$(nvm_find_nvmrc)"
-
-    #          if [ -n "$nvmrc_path" ]; then
-    #              local nvmrc_node_version=$(nvm version "$(cat "${nvmrc_path}")")
-
-    #              if [ "$nvmrc_node_version" = "N/A" ]; then
-    #                  nvm install
-    #              elif [ "$nvmrc_node_version" != "$node_version" ]; then
-    #                 nvm use
-    #             fi
-    #         elif [ "$node_version" != "$(nvm version default)" ]; then
-    #             echo "Reverting to nvm default version"
-    #             nvm use default
-    #         fi
-    #     }
-    #     add-zsh-hook chpwd load-nvmrc
-    #     load-nvmrc
-    # fi
 fi
 
 # ====================================== #
@@ -377,6 +349,7 @@ alias cls="clear"
 alias python="python3"
 alias diff="diff --color"
 alias nvim="mise exec node@24.14 -- nvim"
+alias onvim="NVIM_DISABLE_ONLINE_AI=true nvim"
 alias vims="nvim -S Session.vim"
 alias icat="wezterm imgcat"
 alias top="btop -p 3"
@@ -474,6 +447,7 @@ elif [ "$os" = "Darwin" ]; then
     PROGRAM_CHECKS="Your OS is macOS$PROGRAM_CHECKS"
     export DOCKER_HOST="unix://${HOME}/.colima/docker.sock"
     export PATH="/opt/homebrew/opt/imagemagick-full/bin:$PATH"
+    export PATH="$(brew --prefix rustup)/bin:$PATH"
     alias copy="pbcopy"
 else
     PROGRAM_CHECKS="The operating system is not recognized$PROGRAM_CHECKS"
