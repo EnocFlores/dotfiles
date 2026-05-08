@@ -524,10 +524,11 @@ require('lazy').setup({
   {
     -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
-    dependencies = {
-      'nvim-treesitter/nvim-treesitter-textobjects',
-    },
+    branch = "master",
     build = ':TSUpdate',
+    dependencies = {
+      { 'nvim-treesitter/nvim-treesitter-textobjects', branch = "master" },
+    },
   },
 
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
@@ -900,6 +901,7 @@ wk.add({
 wk.add({
   {
     mode = { 'v' },
+    { '<leader>', group = 'VISUAL <leader>' },
     { '<leader>h', group = 'Git [H]unk' },
   }
 })

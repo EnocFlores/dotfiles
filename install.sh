@@ -588,9 +588,9 @@ neovim_installer() {
         "apt")
             if [[ $arch = "x86_64" ]]; then
                 curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-$arch.appimage
-                chmod u+x nvim.appimage
+                chmod u+x nvim-linux-$arch.appimage
                 mkdir -p $HOME/.local/bin/
-                mv nvim.appimage $HOME/.local/bin/nvim
+                mv nvim-linux-$arch.appimage $HOME/.local/bin/nvim
             else
                 sudo apt-get install ninja-build gettext cmake unzip curl
                 git clone https://github.com/neovim/neovim

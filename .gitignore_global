@@ -19,3 +19,6 @@ opencode.jsonc
 .ignore
 agent-resources
 agent-resources/
+
+# Ignore local mise configs
+mise.local.toml
